@@ -1,0 +1,200 @@
+name: "Build and Release Godot-QuickStart"
+
+# Trigger on version tags and manual dispatch
+on:
+  push:
+    tags:
+      - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.4.1"
+  GODOT_EXPORT_VERSION: "4.4-stable"
+  GAME_NAME: "Godot-QuickStart"
+
+jobs:
+  # Validation job - runs first to catch issues early
+  validate:
+    runs-on: ubuntu-latest
+    name: "🔍 Validate Project"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Verify project structure
+        run: |
+          echo "🔍 Checking project structure..."
+
+          if [ ! -f "project.godot" ]; then
+            echo "❌ project.godot not found!"
+            exit 1
+          fi
+
+          if [ ! -d "scenes" ]; then
+            echo "❌ scenes directory not found!"
+            exit 1
+          fi
+
+          if [ ! -d "scripts" ]; then
+            echo "❌ scripts directory not found!"
+            exit 1
+          fi
+
+          echo "✅ Project structure is valid"
+
+      - name: Import and validate project
+        run: |
+          echo "📦 Importing project..."
+          timeout 120 godot --headless --verbose --editor --quit-after 5 --path . || echo "⚠️ Import completed"
+
+          echo "🔍 Validating GDScript files..."
+          find . -name "*.gd" -not -path "./.godot/*" | while read -r script; do
+            echo "Checking $script..."
+            godot --headless --check-only --script "$script" --path . || exit 1
+          done
+
+          echo "✅ Validation completed"
+
+  # Build job - runs after validation
+  build_game:
+    runs-on: ubuntu-latest
+    name: "🏗️ Build Game"
+    needs: validate
+    steps:
+      # Always include the checkout step so that
+      # your project is available for Godot to export
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        lfs: true
+
+    - name: Install Wine
+      id: wine_install
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wine64
+        echo "WINE_PATH=$(which wine64)" >> $GITHUB_OUTPUT
+
+    - name: Export Game
+      id: export
+      # Use latest version (see releases for all versions)
+      uses: firebelley/godot-export@v6.0.0
+      with:
+        # Defining all the required inputs
+        godot_executable_download_url: https://github.com/godotengine/godot/releases/download/${{ env.GODOT_EXPORT_VERSION }}/Godot_v${{ env.GODOT_EXPORT_VERSION }}_linux.x86_64.zip
+        godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/${{ env.GODOT_EXPORT_VERSION }}/Godot_v${{ env.GODOT_EXPORT_VERSION }}_export_templates.tpz
+        relative_project_path: ./ # Project is in root directory
+        cache: true
+        export_debug: false
+        archive_output: true
+        wine_path: ${{ steps.wine_install.outputs.WINE_PATH }}
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.GAME_NAME }}-builds-${{ github.sha }}
+        path: ${{ steps.export.outputs.archive_directory }}/*
+        retention-days: 30
+
+  # Release job - only runs on version tags
+  release_game:
+    # Only run this job if it's a version tag push
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build_game # Wait for build to complete
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Need permissions for release creation
+    name: "📦 Create Release"
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.GAME_NAME }}-builds-${{ github.sha }}
+        path: ./builds
+
+    - name: Create Release
+      uses: ncipollo/release-action@v1.14.0
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        generateReleaseNotes: true
+        tag: ${{ github.ref_name }}
+        artifacts: ./builds/*
+        name: "${{ env.GAME_NAME }} ${{ github.ref_name }}"
+        body: |
+          ## ${{ env.GAME_NAME }} Release ${{ github.ref_name }}
+
+          🎮 **Godot Quickstart Game** - Built automatically from GitHub Actions using Godot ${{ env.GODOT_EXPORT_VERSION }}
+
+          ### 📥 Downloads
+          Download the appropriate build for your platform from the assets below:
+          - **Windows**: `.exe` file
+          - **Linux**: `.x86_64` file
+          - **Web**: `.zip` file (extract and run locally or host on web server)
+
+          ### 🔄 Changes
+          See the auto-generated release notes below for detailed changes.
+
+  # Deploy job - only runs on version tags after release
+  deploy_game:
+    # Only run this job if it's a version tag push
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: release_game # Wait for release to complete
+    runs-on: ubuntu-latest
+    name: "🚀 Deploy to itch.io"
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.GAME_NAME }}-builds-${{ github.sha }}
+        path: ./builds
+
+    - name: Setup Butler (itch.io CLI)
+      uses: jdno/setup-butler@v1
+
+    - name: Deploy Web Build to itch.io
+      env:
+        BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+      run: |
+        echo "🚀 Deploying to itch.io..."
+
+        # Find the web build (consistently named Web.zip)
+        WEB_BUILD="./builds/Web.zip"
+
+        if [ ! -f "$WEB_BUILD" ]; then
+          echo "❌ Web.zip not found in artifacts"
+          echo "📋 Available files:"
+          ls -la ./builds/
+          exit 1
+        fi
+
+        echo "📦 Found web build: $WEB_BUILD"
+
+        # Extract web build
+        echo "📦 Extracting web build..."
+        mkdir -p ./web_build
+        unzip "$WEB_BUILD" -d ./web_build
+
+        echo "🎯 Using web directory: ./web_build"
+
+        # Deploy to itch.io
+        butler push "./web_build" ${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_GAME_NAME }}:web --userversion ${{ github.ref_name }}
+
+        echo "✅ Successfully deployed to itch.io!"
+        echo "🌐 Game should be available at: https://${{ secrets.ITCH_USERNAME }}.itch.io/${{ secrets.ITCH_GAME_NAME }}"
+

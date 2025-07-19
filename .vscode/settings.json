@@ -1,0 +1,35 @@
+{
+    "files.associations": {
+        "*.gd": "gdscript",
+        "*.tscn": "godot-scene",
+        "*.tres": "godot-resource"
+    },
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "editor.insertSpaces": false,
+    "editor.tabSize": 4,
+    "files.exclude": {
+        "**/.godot": true
+    },
+    "actionButtons": {
+        "defaultColor": "#ff0034",
+        "loadNpmCommands": false,
+        "reloadButton": null,
+        "commands": [
+            {
+                "cwd": "${workspaceFolder}",
+                "name": "🎮 Run Game",
+                "color": "#4CAF50",
+                "singleInstance": true,
+                "command": "godot --path ."
+            },
+            {
+                "cwd": "${workspaceFolder}",
+                "name": "🔧 Godot Editor",
+                "color": "#2196F3",
+                "singleInstance": true,
+                "command": "godot --path . --editor"
+            }
+        ]
+    }
+}
