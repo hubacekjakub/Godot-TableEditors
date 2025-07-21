@@ -12,6 +12,9 @@ var button_2d: Button
 var button_3d: Button
 var button_inspector: Button
 var sheet_editor_dock: Control
+var columns_label: Label
+var rows_label: Label
+var item_list: ItemList
 var current_sheet: Resource
 
 
@@ -101,10 +104,36 @@ func _add_toolbar_buttons() -> void:
 
 func _create_sheet_editor_dock() -> void:
 	sheet_editor_dock = VBoxContainer.new()
-	_add_menu_and_button(sheet_editor_dock)
-	_add_editable_grid(sheet_editor_dock)
 
-func _add_menu_and_button(parent: VBoxContainer) -> void:
+	var menubar = _create_menu_bar()
+	sheet_editor_dock.add_child(menubar)
+
+	# Main content: ItemList and Grid side by side
+	var main_panel = HBoxContainer.new()
+	main_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	# ItemList (left)
+	item_list = ItemList.new()
+	item_list.add_item("Item 1")
+	item_list.add_item("Item 2")
+	item_list.add_item("Item 3")
+	#item_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	#item_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	item_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	item_list.size_flags_horizontal = Control.SIZE_FILL
+	item_list.custom_minimum_size = Vector2(120, 0)
+	main_panel.add_child(item_list)
+
+	# Grid (right)
+	var grid_panel = VBoxContainer.new()
+	grid_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	#grid_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_add_editable_grid(grid_panel)
+	main_panel.add_child(grid_panel)
+
+	sheet_editor_dock.add_child(main_panel)
+
+func _create_menu_bar() -> HBoxContainer:
 	var menubar = HBoxContainer.new()
 
 	var menu_btn = MenuButton.new()
@@ -120,14 +149,22 @@ func _add_menu_and_button(parent: VBoxContainer) -> void:
 	base_btn.pressed.connect(_on_base_button_pressed)
 	menubar.add_child(base_btn)
 
-	parent.add_child(menubar)
+	columns_label = Label.new()
+	columns_label.text = "Columns: 0"
+	menubar.add_child(columns_label)
+
+	rows_label = Label.new()
+	rows_label.text = "Rows: 0"
+	menubar.add_child(rows_label)
+
+	return menubar
 
 func _add_editable_grid(parent: VBoxContainer) -> void:
 	var grid = GridContainer.new()
-	grid.columns = 4
-	for i in range(16):
+	grid.columns = 5
+	for i in range(25):
 		var line_edit = LineEdit.new()
-		line_edit.text = str(randi() % 100)
+		line_edit.text = str(i + 1)
 		grid.add_child(line_edit)
 	parent.add_child(grid)
 
