@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="Sheet" load_steps=2 format=3 uid="uid://csmjl8h442g88"]
+
+[ext_resource type="Script" uid="uid://ds7c1eu2ai7is" path="res://addons/sheet_editor/sheet.gd" id="1_o5mtx"]
+
+[resource]
+script = ExtResource("1_o5mtx")
+row_count = 0
+metadata/_custom_type_script = "uid://ds7c1eu2ai7is"

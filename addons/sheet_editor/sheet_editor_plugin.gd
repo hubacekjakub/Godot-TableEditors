@@ -1,17 +1,87 @@
 @tool
 extends EditorPlugin
 
+
+
 class_name SheetEditorPlugin
+
+# Preload the Sheet resource for type checking
+const SHEET_SCRIPT_RESOURCE := preload("res://addons/sheet_editor/sheet.gd")
 
 var button_2d: Button
 var button_3d: Button
 var button_inspector: Button
 var sheet_editor_dock: Control
+var current_sheet: Resource
+
+
 
 func _enter_tree() -> void:
 	_add_toolbar_buttons()
 	_create_sheet_editor_dock()
 	add_control_to_bottom_panel(sheet_editor_dock, "Sheet Editor")
+	print("Sheet Editor Plugin loaded")
+	# No need to register custom type for resource editor
+
+
+func _handles(object: Object) -> bool:
+	if _is_object_sheet_resource(object):
+		return true
+
+	return false
+
+func _edit(object: Object) -> void:
+	if not _is_object_sheet_resource(object):
+		print("Not a Sheet resource, hiding dock")
+		_hide_dock()
+		return
+
+	print("Editing Sheet resource")
+	current_sheet = object
+	_show_dock()
+
+
+func _show_dock() -> void:
+	make_bottom_panel_item_visible(sheet_editor_dock)
+
+	print("Current sheet:", current_sheet)
+	print("Properties:", current_sheet.get_property_list())
+	print("row_count:", current_sheet.get("row_count"))
+	print("column_count:", current_sheet.get("column_count"))
+
+	if current_sheet is Resource and current_sheet.get_class() == "Sheet":
+		print("Current sheet:", current_sheet)
+		print("Properties:", current_sheet.get_property_list())
+		print("row_count:", current_sheet.get("row_count"))
+		print("column_count:", current_sheet.get("column_count"))
+
+	if current_sheet as Sheet:
+		print("We have a Sheet resource")
+		print(current_sheet.row_count)
+		print(current_sheet.column_count)
+
+	#sheet_editor_dock.show()
+
+func _hide_dock() -> void:
+	return
+	#sheet_editor_dock.hide()
+
+
+func _is_object_sheet_resource(object: Object) -> bool:
+	if not object:
+		return false
+	if object is not Resource:
+		return false
+
+	# first approach, uses preloaded script variable
+	if object.get_script() == SHEET_SCRIPT_RESOURCE:
+		return true
+
+	#second approach, uses string comparison
+	#if object.get_script() and object.get_script().get_global_name() == "Sheet":
+	#	return true
+
+	return false
 
 func _add_toolbar_buttons() -> void:
 	button_2d = Button.new()
@@ -40,13 +110,13 @@ func _add_menu_and_button(parent: VBoxContainer) -> void:
 	var menu_btn = MenuButton.new()
 	menu_btn.text = "Menu"
 	var popup = menu_btn.get_popup()
-	popup.add_item("First option", 0)
-	popup.add_item("Second option", 1)
+	popup.add_item("Load", 0)
+	popup.add_item("Save", 1)
 	popup.id_pressed.connect(_on_menu_item_pressed)
 	menubar.add_child(menu_btn)
 
 	var base_btn = Button.new()
-	base_btn.text = "Just Button"
+	base_btn.text = "Quick Test"
 	base_btn.pressed.connect(_on_base_button_pressed)
 	menubar.add_child(base_btn)
 
@@ -61,6 +131,7 @@ func _add_editable_grid(parent: VBoxContainer) -> void:
 		grid.add_child(line_edit)
 	parent.add_child(grid)
 
+
 func _exit_tree() -> void:
 	remove_control_from_container(EditorPlugin.CONTAINER_CANVAS_EDITOR_MENU, button_2d)
 	button_2d.queue_free()
@@ -73,6 +144,8 @@ func _exit_tree() -> void:
 
 	remove_control_from_bottom_panel(sheet_editor_dock)
 	sheet_editor_dock.queue_free()
+
+	# No need to unregister custom type for resource editor
 
 func _on_button_pressed() -> void:
 	print("Hello, editor!")
