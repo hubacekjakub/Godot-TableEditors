@@ -52,6 +52,7 @@ func _show_dock() -> void:
 	print("row_count:", current_sheet.get("row_count"))
 	print("column_count:", current_sheet.get("column_count"))
 
+
 	if current_sheet is Resource and current_sheet.get_class() == "Sheet":
 		print("Current sheet:", current_sheet)
 		print("Properties:", current_sheet.get_property_list())
@@ -62,6 +63,8 @@ func _show_dock() -> void:
 		print("We have a Sheet resource")
 		print(current_sheet.row_count)
 		print(current_sheet.column_count)
+		columns_label.text = "Columns: %d" % current_sheet.column_count
+		rows_label.text = "Rows: %d" % current_sheet.row_count
 
 	#sheet_editor_dock.show()
 
@@ -76,11 +79,15 @@ func _is_object_sheet_resource(object: Object) -> bool:
 	if object is not Resource:
 		return false
 
-	# first approach, uses preloaded script variable
-	if object.get_script() == SHEET_SCRIPT_RESOURCE:
+	# best approach I quess
+	if object is Sheet:
 		return true
 
-	#second approach, uses string comparison
+	# second approach, uses preloaded script variable
+	#if object.get_script() == SHEET_SCRIPT_RESOURCE:
+	#	return true
+
+	# third approach, uses string comparison
 	#if object.get_script() and object.get_script().get_global_name() == "Sheet":
 	#	return true
 
@@ -108,8 +115,8 @@ func _create_sheet_editor_dock() -> void:
 	var menubar = _create_menu_bar()
 	sheet_editor_dock.add_child(menubar)
 
-	# Main content: ItemList and Grid side by side
-	var main_panel = HBoxContainer.new()
+	# Main content: ItemList and Grid side by side (draggable)
+	var main_panel = HSplitContainer.new()
 	main_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 
 	# ItemList (left)
@@ -117,17 +124,13 @@ func _create_sheet_editor_dock() -> void:
 	item_list.add_item("Item 1")
 	item_list.add_item("Item 2")
 	item_list.add_item("Item 3")
-	#item_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	#item_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	item_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	item_list.size_flags_horizontal = Control.SIZE_FILL
 	item_list.custom_minimum_size = Vector2(120, 0)
 	main_panel.add_child(item_list)
 
 	# Grid (right)
 	var grid_panel = VBoxContainer.new()
 	grid_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	#grid_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_add_editable_grid(grid_panel)
 	main_panel.add_child(grid_panel)
 
