@@ -1,20 +1,15 @@
 @tool
 extends EditorPlugin
 
-
-
 class_name SheetEditorPlugin
 
-# Preload the Sheet resource for type checking
-const SHEET_SCRIPT_RESOURCE := preload("res://addons/sheet_editor/sheet.gd")
+# Preload the dock scene
+const DOCK_SCENE := preload("res://addons/sheet_editor/sheet_editor_dock.tscn")
 
 var button_2d: Button
 var button_3d: Button
 var button_inspector: Button
 var sheet_editor_dock: Control
-var columns_label: Label
-var rows_label: Label
-var item_list: ItemList
 var current_sheet: Resource
 
 
@@ -24,7 +19,6 @@ func _enter_tree() -> void:
 	_create_sheet_editor_dock()
 	add_control_to_bottom_panel(sheet_editor_dock, "Sheet Editor")
 	print("Sheet Editor Plugin loaded")
-	# No need to register custom type for resource editor
 
 
 func _handles(object: Object) -> bool:
@@ -46,27 +40,8 @@ func _edit(object: Object) -> void:
 
 func _show_dock() -> void:
 	make_bottom_panel_item_visible(sheet_editor_dock)
-
-	print("Current sheet:", current_sheet)
-	print("Properties:", current_sheet.get_property_list())
-	print("row_count:", current_sheet.get("row_count"))
-	print("column_count:", current_sheet.get("column_count"))
-
-
-	if current_sheet is Resource and current_sheet.get_class() == "Sheet":
-		print("Current sheet:", current_sheet)
-		print("Properties:", current_sheet.get_property_list())
-		print("row_count:", current_sheet.get("row_count"))
-		print("column_count:", current_sheet.get("column_count"))
-
-	if current_sheet as Sheet:
-		print("We have a Sheet resource")
-		print(current_sheet.row_count)
-		print(current_sheet.column_count)
-		columns_label.text = "Columns: %d" % current_sheet.column_count
-		rows_label.text = "Rows: %d" % current_sheet.row_count
-
-	#sheet_editor_dock.show()
+	if sheet_editor_dock and sheet_editor_dock.has_method("set_sheet"):
+		sheet_editor_dock.set_sheet(current_sheet)
 
 func _hide_dock() -> void:
 	return
@@ -110,66 +85,219 @@ func _add_toolbar_buttons() -> void:
 	add_control_to_container(EditorPlugin.CONTAINER_INSPECTOR_BOTTOM, button_inspector)
 
 func _create_sheet_editor_dock() -> void:
-	sheet_editor_dock = VBoxContainer.new()
+	# Load the dock scene
+	print("Loading dock scene...")
+	sheet_editor_dock = DOCK_SCENE.instantiate()
+	print("Dock scene loaded: ", sheet_editor_dock)
 
-	var menubar = _create_menu_bar()
-	sheet_editor_dock.add_child(menubar)
+	# Connect signals from the dock
+	print("Connecting signals...")
+	if sheet_editor_dock.has_signal("column_added"):
+		sheet_editor_dock.column_added.connect(_on_add_column_pressed)
+		print("✓ Connected column_added signal")
+	if sheet_editor_dock.has_signal("row_added"):
+		sheet_editor_dock.row_added.connect(_on_add_row_pressed)
+		print("✓ Connected row_added signal")
+	if sheet_editor_dock.has_signal("column_deleted"):
+		sheet_editor_dock.column_deleted.connect(_on_column_deleted)
+		print("✓ Connected column_deleted signal")
+	if sheet_editor_dock.has_signal("row_deleted"):
+		sheet_editor_dock.row_deleted.connect(_on_row_deleted)
+		print("✓ Connected row_deleted signal")
+	if sheet_editor_dock.has_signal("column_renamed"):
+		sheet_editor_dock.column_renamed.connect(_on_column_renamed)
+		print("✓ Connected column_renamed signal")
+	if sheet_editor_dock.has_signal("row_renamed"):
+		sheet_editor_dock.row_renamed.connect(_on_row_renamed)
+		print("✓ Connected row_renamed signal")
+	if sheet_editor_dock.has_signal("data_cleared"):
+		sheet_editor_dock.data_cleared.connect(_clear_all_data)
+		print("✓ Connected data_cleared signal")
+	if sheet_editor_dock.has_signal("save_requested"):
+		sheet_editor_dock.save_requested.connect(_save_sheet)
+		print("✓ Connected save_requested signal")
+	if sheet_editor_dock.has_signal("close_requested"):
+		sheet_editor_dock.close_requested.connect(_hide_dock)
+		print("✓ Connected close_requested signal")
+	if sheet_editor_dock.has_signal("new_sheet_requested"):
+		sheet_editor_dock.new_sheet_requested.connect(_create_new_sheet)
+		print("✓ Connected new_sheet_requested signal")
+func _on_add_column_pressed() -> void:
+	print("=== ADD COLUMN PRESSED ===")
+	print("Current sheet: ", current_sheet)
 
-	# Main content: ItemList and Grid side by side (draggable)
-	var main_panel = HSplitContainer.new()
-	main_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	if not current_sheet or not current_sheet is Sheet:
+		print("ERROR: No valid sheet!")
+		return
 
-	# ItemList (left)
-	item_list = ItemList.new()
-	item_list.add_item("Item 1")
-	item_list.add_item("Item 2")
-	item_list.add_item("Item 3")
-	item_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	item_list.custom_minimum_size = Vector2(120, 0)
-	main_panel.add_child(item_list)
+	var sheet := current_sheet as Sheet
+	print("Before: column_count = ", sheet.column_count)
+	sheet.column_count += 1
+	print("After: column_count = ", sheet.column_count)
 
-	# Grid (right)
-	var grid_panel = VBoxContainer.new()
-	grid_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_add_editable_grid(grid_panel)
-	main_panel.add_child(grid_panel)
+	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
+		print("Calling update_ui()...")
+		sheet_editor_dock.update_ui()
+	else:
+		print("ERROR: sheet_editor_dock or update_ui() not available")
 
-	sheet_editor_dock.add_child(main_panel)
+	print("=== ADD COLUMN COMPLETE ===")
 
-func _create_menu_bar() -> HBoxContainer:
-	var menubar = HBoxContainer.new()
 
-	var menu_btn = MenuButton.new()
-	menu_btn.text = "Menu"
-	var popup = menu_btn.get_popup()
-	popup.add_item("Load", 0)
-	popup.add_item("Save", 1)
-	popup.id_pressed.connect(_on_menu_item_pressed)
-	menubar.add_child(menu_btn)
+func _on_add_row_pressed() -> void:
+	print("=== ADD ROW PRESSED ===")
+	print("Current sheet: ", current_sheet)
 
-	var base_btn = Button.new()
-	base_btn.text = "Quick Test"
-	base_btn.pressed.connect(_on_base_button_pressed)
-	menubar.add_child(base_btn)
+	if not current_sheet or not current_sheet is Sheet:
+		print("ERROR: No valid sheet!")
+		return
 
-	columns_label = Label.new()
-	columns_label.text = "Columns: 0"
-	menubar.add_child(columns_label)
+	var sheet := current_sheet as Sheet
+	print("Before: row_count = ", sheet.row_count)
+	sheet.row_count += 1
+	print("After: row_count = ", sheet.row_count)
 
-	rows_label = Label.new()
-	rows_label.text = "Rows: 0"
-	menubar.add_child(rows_label)
+	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
+		print("Calling update_ui()...")
+		sheet_editor_dock.update_ui()
+	else:
+		print("ERROR: sheet_editor_dock or update_ui() not available")
 
-	return menubar
+	print("=== ADD ROW COMPLETE ===")
 
-func _add_editable_grid(parent: VBoxContainer) -> void:
-	var grid = GridContainer.new()
-	grid.columns = 5
-	for i in range(25):
-		var line_edit = LineEdit.new()
-		line_edit.text = str(i + 1)
-		grid.add_child(line_edit)
-	parent.add_child(grid)
+
+# Column naming (P1-008)
+func _on_column_renamed(col: int, new_name: String) -> void:
+	print("=== RENAME COLUMN %d ==="%col)
+	print("New name: '%s'" % new_name)
+
+	if not current_sheet or not current_sheet is Sheet:
+		print("ERROR: No valid sheet!")
+		return
+
+	var sheet := current_sheet as Sheet
+	sheet.set_column_name(col, new_name)
+
+	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
+		sheet_editor_dock.update_ui()
+
+	print("=== COLUMN RENAMED ===")
+
+
+# Row naming (P1-013)
+func _on_row_renamed(row: int, new_name: String) -> void:
+	print("=== RENAME ROW %d ===" % row)
+	print("New name: '%s'" % new_name)
+
+	if not current_sheet or not current_sheet is Sheet:
+		print("ERROR: No valid sheet!")
+		return
+
+	var sheet := current_sheet as Sheet
+	sheet.set_row_name(row, new_name)
+
+	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
+		sheet_editor_dock.update_ui()
+
+	print("=== ROW RENAMED ===")
+
+
+# Column deletion (P1-009)
+func _on_column_deleted(col: int) -> void:
+	print("=== DELETE COLUMN %d ===" % col)
+
+	if not current_sheet or not current_sheet is Sheet:
+		print("ERROR: No valid sheet!")
+		return
+
+	var sheet := current_sheet as Sheet
+	print("Before: column_count = ", sheet.column_count)
+
+	sheet.delete_column(col)
+
+	print("After: column_count = ", sheet.column_count)
+
+	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
+		sheet_editor_dock.update_ui()
+
+	print("=== COLUMN DELETED ===")
+
+
+# Row deletion (P1-014)
+func _on_row_deleted(row: int) -> void:
+	print("=== DELETE ROW %d ===" % row)
+
+	if not current_sheet or not current_sheet is Sheet:
+		print("ERROR: No valid sheet!")
+		return
+
+	var sheet := current_sheet as Sheet
+	print("Before: row_count = ", sheet.row_count)
+
+	sheet.delete_row(row)
+
+	print("After: row_count = ", sheet.row_count)
+
+	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
+		sheet_editor_dock.update_ui()
+
+	print("=== ROW DELETED ===")
+
+
+func _clear_all_data() -> void:
+	if not current_sheet or not current_sheet is Sheet:
+		return
+
+	var sheet := current_sheet as Sheet
+	sheet.column_count = 0
+	sheet.row_count = 0
+	sheet.clear_all_cells()  # Also clear cell data
+	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
+		sheet_editor_dock.update_ui()
+	print("Cleared all data including cells")
+
+
+func _create_new_sheet() -> void:
+	"""Create a new Sheet resource and start editing it"""
+	print("=== CREATING NEW SHEET ===")
+
+	# Create a new Sheet instance
+	var new_sheet := Sheet.new()
+	new_sheet.sheet_name = "Untitled Sheet"
+	new_sheet.column_count = 3  # Start with 3 columns
+	new_sheet.row_count = 5     # Start with 5 rows
+
+	print("New sheet created: ", new_sheet)
+	print("  sheet_name: ", new_sheet.sheet_name)
+	print("  column_count: ", new_sheet.column_count)
+	print("  row_count: ", new_sheet.row_count)
+
+	# Set it as the current sheet and start editing
+	current_sheet = new_sheet
+	_show_dock()
+
+	# Also select it in the inspector so it can be saved
+	get_editor_interface().edit_resource(new_sheet)
+
+	print("=== NEW SHEET READY ===")
+
+
+func _save_sheet() -> void:
+	if not current_sheet:
+		print("No sheet to save")
+		return
+
+	# Get the resource path
+	var path := current_sheet.resource_path
+	if path.is_empty():
+		print("Sheet has no path, cannot save")
+		return
+
+	var error := ResourceSaver.save(current_sheet, path)
+	if error == OK:
+		print("Sheet saved successfully to: ", path)
+	else:
+		push_error("Failed to save sheet: " + str(error))
 
 
 func _exit_tree() -> void:
@@ -185,16 +313,10 @@ func _exit_tree() -> void:
 	remove_control_from_bottom_panel(sheet_editor_dock)
 	sheet_editor_dock.queue_free()
 
-	# No need to unregister custom type for resource editor
 
 func _on_button_pressed() -> void:
-	print("Hello, editor!")
+	if current_sheet:
+		make_bottom_panel_item_visible(sheet_editor_dock)
+	else:
+		print("No sheet selected")
 
-func _on_menu_item_pressed(id: int) -> void:
-	if id == 0:
-		print("first option")
-	elif id == 1:
-		print("second option")
-
-func _on_base_button_pressed() -> void:
-	print("just button pressed")
