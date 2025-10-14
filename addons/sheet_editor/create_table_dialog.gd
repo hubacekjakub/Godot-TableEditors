@@ -21,6 +21,7 @@ var file_dialog: EditorFileDialog = null
 func _ready() -> void:
 	_setup_dialog()
 	_connect_signals()
+	_validate_inputs()
 
 
 func _setup_dialog() -> void:
@@ -67,6 +68,7 @@ func _validate_inputs(_text: String = "") -> void:
 				is_valid = false
 				warning_text.visible = true
 				warning_text.text = "⚠️ WARNING: File '" + file_name + "' already exists!"
+				warning_text.add_theme_color_override("font_color", Color(1, 0.5, 0.5, 1))  # Light red for visibility
 				print("File already exists: " + full_path)
 			else:
 				warning_text.visible = false
