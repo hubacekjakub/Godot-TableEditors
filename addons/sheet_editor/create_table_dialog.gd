@@ -13,9 +13,9 @@ signal table_creation_confirmed(table_name: String, file_name: String, rows: int
 @onready var path_edit: LineEdit = %PathEdit
 @onready var browse_button: Button = %BrowseButton
 @onready var help_text: Label = %HelpText
+@onready var warning_text: Label = %WarningText
 
 var file_dialog: EditorFileDialog = null
-var _base_help_text := "You can add or remove rows and columns later.\nThe table will be saved as a .tres resource file."
 
 
 func _ready() -> void:
@@ -50,7 +50,6 @@ func _connect_signals() -> void:
 func _validate_inputs(_text: String = "") -> void:
 	"""Validate user inputs and enable/disable OK button"""
 	var is_valid := true
-	var help_text_content := _base_help_text
 
 	# Check table name
 	if name_edit.text.strip_edges().is_empty():
@@ -66,14 +65,18 @@ func _validate_inputs(_text: String = "") -> void:
 		if not full_path.ends_with("/"):
 			if FileAccess.file_exists(full_path):
 				is_valid = false
-				help_text_content += "\n\n⚠️ WARNING: File '" + file_name + "' already exists!"
+				warning_text.visible = true
+				warning_text.text = "⚠️ WARNING: File '" + file_name + "' already exists!"
+				print("File already exists: " + full_path)
+			else:
+				warning_text.visible = false
+				print("File does not exist: " + full_path)
 
 	# Check path
 	if path_edit.text.strip_edges().is_empty():
 		is_valid = false
 
 	get_ok_button().disabled = not is_valid
-	help_text.text = help_text_content
 
 
 func _on_browse_pressed() -> void:

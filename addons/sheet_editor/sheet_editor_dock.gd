@@ -49,8 +49,8 @@ func _setup_menus() -> void:
 	# Setup File menu
 	var file_popup := file_menu.get_popup()
 	file_popup.clear()
-	file_popup.add_item("New Sheet", 0)
-	file_popup.add_item("Load Sheet", 1)
+	file_popup.add_item("New", 0)
+	file_popup.add_item("Load", 1)
 	file_popup.add_item("Save", 2)
 	file_popup.add_separator()
 	file_popup.add_item("Close", 3)
@@ -62,10 +62,7 @@ func _setup_menus() -> void:
 	edit_popup.add_item("Add Column", 0)
 	edit_popup.add_item("Add Row", 1)
 	edit_popup.add_separator()
-	edit_popup.add_item("Delete Column", 2)
-	edit_popup.add_item("Delete Row", 3)
-	edit_popup.add_separator()
-	edit_popup.add_item("Clear All", 4)
+	edit_popup.add_item("Clear All", 2)
 	edit_popup.id_pressed.connect(_on_edit_menu_pressed)
 
 
@@ -321,9 +318,9 @@ func _move_to_cell(target_row: int, target_col: int) -> void:
 
 func _on_file_menu_pressed(id: int) -> void:
 	match id:
-		0:  # New Sheet
+		0:  # New
 			_show_create_table_dialog()
-		1:  # Load Sheet
+		1:  # Load
 			load_requested.emit()
 		2:  # Save
 			save_requested.emit()
@@ -337,11 +334,7 @@ func _on_edit_menu_pressed(id: int) -> void:
 			_on_add_column_pressed()
 		1:  # Add Row
 			_on_add_row_pressed()
-		2:  # Delete Column
-			_prompt_delete_column()
-		3:  # Delete Row
-			_prompt_delete_row()
-		4:  # Clear All
+		2:  # Clear All
 			data_cleared.emit()
 
 
@@ -401,18 +394,6 @@ func _on_row_header_gui_input(event: InputEvent, row: int) -> void:
 			get_viewport().set_input_as_handled()
 
 
-func _prompt_delete_column() -> void:
-	"""Delete the last column (simple implementation)"""
-	if not current_sheet or not current_sheet is Sheet:
-		return
-
-	var sheet := current_sheet as Sheet
-	if sheet.column_count == 0:
-		return
-
-	column_deleted.emit(sheet.column_count - 1)
-
-
 func _show_column_context_menu(col: int, position: Vector2) -> void:
 	"""Display context menu for column operations"""
 	var popup := PopupMenu.new()
@@ -424,18 +405,6 @@ func _show_column_context_menu(col: int, position: Vector2) -> void:
 	)
 	add_child(popup)
 	popup.popup(Rect2i(position, Vector2i(150, 50)))
-
-
-func _prompt_delete_row() -> void:
-	"""Delete the last row (simple implementation)"""
-	if not current_sheet or not current_sheet is Sheet:
-		return
-
-	var sheet := current_sheet as Sheet
-	if sheet.row_count == 0:
-		return
-
-	row_deleted.emit(sheet.row_count - 1)
 
 
 func _show_row_context_menu(row: int, position: Vector2) -> void:
@@ -502,14 +471,15 @@ func _show_create_table_dialog() -> void:
 		# Connect to the dialog's custom signal
 		create_table_dialog.table_creation_confirmed.connect(_on_create_table_confirmed)
 
-		# Add as child of the editor base control to center properly
-		get_tree().root.add_child(create_table_dialog)
+		# Add as child of the dock to ensure proper modal behavior
+		add_child(create_table_dialog)
 
 	# Reset dialog to default values
 	create_table_dialog.reset_to_defaults()
 
-	# Show the dialog
+	# Show the dialog as modal and ensure it gets focus
 	create_table_dialog.popup_centered()
+	create_table_dialog.grab_focus()
 
 
 func _on_create_table_confirmed(table_name: String, file_name: String, num_rows: int, num_columns: int, save_path: String) -> void:

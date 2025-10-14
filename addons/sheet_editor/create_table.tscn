@@ -5,30 +5,24 @@
 [node name="CreateTable" type="ConfirmationDialog"]
 title = "Create New Table"
 initial_position = 1
-size = Vector2i(600, 700)
+size = Vector2i(495, 478)
 visible = true
-wrap_controls = false
-unresizable = true
-content_scale_mode = 1
-content_scale_aspect = 1
 ok_button_text = "Create"
 script = ExtResource("1_yh8k3")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+custom_minimum_size = Vector2(450, 280)
 offset_left = 8.0
 offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -49.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 3
+offset_right = 487.0
+offset_bottom = 429.0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
-size_flags_horizontal = 3
 
 [node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -73,7 +67,7 @@ text = "Rows:"
 unique_name_in_owner = true
 layout_mode = 2
 min_value = 1.0
-value = 5.0
+value = 10.0
 
 [node name="ColumnsLabel" type="Label" parent="MarginContainer/VBoxContainer/DimensionsContainer"]
 layout_mode = 2
@@ -113,16 +107,23 @@ text = "Browse..."
 custom_minimum_size = Vector2(0, 15)
 layout_mode = 2
 
-[node name="DescriptionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_type_variation = &"HeaderSmall"
-text = "Create a new data table with custom dimensions"
-
 [node name="HelpText" type="Label" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(5, 100)
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 12
 text = "You can add or remove rows and columns later.
 The table will be saved as a .tres resource file."
 autowrap_mode = 3
+clip_text = true
+
+[node name="WarningText" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+text = "⚠️ WARNING: File 'my_table.tres' already exists!"
+autowrap_mode = 3
+clip_text = true
