@@ -21,13 +21,13 @@ addons/sheet_editor/
 ## Task Tracking
 
 Reference tasks from `PLAN.md` in commits: `feat: add grid (P1-004)`
-- Phase 1 (Core): P1-001 to P1-018 ✅ In Progress
+- Phase 1 (Core): P1-001 to P1-018 ✅ **Complete**
 - Phase 2 (CSV): P2-001 to P2-018
 - Phase 3 (Classes): P3-001 to P3-026
 - Phase 4 (Polish): P4-001 to P4-026
 
-**Completed:** P1-001 (plugin setup), P1-002 (dock), P1-003 (menu bar), P1-003.5 (new sheet), P1-004 (grid), P1-005 (cell editing), P1-006 (navigation), P1-007 (add column), P1-008 (column naming), P1-009 (column deletion), P1-012 (add row), P1-013 (row naming), P1-014 (row deletion), P1-016 (Sheet resource class)
-**Next:** P1-017 (save functionality), P1-018 (load functionality)
+**Phase 1 Complete:** All core functionality implemented including plugin setup, dock UI, grid display, cell editing, navigation, column/row management (add/delete/rename), Sheet resource class, and save/load functionality.
+**Next Phase:** P2-001 (CSV export/import)
 
 ## Key Patterns
 

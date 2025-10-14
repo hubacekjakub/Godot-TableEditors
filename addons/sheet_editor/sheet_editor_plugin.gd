@@ -37,6 +37,11 @@ func _edit(object: Object) -> void:
 	current_sheet = object
 	_show_dock()
 
+	# Add to recent sheets if it has a path
+	if current_sheet.resource_path and not current_sheet.resource_path.is_empty():
+		if sheet_editor_dock and sheet_editor_dock.has_method("add_to_recent_sheets"):
+			sheet_editor_dock.add_to_recent_sheets(current_sheet.resource_path)
+
 
 func _show_dock() -> void:
 	make_bottom_panel_item_visible(sheet_editor_dock)
@@ -44,29 +49,18 @@ func _show_dock() -> void:
 		sheet_editor_dock.set_sheet(current_sheet)
 
 func _hide_dock() -> void:
-	return
-	#sheet_editor_dock.hide()
+	"""Hide the sheet editor dock (currently no-op as dock stays visible)"""
+	pass
 
 
 func _is_object_sheet_resource(object: Object) -> bool:
+	"""Check if the given object is a Sheet resource"""
 	if not object:
 		return false
 	if object is not Resource:
 		return false
 
-	# best approach I quess
-	if object is Sheet:
-		return true
-
-	# second approach, uses preloaded script variable
-	#if object.get_script() == SHEET_SCRIPT_RESOURCE:
-	#	return true
-
-	# third approach, uses string comparison
-	#if object.get_script() and object.get_script().get_global_name() == "Sheet":
-	#	return true
-
-	return false
+	return object is Sheet
 
 func _add_toolbar_buttons() -> void:
 	button_2d = Button.new()
@@ -85,94 +79,52 @@ func _add_toolbar_buttons() -> void:
 	add_control_to_container(EditorPlugin.CONTAINER_INSPECTOR_BOTTOM, button_inspector)
 
 func _create_sheet_editor_dock() -> void:
-	# Load the dock scene
-	print("Loading dock scene...")
+	"""Create and initialize the sheet editor dock with signal connections"""
 	sheet_editor_dock = DOCK_SCENE.instantiate()
-	print("Dock scene loaded: ", sheet_editor_dock)
 
 	# Connect signals from the dock
-	print("Connecting signals...")
-	if sheet_editor_dock.has_signal("column_added"):
-		sheet_editor_dock.column_added.connect(_on_add_column_pressed)
-		print("✓ Connected column_added signal")
-	if sheet_editor_dock.has_signal("row_added"):
-		sheet_editor_dock.row_added.connect(_on_add_row_pressed)
-		print("✓ Connected row_added signal")
-	if sheet_editor_dock.has_signal("column_deleted"):
-		sheet_editor_dock.column_deleted.connect(_on_column_deleted)
-		print("✓ Connected column_deleted signal")
-	if sheet_editor_dock.has_signal("row_deleted"):
-		sheet_editor_dock.row_deleted.connect(_on_row_deleted)
-		print("✓ Connected row_deleted signal")
-	if sheet_editor_dock.has_signal("column_renamed"):
-		sheet_editor_dock.column_renamed.connect(_on_column_renamed)
-		print("✓ Connected column_renamed signal")
-	if sheet_editor_dock.has_signal("row_renamed"):
-		sheet_editor_dock.row_renamed.connect(_on_row_renamed)
-		print("✓ Connected row_renamed signal")
-	if sheet_editor_dock.has_signal("data_cleared"):
-		sheet_editor_dock.data_cleared.connect(_clear_all_data)
-		print("✓ Connected data_cleared signal")
-	if sheet_editor_dock.has_signal("save_requested"):
-		sheet_editor_dock.save_requested.connect(_save_sheet)
-		print("✓ Connected save_requested signal")
-	if sheet_editor_dock.has_signal("close_requested"):
-		sheet_editor_dock.close_requested.connect(_hide_dock)
-		print("✓ Connected close_requested signal")
-	if sheet_editor_dock.has_signal("new_sheet_requested"):
-		sheet_editor_dock.new_sheet_requested.connect(_create_new_sheet)
-		print("✓ Connected new_sheet_requested signal")
+	sheet_editor_dock.column_added.connect(_on_add_column_pressed)
+	sheet_editor_dock.row_added.connect(_on_add_row_pressed)
+	sheet_editor_dock.column_deleted.connect(_on_column_deleted)
+	sheet_editor_dock.row_deleted.connect(_on_row_deleted)
+	sheet_editor_dock.column_renamed.connect(_on_column_renamed)
+	sheet_editor_dock.row_renamed.connect(_on_row_renamed)
+	sheet_editor_dock.data_cleared.connect(_clear_all_data)
+	sheet_editor_dock.save_requested.connect(_save_sheet)
+	sheet_editor_dock.load_requested.connect(_load_sheet)
+	sheet_editor_dock.close_requested.connect(_hide_dock)
+	sheet_editor_dock.new_sheet_requested.connect(_create_new_sheet)
+	sheet_editor_dock.sheet_selected.connect(_on_sheet_selected_from_recent)
 func _on_add_column_pressed() -> void:
-	print("=== ADD COLUMN PRESSED ===")
-	print("Current sheet: ", current_sheet)
-
+	"""Add a new column to the current sheet"""
 	if not current_sheet or not current_sheet is Sheet:
-		print("ERROR: No valid sheet!")
+		push_warning("Sheet Editor: Cannot add column - no valid sheet loaded")
 		return
 
 	var sheet := current_sheet as Sheet
-	print("Before: column_count = ", sheet.column_count)
 	sheet.column_count += 1
-	print("After: column_count = ", sheet.column_count)
 
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
-		print("Calling update_ui()...")
 		sheet_editor_dock.update_ui()
-	else:
-		print("ERROR: sheet_editor_dock or update_ui() not available")
-
-	print("=== ADD COLUMN COMPLETE ===")
 
 
 func _on_add_row_pressed() -> void:
-	print("=== ADD ROW PRESSED ===")
-	print("Current sheet: ", current_sheet)
-
+	"""Add a new row to the current sheet"""
 	if not current_sheet or not current_sheet is Sheet:
-		print("ERROR: No valid sheet!")
+		push_warning("Sheet Editor: Cannot add row - no valid sheet loaded")
 		return
 
 	var sheet := current_sheet as Sheet
-	print("Before: row_count = ", sheet.row_count)
 	sheet.row_count += 1
-	print("After: row_count = ", sheet.row_count)
 
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
-		print("Calling update_ui()...")
 		sheet_editor_dock.update_ui()
-	else:
-		print("ERROR: sheet_editor_dock or update_ui() not available")
-
-	print("=== ADD ROW COMPLETE ===")
 
 
-# Column naming (P1-008)
 func _on_column_renamed(col: int, new_name: String) -> void:
-	print("=== RENAME COLUMN %d ==="%col)
-	print("New name: '%s'" % new_name)
-
+	"""Update column name in the sheet"""
 	if not current_sheet or not current_sheet is Sheet:
-		print("ERROR: No valid sheet!")
+		push_warning("Sheet Editor: Cannot rename column - no valid sheet loaded")
 		return
 
 	var sheet := current_sheet as Sheet
@@ -181,16 +133,11 @@ func _on_column_renamed(col: int, new_name: String) -> void:
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
 		sheet_editor_dock.update_ui()
 
-	print("=== COLUMN RENAMED ===")
 
-
-# Row naming (P1-013)
 func _on_row_renamed(row: int, new_name: String) -> void:
-	print("=== RENAME ROW %d ===" % row)
-	print("New name: '%s'" % new_name)
-
+	"""Update row name in the sheet"""
 	if not current_sheet or not current_sheet is Sheet:
-		print("ERROR: No valid sheet!")
+		push_warning("Sheet Editor: Cannot rename row - no valid sheet loaded")
 		return
 
 	var sheet := current_sheet as Sheet
@@ -199,105 +146,172 @@ func _on_row_renamed(row: int, new_name: String) -> void:
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
 		sheet_editor_dock.update_ui()
 
-	print("=== ROW RENAMED ===")
 
-
-# Column deletion (P1-009)
 func _on_column_deleted(col: int) -> void:
-	print("=== DELETE COLUMN %d ===" % col)
-
+	"""Delete a column from the sheet"""
 	if not current_sheet or not current_sheet is Sheet:
-		print("ERROR: No valid sheet!")
+		push_warning("Sheet Editor: Cannot delete column - no valid sheet loaded")
 		return
 
 	var sheet := current_sheet as Sheet
-	print("Before: column_count = ", sheet.column_count)
-
 	sheet.delete_column(col)
 
-	print("After: column_count = ", sheet.column_count)
-
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
 		sheet_editor_dock.update_ui()
 
-	print("=== COLUMN DELETED ===")
 
-
-# Row deletion (P1-014)
 func _on_row_deleted(row: int) -> void:
-	print("=== DELETE ROW %d ===" % row)
-
+	"""Delete a row from the sheet"""
 	if not current_sheet or not current_sheet is Sheet:
-		print("ERROR: No valid sheet!")
+		push_warning("Sheet Editor: Cannot delete row - no valid sheet loaded")
 		return
 
 	var sheet := current_sheet as Sheet
-	print("Before: row_count = ", sheet.row_count)
-
 	sheet.delete_row(row)
-
-	print("After: row_count = ", sheet.row_count)
 
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
 		sheet_editor_dock.update_ui()
-
-	print("=== ROW DELETED ===")
 
 
 func _clear_all_data() -> void:
+	"""Clear all data from the current sheet"""
 	if not current_sheet or not current_sheet is Sheet:
 		return
 
 	var sheet := current_sheet as Sheet
 	sheet.column_count = 0
 	sheet.row_count = 0
-	sheet.clear_all_cells()  # Also clear cell data
+	sheet.clear_all_cells()
+
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
 		sheet_editor_dock.update_ui()
-	print("Cleared all data including cells")
 
 
 func _create_new_sheet() -> void:
 	"""Create a new Sheet resource and start editing it"""
-	print("=== CREATING NEW SHEET ===")
-
-	# Create a new Sheet instance
 	var new_sheet := Sheet.new()
 	new_sheet.sheet_name = "Untitled Sheet"
-	new_sheet.column_count = 3  # Start with 3 columns
-	new_sheet.row_count = 5     # Start with 5 rows
+	new_sheet.column_count = 3
+	new_sheet.row_count = 5
 
-	print("New sheet created: ", new_sheet)
-	print("  sheet_name: ", new_sheet.sheet_name)
-	print("  column_count: ", new_sheet.column_count)
-	print("  row_count: ", new_sheet.row_count)
-
-	# Set it as the current sheet and start editing
 	current_sheet = new_sheet
 	_show_dock()
 
-	# Also select it in the inspector so it can be saved
+	# Select in inspector so it can be saved
 	get_editor_interface().edit_resource(new_sheet)
-
-	print("=== NEW SHEET READY ===")
 
 
 func _save_sheet() -> void:
+	"""Save the current sheet to file"""
 	if not current_sheet:
-		print("No sheet to save")
+		push_warning("Sheet Editor: No sheet to save")
 		return
 
-	# Get the resource path
 	var path := current_sheet.resource_path
 	if path.is_empty():
-		print("Sheet has no path, cannot save")
+		_show_save_dialog()
 		return
 
 	var error := ResourceSaver.save(current_sheet, path)
 	if error == OK:
-		print("Sheet saved successfully to: ", path)
+		print("Sheet saved to: ", path)
 	else:
-		push_error("Failed to save sheet: " + str(error))
+		push_error("Sheet Editor: Failed to save sheet - error code: " + str(error))
+
+
+func _show_save_dialog() -> void:
+	"""Show file dialog to save sheet with a new path"""
+	var dialog := EditorFileDialog.new()
+	dialog.file_mode = EditorFileDialog.FILE_MODE_SAVE_FILE
+	dialog.access = EditorFileDialog.ACCESS_RESOURCES
+	dialog.add_filter("*.tres", "Godot Resource")
+	dialog.title = "Save Sheet As"
+
+	var default_name := "new_sheet.tres"
+	if current_sheet is Sheet:
+		var sheet := current_sheet as Sheet
+		if not sheet.sheet_name.is_empty() and sheet.sheet_name != "Untitled Sheet":
+			default_name = sheet.sheet_name.to_snake_case() + ".tres"
+
+	dialog.current_file = default_name
+	dialog.current_dir = "res://"
+	dialog.file_selected.connect(_on_save_file_selected)
+
+	get_editor_interface().get_base_control().add_child(dialog)
+	dialog.popup_centered_ratio(0.6)
+
+
+func _on_save_file_selected(path: String) -> void:
+	"""Save the sheet to the selected file path"""
+	if not current_sheet:
+		return
+
+	if not path.ends_with(".tres"):
+		path += ".tres"
+
+	var error := ResourceSaver.save(current_sheet, path)
+	if error == OK:
+		print("Sheet saved to: ", path)
+		current_sheet.resource_path = path
+		get_editor_interface().get_resource_filesystem().scan()
+
+		# Add to recent sheets
+		if sheet_editor_dock and sheet_editor_dock.has_method("add_to_recent_sheets"):
+			sheet_editor_dock.add_to_recent_sheets(path)
+	else:
+		push_error("Sheet Editor: Failed to save sheet - error code: " + str(error))
+
+
+func _load_sheet() -> void:
+	"""Show dialog to load a sheet from file"""
+	_show_load_dialog()
+
+
+func _show_load_dialog() -> void:
+	"""Show file dialog to load an existing sheet"""
+	var dialog := EditorFileDialog.new()
+	dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
+	dialog.access = EditorFileDialog.ACCESS_RESOURCES
+	dialog.add_filter("*.tres", "Godot Resource")
+	dialog.title = "Load Sheet"
+	dialog.current_dir = "res://"
+	dialog.file_selected.connect(_on_load_file_selected)
+
+	get_editor_interface().get_base_control().add_child(dialog)
+	dialog.popup_centered_ratio(0.6)
+
+
+func _on_load_file_selected(path: String) -> void:
+	"""Load sheet from the selected file path"""
+	_load_sheet_from_path(path)
+
+
+func _load_sheet_from_path(path: String) -> void:
+	"""Load a sheet from a given path"""
+	var loaded_resource = ResourceLoader.load(path)
+
+	if not loaded_resource:
+		push_error("Sheet Editor: Failed to load resource from: " + path)
+		return
+
+	if not loaded_resource is Sheet:
+		push_error("Sheet Editor: File is not a Sheet resource: " + path)
+		return
+
+	print("Sheet loaded from: ", path)
+
+	current_sheet = loaded_resource
+	_show_dock()
+	get_editor_interface().edit_resource(loaded_resource)
+
+	# Add to recent sheets
+	if sheet_editor_dock and sheet_editor_dock.has_method("add_to_recent_sheets"):
+		sheet_editor_dock.add_to_recent_sheets(path)
+
+
+func _on_sheet_selected_from_recent(path: String) -> void:
+	"""Handle selection from recent sheets list"""
+	_load_sheet_from_path(path)
 
 
 func _exit_tree() -> void:

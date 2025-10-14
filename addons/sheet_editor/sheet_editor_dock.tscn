@@ -48,12 +48,34 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Rows: 0"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="MainContainer" type="HSplitContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="GridContainer" type="GridContainer" parent="ScrollContainer"]
+[node name="SidePanel" type="VBoxContainer" parent="MainContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+
+[node name="SidePanelLabel" type="Label" parent="MainContainer/SidePanel"]
+layout_mode = 2
+theme_type_variation = &"HeaderSmall"
+text = "Recent Sheets"
+
+[node name="RecentSheetsList" type="ItemList" parent="MainContainer/SidePanel"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="GridContainer" type="GridContainer" parent="MainContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
 columns = 1

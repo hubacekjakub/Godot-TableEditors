@@ -1,3 +1,4 @@
+@tool
 extends Resource
 class_name Sheet
 
@@ -7,8 +8,8 @@ class_name Sheet
 @export var row_count: int = 0
 @export var column_count: int = 0
 @export var cells: Dictionary = {}  # Key format: "row,col" -> value (String)
-@export var column_names: Array[String] = []  # Custom column names (P1-008)
-@export var row_names: Array[String] = []     # Custom row names (P1-013)
+@export var column_names: Array[String] = []  # Custom column names
+@export var row_names: Array[String] = []  # Custom row names
 
 
 func get_cell(row: int, col: int) -> String:
@@ -32,7 +33,7 @@ func clear_all_cells() -> void:
 
 
 func get_column_name(col: int) -> String:
-	"""Get the name of a column (P1-008)"""
+	"""Get the display name of a column, or generate Excel-style letter if unnamed"""
 	if col >= 0 and col < column_names.size():
 		var name := column_names[col]
 		if not name.is_empty():
@@ -41,7 +42,7 @@ func get_column_name(col: int) -> String:
 
 
 func set_column_name(col: int, name: String) -> void:
-	"""Set the name of a column (P1-008)"""
+	"""Set a custom display name for a column"""
 	# Resize array if needed
 	while column_names.size() <= col:
 		column_names.append("")
@@ -49,7 +50,7 @@ func set_column_name(col: int, name: String) -> void:
 
 
 func get_row_name(row: int) -> String:
-	"""Get the name of a row (P1-013)"""
+	"""Get the display name of a row, or generate number if unnamed"""
 	if row >= 0 and row < row_names.size():
 		var name := row_names[row]
 		if not name.is_empty():
@@ -58,7 +59,7 @@ func get_row_name(row: int) -> String:
 
 
 func set_row_name(row: int, name: String) -> void:
-	"""Set the name of a row (P1-013)"""
+	"""Set a custom display name for a row"""
 	# Resize array if needed
 	while row_names.size() <= row:
 		row_names.append("")
@@ -66,7 +67,7 @@ func set_row_name(row: int, name: String) -> void:
 
 
 func delete_column(col: int) -> void:
-	"""Delete a column and shift cells (P1-009)"""
+	"""Delete a column and shift remaining columns left"""
 	if col < 0 or col >= column_count:
 		return
 
@@ -77,7 +78,7 @@ func delete_column(col: int) -> void:
 	# Shift all cells in columns after the deleted one
 	var new_cells := {}
 	for key in cells.keys():
-		var parts := key.split(",")
+		var parts: PackedStringArray = key.split(",")
 		var cell_row := int(parts[0])
 		var cell_col := int(parts[1])
 
@@ -96,7 +97,7 @@ func delete_column(col: int) -> void:
 
 
 func delete_row(row: int) -> void:
-	"""Delete a row and shift cells (P1-014)"""
+	"""Delete a row and shift remaining rows up"""
 	if row < 0 or row >= row_count:
 		return
 
@@ -107,7 +108,7 @@ func delete_row(row: int) -> void:
 	# Shift all cells in rows after the deleted one
 	var new_cells := {}
 	for key in cells.keys():
-		var parts := key.split(",")
+		var parts: PackedStringArray = key.split(",")
 		var cell_row := int(parts[0])
 		var cell_col := int(parts[1])
 

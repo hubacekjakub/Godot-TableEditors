@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Sheet" load_steps=2 format=3 uid="uid://cpuykdg6u7xh1"]
+
+[ext_resource type="Script" uid="uid://ds7c1eu2ai7is" path="res://addons/sheet_editor/sheet.gd" id="1_kl5d3"]
+
+[resource]
+script = ExtResource("1_kl5d3")
+sheet_name = "Untitled Sheet"
+row_count = 5
+column_count = 3
+cells = {}
+column_names = Array[String]([])
+row_names = Array[String]([])
