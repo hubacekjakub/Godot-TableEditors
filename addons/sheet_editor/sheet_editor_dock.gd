@@ -87,12 +87,14 @@ func update_ui() -> void:
 		columns_label.text = "Columns: 0"
 		rows_label.text = "Rows: 0"
 		_rebuild_grid()
+		_update_recent_sheets_list()
 		return
 
 	var sheet := current_sheet as Sheet
 	columns_label.text = "Columns: %d" % sheet.column_count
 	rows_label.text = "Rows: %d" % sheet.row_count
 	_rebuild_grid()
+	_update_recent_sheets_list()
 
 
 func _rebuild_grid() -> void:
@@ -472,10 +474,16 @@ func _update_recent_sheets_list() -> void:
 	"""Update the ItemList display with recent sheets"""
 	recent_sheets_list.clear()
 
-	for path in recent_sheets:
+	for i in range(recent_sheets.size()):
+		var path := recent_sheets[i]
 		var file_name := path.get_file()
 		recent_sheets_list.add_item(file_name)
-		recent_sheets_list.set_item_tooltip(recent_sheets_list.item_count - 1, path)
+		recent_sheets_list.set_item_tooltip(i, path)
+
+		# Highlight the currently active sheet
+		if current_sheet and current_sheet.resource_path == path:
+			recent_sheets_list.set_item_custom_bg_color(i, Color(0.3, 0.5, 0.7, 0.3))  # Light blue highlight
+			recent_sheets_list.set_item_custom_fg_color(i, Color(1, 1, 1, 1))  # White text for contrast
 
 
 func _on_recent_sheet_selected(index: int) -> void:
