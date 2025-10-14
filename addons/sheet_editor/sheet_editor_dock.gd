@@ -3,6 +3,8 @@ extends VBoxContainer
 
 ## Sheet Editor Dock UI Controller
 
+const CREATE_TABLE_SCENE := preload("res://addons/sheet_editor/create_table.tscn")
+
 signal column_added
 signal row_added
 signal column_deleted(col: int)
@@ -15,6 +17,7 @@ signal load_requested
 signal close_requested
 signal new_sheet_requested
 signal sheet_selected(path: String)
+signal create_table_requested(table_name: String, rows: int, columns: int, save_path: String)
 
 # UI References (automatically connected from scene)
 @onready var file_menu: MenuButton = %FileMenu
@@ -26,6 +29,8 @@ signal sheet_selected(path: String)
 @onready var recent_sheets_list: ItemList = %RecentSheetsList
 @onready var scroll_container: ScrollContainer = %ScrollContainer
 @onready var grid_container: GridContainer = %GridContainer
+
+var create_table_dialog: ConfirmationDialog = null
 
 var current_sheet: Resource = null
 var current_focused_row: int = -1
@@ -68,6 +73,8 @@ func _connect_signals() -> void:
 	add_column_btn.pressed.connect(_on_add_column_pressed)
 	add_row_btn.pressed.connect(_on_add_row_pressed)
 	recent_sheets_list.item_selected.connect(_on_recent_sheet_selected)
+
+
 func set_sheet(sheet: Resource) -> void:
 	"""Set the current sheet and update the UI"""
 	current_sheet = sheet
@@ -105,6 +112,10 @@ func _rebuild_grid() -> void:
 	# Set grid columns (add 1 for row headers)
 	grid_container.columns = max(1, sheet.column_count + 1)
 
+	# Add spacing between cells for a cleaner look
+	grid_container.add_theme_constant_override("h_separation", 0)
+	grid_container.add_theme_constant_override("v_separation", 0)
+
 	# If empty sheet, show a placeholder
 	if sheet.column_count == 0 or sheet.row_count == 0:
 		var label := Label.new()
@@ -116,6 +127,17 @@ func _rebuild_grid() -> void:
 	var corner_label := Label.new()
 	corner_label.text = ""
 	corner_label.custom_minimum_size = Vector2(40, 30)
+	corner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	corner_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+	# Add subtle border styling
+	var corner_style := StyleBoxFlat.new()
+	corner_style.bg_color = Color(0.25, 0.25, 0.25, 1)
+	corner_style.border_width_right = 1
+	corner_style.border_width_bottom = 2
+	corner_style.border_color = Color(0.4, 0.4, 0.4, 1)
+	corner_label.add_theme_stylebox_override("normal", corner_style)
+
 	grid_container.add_child(corner_label)
 
 	# Create editable column headers with Excel-style letters (A, B, C...)
@@ -123,9 +145,18 @@ func _rebuild_grid() -> void:
 		var header_edit := LineEdit.new()
 		header_edit.text = sheet.get_column_name(col)
 		header_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		header_edit.custom_minimum_size = Vector2(80, 30)
+		header_edit.custom_minimum_size = Vector2(100, 30)
 		header_edit.placeholder_text = _get_column_letter(col)
 		header_edit.set_meta("column_index", col)
+
+		# Style column headers like Excel
+		var header_style := StyleBoxFlat.new()
+		header_style.bg_color = Color(0.22, 0.22, 0.22, 1)
+		header_style.border_width_right = 1
+		header_style.border_width_bottom = 2
+		header_style.border_color = Color(0.4, 0.4, 0.4, 1)
+		header_edit.add_theme_stylebox_override("normal", header_style)
+		header_edit.add_theme_stylebox_override("focus", header_style)
 
 		header_edit.text_submitted.connect(_on_column_renamed.bind(col))
 		header_edit.focus_exited.connect(_on_column_header_focus_exited.bind(col, header_edit))
@@ -143,6 +174,15 @@ func _rebuild_grid() -> void:
 		row_edit.placeholder_text = str(row + 1)
 		row_edit.set_meta("row_index", row)
 
+		# Style row headers like Excel
+		var row_style := StyleBoxFlat.new()
+		row_style.bg_color = Color(0.22, 0.22, 0.22, 1)
+		row_style.border_width_right = 1
+		row_style.border_width_bottom = 1
+		row_style.border_color = Color(0.4, 0.4, 0.4, 1)
+		row_edit.add_theme_stylebox_override("normal", row_style)
+		row_edit.add_theme_stylebox_override("focus", row_style)
+
 		row_edit.text_submitted.connect(_on_row_renamed.bind(row))
 		row_edit.focus_exited.connect(_on_row_header_focus_exited.bind(row, row_edit))
 		row_edit.gui_input.connect(_on_row_header_gui_input.bind(row))
@@ -153,8 +193,30 @@ func _rebuild_grid() -> void:
 		for col in range(sheet.column_count):
 			var line_edit := LineEdit.new()
 			line_edit.text = sheet.get_cell(row, col)
-			line_edit.custom_minimum_size = Vector2(80, 30)
+			line_edit.custom_minimum_size = Vector2(100, 30)
 			line_edit.placeholder_text = "..."
+
+			# Style data cells with subtle alternating row colors
+			var cell_style := StyleBoxFlat.new()
+			# Use standard Godot theme colors with subtle alternation
+			if row % 2 == 0:
+				cell_style.bg_color = Color(0.24, 0.24, 0.24, 1)  # Slightly lighter
+			else:
+				cell_style.bg_color = Color(0.22, 0.22, 0.22, 1)  # Standard
+			cell_style.border_width_right = 1
+			cell_style.border_width_bottom = 1
+			cell_style.border_color = Color(0.3, 0.3, 0.3, 1)
+			line_edit.add_theme_stylebox_override("normal", cell_style)
+
+			# Focus style with highlight
+			var focus_style := StyleBoxFlat.new()
+			focus_style.bg_color = Color(0.25, 0.35, 0.45, 1)
+			focus_style.border_width_left = 2
+			focus_style.border_width_right = 2
+			focus_style.border_width_top = 2
+			focus_style.border_width_bottom = 2
+			focus_style.border_color = Color(0.4, 0.6, 0.8, 1)
+			line_edit.add_theme_stylebox_override("focus", focus_style)
 
 			line_edit.set_meta("row", row)
 			line_edit.set_meta("col", col)
@@ -258,7 +320,7 @@ func _move_to_cell(target_row: int, target_col: int) -> void:
 func _on_file_menu_pressed(id: int) -> void:
 	match id:
 		0:  # New Sheet
-			new_sheet_requested.emit()
+			_show_create_table_dialog()
 		1:  # Load Sheet
 			load_requested.emit()
 		2:  # Save
@@ -421,4 +483,31 @@ func _on_recent_sheet_selected(index: int) -> void:
 	if index >= 0 and index < recent_sheets.size():
 		var path := recent_sheets[index]
 		sheet_selected.emit(path)
+
+
+func _show_create_table_dialog() -> void:
+	"""Show the Create Table dialog"""
+	# Instantiate dialog if it doesn't exist
+	if not create_table_dialog:
+		create_table_dialog = CREATE_TABLE_SCENE.instantiate()
+
+		# Connect to the dialog's custom signal
+		create_table_dialog.table_creation_confirmed.connect(_on_create_table_confirmed)
+
+		# Add as child of the editor base control to center properly
+		get_tree().root.add_child(create_table_dialog)
+
+	# Reset dialog to default values
+	create_table_dialog.reset_to_defaults()
+
+	# Show the dialog
+	create_table_dialog.popup_centered()
+
+
+func _on_create_table_confirmed(table_name: String, num_rows: int, num_columns: int, save_path: String) -> void:
+	"""Handle Create Table dialog confirmation"""
+	# Emit signal with parameters for the plugin to handle
+	create_table_requested.emit(table_name, num_rows, num_columns, save_path)
+
+
 

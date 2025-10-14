@@ -95,6 +95,7 @@ func _create_sheet_editor_dock() -> void:
 	sheet_editor_dock.close_requested.connect(_hide_dock)
 	sheet_editor_dock.new_sheet_requested.connect(_create_new_sheet)
 	sheet_editor_dock.sheet_selected.connect(_on_sheet_selected_from_recent)
+	sheet_editor_dock.create_table_requested.connect(_on_create_table_requested)
 func _on_add_column_pressed() -> void:
 	"""Add a new column to the current sheet"""
 	if not current_sheet or not current_sheet is Sheet:
@@ -312,6 +313,40 @@ func _load_sheet_from_path(path: String) -> void:
 func _on_sheet_selected_from_recent(path: String) -> void:
 	"""Handle selection from recent sheets list"""
 	_load_sheet_from_path(path)
+
+
+func _on_create_table_requested(table_name: String, rows: int, columns: int, save_path: String) -> void:
+	"""Create a new table with specified parameters from the Create Table dialog"""
+	var new_sheet := Sheet.new()
+	new_sheet.sheet_name = table_name
+	new_sheet.column_count = columns
+	new_sheet.row_count = rows
+
+	# Build full path
+	var full_path := save_path
+	if not full_path.begins_with("res://"):
+		full_path = "res://" + full_path
+
+	var file_name := table_name.to_snake_case() + ".tres"
+	full_path = full_path.path_join(file_name)
+
+	# Save the sheet
+	var error := ResourceSaver.save(new_sheet, full_path)
+	if error == OK:
+		print("New table created and saved to: ", full_path)
+		new_sheet.resource_path = full_path
+		get_editor_interface().get_resource_filesystem().scan()
+
+		# Load and edit the new sheet
+		current_sheet = new_sheet
+		_show_dock()
+		get_editor_interface().edit_resource(new_sheet)
+
+		# Add to recent sheets
+		if sheet_editor_dock and sheet_editor_dock.has_method("add_to_recent_sheets"):
+			sheet_editor_dock.add_to_recent_sheets(full_path)
+	else:
+		push_error("Sheet Editor: Failed to save new table - error code: " + str(error))
 
 
 func _exit_tree() -> void:

@@ -1,0 +1,110 @@
+[gd_scene load_steps=2 format=3 uid="uid://cgr1rlkptl5ur"]
+
+[ext_resource type="Script" path="res://addons/sheet_editor/create_table_dialog.gd" id="1_yh8k3"]
+
+[node name="CreateTable" type="ConfirmationDialog"]
+script = ExtResource("1_yh8k3")
+title = "Create New Table"
+initial_position = 1
+size = Vector2i(600, 700)
+visible = true
+wrap_controls = false
+unresizable = true
+content_scale_mode = 1
+content_scale_aspect = 1
+ok_button_text = "Create"
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -49.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Table Name:"
+
+[node name="NameEdit" type="LineEdit" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "MyTable"
+placeholder_text = "Enter table name..."
+
+[node name="Spacer1" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="RowsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Number of Rows:"
+
+[node name="RowsSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+value = 5.0
+
+[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="ColumnsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Number of Columns:"
+
+[node name="ColumnsSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+max_value = 10.0
+value = 5.0
+
+[node name="Spacer3" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="PathLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Save Path:"
+
+[node name="PathContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PathEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/PathContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "res://resources/"
+placeholder_text = "res://resources/"
+
+[node name="BrowseButton" type="Button" parent="MarginContainer/VBoxContainer/PathContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Browse..."
+
+[node name="Spacer4" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="DescriptionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_type_variation = &"HeaderSmall"
+text = "Create a new data table with custom dimensions"
+
+[node name="HelpText" type="Label" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(5, 100)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "You can add or remove rows and columns later.
+The table will be saved as a .tres resource file."
+autowrap_mode = 3
