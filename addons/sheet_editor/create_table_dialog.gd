@@ -4,15 +4,18 @@ extends ConfirmationDialog
 ## Create Table Dialog Controller
 ## Handles UI for creating new data tables
 
-signal table_creation_confirmed(table_name: String, rows: int, columns: int, save_path: String)
+signal table_creation_confirmed(table_name: String, file_name: String, rows: int, columns: int, save_path: String)
 
 @onready var name_edit: LineEdit = %NameEdit
+@onready var file_name_edit: LineEdit = %FileNameEdit
 @onready var rows_spinbox: SpinBox = %RowsSpinBox
 @onready var columns_spinbox: SpinBox = %ColumnsSpinBox
 @onready var path_edit: LineEdit = %PathEdit
 @onready var browse_button: Button = %BrowseButton
+@onready var help_text: Label = %HelpText
 
 var file_dialog: EditorFileDialog = null
+var _base_help_text := "You can add or remove rows and columns later.\nThe table will be saved as a .tres resource file."
 
 
 func _ready() -> void:
@@ -40,22 +43,37 @@ func _connect_signals() -> void:
 
 	# Validate inputs on text change
 	name_edit.text_changed.connect(_validate_inputs)
+	file_name_edit.text_changed.connect(_validate_inputs)
 	path_edit.text_changed.connect(_validate_inputs)
 
 
 func _validate_inputs(_text: String = "") -> void:
 	"""Validate user inputs and enable/disable OK button"""
 	var is_valid := true
+	var help_text_content := _base_help_text
 
 	# Check table name
 	if name_edit.text.strip_edges().is_empty():
 		is_valid = false
+
+	# Check file name
+	var file_name := file_name_edit.text.strip_edges()
+	if file_name.is_empty():
+		is_valid = false
+	else:
+		# Check if file already exists
+		var full_path := path_edit.text.strip_edges() + file_name
+		if not full_path.ends_with("/"):
+			if FileAccess.file_exists(full_path):
+				is_valid = false
+				help_text_content += "\n\n⚠️ WARNING: File '" + file_name + "' already exists!"
 
 	# Check path
 	if path_edit.text.strip_edges().is_empty():
 		is_valid = false
 
 	get_ok_button().disabled = not is_valid
+	help_text.text = help_text_content
 
 
 func _on_browse_pressed() -> void:
@@ -79,6 +97,7 @@ func _on_directory_selected(dir: String) -> void:
 func _on_confirmed() -> void:
 	"""Handle dialog confirmation"""
 	var table_name := name_edit.text.strip_edges()
+	var file_name := file_name_edit.text.strip_edges()
 	var num_rows := int(rows_spinbox.value)
 	var num_columns := int(columns_spinbox.value)
 	var save_path := path_edit.text.strip_edges()
@@ -87,16 +106,20 @@ func _on_confirmed() -> void:
 	if table_name.is_empty():
 		table_name = "MyTable"
 
+	if file_name.is_empty():
+		file_name = "my_table.tres"
+
 	if not save_path.ends_with("/"):
 		save_path += "/"
 
 	# Emit signal with validated parameters
-	table_creation_confirmed.emit(table_name, num_rows, num_columns, save_path)
+	table_creation_confirmed.emit(table_name, file_name, num_rows, num_columns, save_path)
 
 
 func reset_to_defaults() -> void:
 	"""Reset all fields to default values"""
 	name_edit.text = "MyTable"
+	file_name_edit.text = "my_table.tres"
 	rows_spinbox.value = 10
 	columns_spinbox.value = 5
 	path_edit.text = "res://resources/"

@@ -17,7 +17,7 @@ signal load_requested
 signal close_requested
 signal new_sheet_requested
 signal sheet_selected(path: String)
-signal create_table_requested(table_name: String, rows: int, columns: int, save_path: String)
+signal create_table_requested(table_name: String, file_name: String, rows: int, columns: int, save_path: String)
 
 # UI References (automatically connected from scene)
 @onready var file_menu: MenuButton = %FileMenu
@@ -504,10 +504,10 @@ func _show_create_table_dialog() -> void:
 	create_table_dialog.popup_centered()
 
 
-func _on_create_table_confirmed(table_name: String, num_rows: int, num_columns: int, save_path: String) -> void:
+func _on_create_table_confirmed(table_name: String, file_name: String, num_rows: int, num_columns: int, save_path: String) -> void:
 	"""Handle Create Table dialog confirmation"""
 	# Emit signal with parameters for the plugin to handle
-	create_table_requested.emit(table_name, num_rows, num_columns, save_path)
+	create_table_requested.emit(table_name, file_name, num_rows, num_columns, save_path)
 
 
 

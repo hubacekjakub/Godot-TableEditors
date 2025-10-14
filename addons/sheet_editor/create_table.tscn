@@ -1,9 +1,8 @@
 [gd_scene load_steps=2 format=3 uid="uid://cgr1rlkptl5ur"]
 
-[ext_resource type="Script" path="res://addons/sheet_editor/create_table_dialog.gd" id="1_yh8k3"]
+[ext_resource type="Script" uid="uid://dvc6n3b0oqvra" path="res://addons/sheet_editor/create_table_dialog.gd" id="1_yh8k3"]
 
 [node name="CreateTable" type="ConfirmationDialog"]
-script = ExtResource("1_yh8k3")
 title = "Create New Table"
 initial_position = 1
 size = Vector2i(600, 700)
@@ -13,6 +12,7 @@ unresizable = true
 content_scale_mode = 1
 content_scale_aspect = 1
 ok_button_text = "Create"
+script = ExtResource("1_yh8k3")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 anchors_preset = 15
@@ -44,25 +44,42 @@ placeholder_text = "Enter table name..."
 custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 
-[node name="RowsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="FileNameLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Number of Rows:"
+text = "File Name:"
 
-[node name="RowsSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer"]
+[node name="FileNameEdit" type="LineEdit" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-min_value = 1.0
-value = 5.0
+text = "my_table.tres"
+placeholder_text = "Enter file name (e.g., my_table.tres)"
 
 [node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 
-[node name="ColumnsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="DimensionsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Number of Columns:"
+text = "Table Dimensions:"
 
-[node name="ColumnsSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer"]
+[node name="DimensionsContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="RowsLabel" type="Label" parent="MarginContainer/VBoxContainer/DimensionsContainer"]
+layout_mode = 2
+text = "Rows:"
+
+[node name="RowsSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/DimensionsContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 1.0
+value = 5.0
+
+[node name="ColumnsLabel" type="Label" parent="MarginContainer/VBoxContainer/DimensionsContainer"]
+layout_mode = 2
+text = "Columns:"
+
+[node name="ColumnsSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/DimensionsContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 min_value = 1.0
@@ -102,6 +119,7 @@ theme_type_variation = &"HeaderSmall"
 text = "Create a new data table with custom dimensions"
 
 [node name="HelpText" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(5, 100)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)

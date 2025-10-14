@@ -315,19 +315,18 @@ func _on_sheet_selected_from_recent(path: String) -> void:
 	_load_sheet_from_path(path)
 
 
-func _on_create_table_requested(table_name: String, rows: int, columns: int, save_path: String) -> void:
+func _on_create_table_requested(table_name: String, file_name: String, rows: int, columns: int, save_path: String) -> void:
 	"""Create a new table with specified parameters from the Create Table dialog"""
 	var new_sheet := Sheet.new()
 	new_sheet.sheet_name = table_name
 	new_sheet.column_count = columns
 	new_sheet.row_count = rows
 
-	# Build full path
+	# Build full path using provided filename
 	var full_path := save_path
 	if not full_path.begins_with("res://"):
 		full_path = "res://" + full_path
 
-	var file_name := table_name.to_snake_case() + ".tres"
 	full_path = full_path.path_join(file_name)
 
 	# Save the sheet
