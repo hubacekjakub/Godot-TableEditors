@@ -145,21 +145,21 @@ func _get_column_letter(col_index: int) -> String:
 ## CSV Export/Import Functions
 
 func export_to_csv(file_path: String) -> bool:
-	"""Export sheet data to CSV file (comma-separated with header row)"""
+	"""Export sheet data to CSV file (comma-separated with header row including row names)"""
 	var file := FileAccess.open(file_path, FileAccess.WRITE)
 	if file == null:
 		push_error("Failed to open file for writing: " + file_path)
 		return false
 
-	# Write header row (column names)
-	var header_row: PackedStringArray = []
+	# Write header row (row name column + column names)
+	var header_row: PackedStringArray = ["Row Name"]
 	for col in range(column_count):
 		header_row.append(_escape_csv_value(get_column_name(col)))
 	file.store_line(",".join(header_row))
 
-	# Write data rows
+	# Write data rows with row names
 	for row in range(row_count):
-		var data_row: PackedStringArray = []
+		var data_row: PackedStringArray = [_escape_csv_value(get_row_name(row))]
 		for col in range(column_count):
 			var value := get_cell(row, col)
 			data_row.append(_escape_csv_value(value))
@@ -171,7 +171,7 @@ func export_to_csv(file_path: String) -> bool:
 
 
 func import_from_csv(file_path: String) -> bool:
-	"""Import CSV file into sheet (first row = column names, subsequent rows = data)"""
+	"""Import CSV file into sheet (supports row names in first column)"""
 	var file := FileAccess.open(file_path, FileAccess.READ)
 	if file == null:
 		push_error("Failed to open file for reading: " + file_path)
@@ -184,6 +184,8 @@ func import_from_csv(file_path: String) -> bool:
 
 	var line_number := 0
 	var is_first_line := true
+	var has_row_names := false
+	var header_values: PackedStringArray = []
 
 	while not file.eof_reached():
 		var line := file.get_line().strip_edges()
@@ -193,23 +195,42 @@ func import_from_csv(file_path: String) -> bool:
 		var values := _parse_csv_line(line)
 
 		if is_first_line:
-			# First line is header (column names)
-			column_count = values.size()
-			for i in range(values.size()):
-				set_column_name(i, values[i])
+			# First line is header
+			header_values = values
 			is_first_line = false
+
+			# Check if first column is "Row Name" (case insensitive)
+			if values.size() > 0 and values[0].to_lower() == "row name":
+				has_row_names = true
+				# Skip the "Row Name" column for actual column names
+				column_count = values.size() - 1
+				for i in range(1, values.size()):
+					set_column_name(i - 1, values[i])
+			else:
+				# No row names column, treat as regular data columns
+				has_row_names = false
+				column_count = values.size()
+				for i in range(values.size()):
+					set_column_name(i, values[i])
 		else:
 			# Data rows
 			var row_index := line_number - 1
 			row_count = row_index + 1
 
-			for col in range(min(values.size(), column_count)):
-				set_cell(row_index, col, values[col])
+			if has_row_names and values.size() > 0:
+				# First value is row name, rest are data
+				set_row_name(row_index, values[0])
+				for col in range(min(values.size() - 1, column_count)):
+					set_cell(row_index, col, values[col + 1])
+			else:
+				# No row names, all values are data
+				for col in range(min(values.size(), column_count)):
+					set_cell(row_index, col, values[col])
 
 		line_number += 1
 
 	file.close()
-	print("Sheet imported from CSV: " + file_path + " (" + str(row_count) + " rows, " + str(column_count) + " columns)")
+	print("Sheet imported from CSV: " + file_path + " (" + str(row_count) + " rows, " + str(column_count) + " columns, row names: " + str(has_row_names) + ")")
 	return true
 
 

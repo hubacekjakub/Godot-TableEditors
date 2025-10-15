@@ -54,7 +54,7 @@ Each implementation will be **independently functional** and can be kept or remo
 
 - [x] **Row Management**
   - [x] `P1-012` Add "Add Row" functionality
-  - [x] `P1-013` Implement row naming
+  - [x] `P1-013` Implement row naming (editable row headers shown in editor)
   - [x] `P1-014` Implement row deletion
 
 - [x] **Data Persistence**
@@ -64,9 +64,9 @@ Each implementation will be **independently functional** and can be kept or remo
 
 - [x] **CSV Export/Import** (Minimal Implementation)
   - [x] `P1-019` Implement simple CSV export dialog with file path selection
-  - [x] `P1-020` Export table data to CSV (comma-separated, with header row)
+  - [x] `P1-020` Export table data to CSV (comma-separated, with header row and row names)
   - [x] `P1-021` Implement simple CSV import dialog with file path selection
-  - [x] `P1-022` Import CSV data and populate table (basic parsing)
+  - [x] `P1-022` Import CSV data and populate table (basic parsing, supports row names)
 
 - [x] **Refactoring for Multi-Implementation Support**
   - [x] `P1-023` Move current files to `spreadsheet/` folder

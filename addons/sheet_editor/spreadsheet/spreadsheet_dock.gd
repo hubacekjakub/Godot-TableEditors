@@ -54,13 +54,13 @@ func _setup_csv_dialogs() -> void:
 	var CSVExportDialog := load("res://addons/sheet_editor/spreadsheet/csv_export_dialog.gd")
 	csv_export_dialog = CSVExportDialog.new()
 	csv_export_dialog.export_confirmed.connect(_on_csv_export_confirmed)
-	add_child(csv_export_dialog)
+	add_child.call_deferred(csv_export_dialog)
 
 	# Create CSV import dialog
 	var CSVImportDialog := load("res://addons/sheet_editor/spreadsheet/csv_import_dialog.gd")
 	csv_import_dialog = CSVImportDialog.new()
 	csv_import_dialog.import_confirmed.connect(_on_csv_import_confirmed)
-	add_child(csv_import_dialog)
+	add_child.call_deferred(csv_import_dialog)
 
 
 func _setup_menus() -> void:
@@ -104,14 +104,14 @@ func update_ui() -> void:
 	if not current_sheet or not current_sheet is SpreadsheetResource:
 		columns_label.text = "Columns: 0"
 		rows_label.text = "Rows: 0"
-		_rebuild_grid()
+		_rebuild_grid.call_deferred()
 		_update_recent_sheets_list()
 		return
 
 	var sheet := current_sheet as SpreadsheetResource
 	columns_label.text = "Columns: %d" % sheet.column_count
 	rows_label.text = "Rows: %d" % sheet.row_count
-	_rebuild_grid()
+	_rebuild_grid.call_deferred()
 	_update_recent_sheets_list()
 
 
@@ -393,7 +393,7 @@ func _on_csv_import_confirmed(file_path: String) -> void:
 	var sheet := current_sheet as SpreadsheetResource
 	if sheet.import_from_csv(file_path):
 		print("Successfully imported from: " + file_path)
-		update_ui()  # Refresh the UI to show imported data
+		update_ui.call_deferred()  # Refresh the UI to show imported data
 	else:
 		push_error("Failed to import CSV from: " + file_path)
 
@@ -473,7 +473,7 @@ func _show_column_context_menu(col: int, position: Vector2) -> void:
 			column_deleted.emit(col)
 		popup.queue_free()
 	)
-	add_child(popup)
+	add_child.call_deferred(popup)
 	popup.popup(Rect2i(position, Vector2i(150, 50)))
 
 
@@ -486,7 +486,7 @@ func _show_row_context_menu(row: int, position: Vector2) -> void:
 			row_deleted.emit(row)
 		popup.queue_free()
 	)
-	add_child(popup)
+	add_child.call_deferred(popup)
 	popup.popup(Rect2i(position, Vector2i(150, 50)))
 
 
@@ -542,7 +542,7 @@ func _show_create_table_dialog() -> void:
 		create_table_dialog.table_creation_confirmed.connect(_on_create_table_confirmed)
 
 		# Add as child of the dock to ensure proper modal behavior
-		add_child(create_table_dialog)
+		add_child.call_deferred(create_table_dialog)
 
 	# Reset dialog to default values
 	create_table_dialog.reset_to_defaults()
