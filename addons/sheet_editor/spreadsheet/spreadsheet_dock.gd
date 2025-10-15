@@ -1,9 +1,9 @@
 @tool
 extends VBoxContainer
 
-## Sheet Editor Dock UI Controller
+## Spreadsheet Dock UI Controller - Implementation 1: Excel-Style Table Editor
 
-const CREATE_TABLE_SCENE := preload("res://addons/sheet_editor/create_table.tscn")
+const CREATE_TABLE_SCENE := preload("res://addons/sheet_editor/spreadsheet/create_table_dialog.tscn")
 
 signal column_added
 signal row_added
@@ -51,13 +51,13 @@ func _ready() -> void:
 func _setup_csv_dialogs() -> void:
 	"""Setup CSV export/import dialogs"""
 	# Create CSV export dialog
-	var CSVExportDialog := load("res://addons/sheet_editor/csv_export_dialog.gd")
+	var CSVExportDialog := load("res://addons/sheet_editor/spreadsheet/csv_export_dialog.gd")
 	csv_export_dialog = CSVExportDialog.new()
 	csv_export_dialog.export_confirmed.connect(_on_csv_export_confirmed)
 	add_child(csv_export_dialog)
 
 	# Create CSV import dialog
-	var CSVImportDialog := load("res://addons/sheet_editor/csv_import_dialog.gd")
+	var CSVImportDialog := load("res://addons/sheet_editor/spreadsheet/csv_import_dialog.gd")
 	csv_import_dialog = CSVImportDialog.new()
 	csv_import_dialog.import_confirmed.connect(_on_csv_import_confirmed)
 	add_child(csv_import_dialog)
@@ -101,14 +101,14 @@ func set_sheet(sheet: Resource) -> void:
 
 func update_ui() -> void:
 	"""Update the UI to reflect the current sheet data"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		columns_label.text = "Columns: 0"
 		rows_label.text = "Rows: 0"
 		_rebuild_grid()
 		_update_recent_sheets_list()
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	columns_label.text = "Columns: %d" % sheet.column_count
 	rows_label.text = "Rows: %d" % sheet.row_count
 	_rebuild_grid()
@@ -121,13 +121,13 @@ func _rebuild_grid() -> void:
 	for child in grid_container.get_children():
 		child.queue_free()
 
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		var label := Label.new()
 		label.text = "No sheet loaded"
 		grid_container.add_child(label)
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 
 	# Set grid columns (add 1 for row headers)
 	grid_container.columns = max(1, sheet.column_count + 1)
@@ -266,10 +266,10 @@ func _get_column_letter(col_index: int) -> String:
 
 func _on_cell_text_changed(new_text: String, row: int, col: int) -> void:
 	"""Update cell data when text changes"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	sheet.set_cell(row, col, new_text)
 
 
@@ -315,10 +315,10 @@ func _on_cell_gui_input(event: InputEvent, row: int, col: int) -> void:
 
 func _move_to_cell(target_row: int, target_col: int) -> void:
 	"""Move focus to a specific cell if it exists"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 
 	# Validate target position
 	if target_row < 0 or target_row >= sheet.row_count:
@@ -355,7 +355,7 @@ func _on_file_menu_pressed(id: int) -> void:
 
 func _on_export_csv_pressed() -> void:
 	"""Show CSV export dialog"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		push_warning("No sheet loaded to export")
 		return
 
@@ -365,7 +365,7 @@ func _on_export_csv_pressed() -> void:
 
 func _on_import_csv_pressed() -> void:
 	"""Show CSV import dialog"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		push_warning("No sheet loaded to import into")
 		return
 
@@ -375,10 +375,10 @@ func _on_import_csv_pressed() -> void:
 
 func _on_csv_export_confirmed(file_path: String) -> void:
 	"""Handle CSV export confirmation"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	if sheet.export_to_csv(file_path):
 		print("Successfully exported to: " + file_path)
 	else:
@@ -387,10 +387,10 @@ func _on_csv_export_confirmed(file_path: String) -> void:
 
 func _on_csv_import_confirmed(file_path: String) -> void:
 	"""Handle CSV import confirmation"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	if sheet.import_from_csv(file_path):
 		print("Successfully imported from: " + file_path)
 		update_ui()  # Refresh the UI to show imported data
@@ -424,10 +424,10 @@ func _on_column_renamed(new_name: String, col: int) -> void:
 func _on_column_header_focus_exited(col: int, header_edit: LineEdit) -> void:
 	"""Save column name when header loses focus"""
 	var new_name := header_edit.text
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	if new_name != sheet.get_column_name(col):
 		column_renamed.emit(col, new_name)
 
@@ -448,10 +448,10 @@ func _on_row_renamed(new_name: String, row: int) -> void:
 func _on_row_header_focus_exited(row: int, header_edit: LineEdit) -> void:
 	"""Save row name when header loses focus"""
 	var new_name := header_edit.text
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	if new_name != sheet.get_row_name(row):
 		row_renamed.emit(row, new_name)
 
@@ -556,6 +556,3 @@ func _on_create_table_confirmed(table_name: String, file_name: String, num_rows:
 	"""Handle Create Table dialog confirmation"""
 	# Emit signal with parameters for the plugin to handle
 	create_table_requested.emit(table_name, file_name, num_rows, num_columns, save_path)
-
-
-

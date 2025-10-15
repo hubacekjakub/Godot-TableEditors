@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="Sheet" load_steps=2 format=3 uid="uid://cj3srpeplai6l"]
+[gd_resource type="Resource" script_class="SpreadsheetResource" load_steps=2 format=3 uid="uid://cj3srpeplai6l"]
 
-[ext_resource type="Script" uid="uid://ds7c1eu2ai7is" path="res://addons/sheet_editor/sheet.gd" id="1_05ukw"]
+[ext_resource type="Script" uid="uid://ds7c1eu2ai7is" path="res://addons/sheet_editor/spreadsheet/spreadsheet_resource.gd" id="1_05ukw"]
 
 [resource]
 script = ExtResource("1_05ukw")

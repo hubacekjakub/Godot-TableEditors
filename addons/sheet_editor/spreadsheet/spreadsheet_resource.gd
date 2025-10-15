@@ -1,8 +1,9 @@
 @tool
 extends Resource
-class_name Sheet
+class_name SpreadsheetResource
 
-## Table data structure for SheetEditor
+## Spreadsheet data structure for Implementation 1: Excel-Style Table Editor
+## Stores table data with manual column/row creation and CSV export/import support
 
 @export var sheet_name: String = "Untitled"
 @export var row_count: int = 0

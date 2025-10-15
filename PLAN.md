@@ -68,11 +68,11 @@ Each implementation will be **independently functional** and can be kept or remo
   - [x] `P1-021` Implement simple CSV import dialog with file path selection
   - [x] `P1-022` Import CSV data and populate table (basic parsing)
 
-- [ ] **Refactoring for Multi-Implementation Support**
-  - [ ] `P1-023` Move current files to `spreadsheet/` folder
-  - [ ] `P1-024` Rename files with `spreadsheet_` prefix
-  - [ ] `P1-025` Update plugin.cfg and plugin entry point for mode switching
-  - [ ] `P1-026` Test Implementation 1 works independently in new structure
+- [x] **Refactoring for Multi-Implementation Support**
+  - [x] `P1-023` Move current files to `spreadsheet/` folder
+  - [x] `P1-024` Rename files with `spreadsheet_` prefix
+  - [x] `P1-025` Update plugin.cfg and plugin entry point for mode switching
+  - [x] `P1-026` Test Implementation 1 works independently in new structure
 
 ---
 

@@ -1,10 +1,10 @@
 @tool
 extends EditorPlugin
 
-class_name SheetEditorPlugin
+class_name SpreadsheetPlugin
 
 # Preload the dock scene
-const DOCK_SCENE := preload("res://addons/sheet_editor/sheet_editor_dock.tscn")
+const DOCK_SCENE := preload("res://addons/sheet_editor/spreadsheet/spreadsheet_dock.tscn")
 
 var button_2d: Button
 var button_3d: Button
@@ -29,11 +29,11 @@ func _handles(object: Object) -> bool:
 
 func _edit(object: Object) -> void:
 	if not _is_object_sheet_resource(object):
-		print("Not a Sheet resource, hiding dock")
+		print("Not a SpreadsheetResource resource, hiding dock")
 		_hide_dock()
 		return
 
-	print("Editing Sheet resource")
+	print("Editing SpreadsheetResource resource")
 	current_sheet = object
 	_show_dock()
 
@@ -54,13 +54,13 @@ func _hide_dock() -> void:
 
 
 func _is_object_sheet_resource(object: Object) -> bool:
-	"""Check if the given object is a Sheet resource"""
+	"""Check if the given object is a SpreadsheetResource resource"""
 	if not object:
 		return false
 	if object is not Resource:
 		return false
 
-	return object is Sheet
+	return object is SpreadsheetResource
 
 func _add_toolbar_buttons() -> void:
 	button_2d = Button.new()
@@ -98,11 +98,11 @@ func _create_sheet_editor_dock() -> void:
 	sheet_editor_dock.create_table_requested.connect(_on_create_table_requested)
 func _on_add_column_pressed() -> void:
 	"""Add a new column to the current sheet"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		push_warning("Sheet Editor: Cannot add column - no valid sheet loaded")
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	sheet.column_count += 1
 
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
@@ -111,11 +111,11 @@ func _on_add_column_pressed() -> void:
 
 func _on_add_row_pressed() -> void:
 	"""Add a new row to the current sheet"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		push_warning("Sheet Editor: Cannot add row - no valid sheet loaded")
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	sheet.row_count += 1
 
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
@@ -124,11 +124,11 @@ func _on_add_row_pressed() -> void:
 
 func _on_column_renamed(col: int, new_name: String) -> void:
 	"""Update column name in the sheet"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		push_warning("Sheet Editor: Cannot rename column - no valid sheet loaded")
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	sheet.set_column_name(col, new_name)
 
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
@@ -137,11 +137,11 @@ func _on_column_renamed(col: int, new_name: String) -> void:
 
 func _on_row_renamed(row: int, new_name: String) -> void:
 	"""Update row name in the sheet"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		push_warning("Sheet Editor: Cannot rename row - no valid sheet loaded")
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	sheet.set_row_name(row, new_name)
 
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
@@ -150,11 +150,11 @@ func _on_row_renamed(row: int, new_name: String) -> void:
 
 func _on_column_deleted(col: int) -> void:
 	"""Delete a column from the sheet"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		push_warning("Sheet Editor: Cannot delete column - no valid sheet loaded")
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	sheet.delete_column(col)
 
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
@@ -163,11 +163,11 @@ func _on_column_deleted(col: int) -> void:
 
 func _on_row_deleted(row: int) -> void:
 	"""Delete a row from the sheet"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		push_warning("Sheet Editor: Cannot delete row - no valid sheet loaded")
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	sheet.delete_row(row)
 
 	if sheet_editor_dock and sheet_editor_dock.has_method("update_ui"):
@@ -176,10 +176,10 @@ func _on_row_deleted(row: int) -> void:
 
 func _clear_all_data() -> void:
 	"""Clear all data from the current sheet"""
-	if not current_sheet or not current_sheet is Sheet:
+	if not current_sheet or not current_sheet is SpreadsheetResource:
 		return
 
-	var sheet := current_sheet as Sheet
+	var sheet := current_sheet as SpreadsheetResource
 	sheet.column_count = 0
 	sheet.row_count = 0
 	sheet.clear_all_cells()
@@ -189,8 +189,8 @@ func _clear_all_data() -> void:
 
 
 func _create_new_sheet() -> void:
-	"""Create a new Sheet resource and start editing it"""
-	var new_sheet := Sheet.new()
+	"""Create a new SpreadsheetResource resource and start editing it"""
+	var new_sheet := SpreadsheetResource.new()
 	new_sheet.sheet_name = "Untitled Sheet"
 	new_sheet.column_count = 3
 	new_sheet.row_count = 5
@@ -229,8 +229,8 @@ func _show_save_dialog() -> void:
 	dialog.title = "Save Sheet As"
 
 	var default_name := "new_sheet.tres"
-	if current_sheet is Sheet:
-		var sheet := current_sheet as Sheet
+	if current_sheet is SpreadsheetResource:
+		var sheet := current_sheet as SpreadsheetResource
 		if not sheet.sheet_name.is_empty() and sheet.sheet_name != "Untitled Sheet":
 			default_name = sheet.sheet_name.to_snake_case() + ".tres"
 
@@ -295,8 +295,8 @@ func _load_sheet_from_path(path: String) -> void:
 		push_error("Sheet Editor: Failed to load resource from: " + path)
 		return
 
-	if not loaded_resource is Sheet:
-		push_error("Sheet Editor: File is not a Sheet resource: " + path)
+	if not loaded_resource is SpreadsheetResource:
+		push_error("Sheet Editor: File is not a SpreadsheetResource resource: " + path)
 		return
 
 	print("Sheet loaded from: ", path)
@@ -317,7 +317,7 @@ func _on_sheet_selected_from_recent(path: String) -> void:
 
 func _on_create_table_requested(table_name: String, file_name: String, rows: int, columns: int, save_path: String) -> void:
 	"""Create a new table with specified parameters from the Create Table dialog"""
-	var new_sheet := Sheet.new()
+	var new_sheet := SpreadsheetResource.new()
 	new_sheet.sheet_name = table_name
 	new_sheet.column_count = columns
 	new_sheet.row_count = rows
@@ -367,4 +367,3 @@ func _on_button_pressed() -> void:
 		make_bottom_panel_item_visible(sheet_editor_dock)
 	else:
 		print("No sheet selected")
-
