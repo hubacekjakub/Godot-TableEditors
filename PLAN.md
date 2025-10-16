@@ -90,53 +90,48 @@ Each implementation will be **independently functional** and can be kept or remo
 - CSV export/import with type preservation
 - Completely separate codebase from Implementation 1
 
+**Status**: Not started. Will begin with copying Implementation 1 files.
+
 **Note**: This implementation will have its own dialogs, dock UI, and all necessary code duplicated and adapted from Implementation 1. No code sharing between implementations to maintain independence.
 
-### Tasks
+---
 
-- [ ] **Class Analysis** (P2-001 to P2-005)
-  - [ ] `P2-001` Parse GDScript class files
-  - [ ] `P2-002` Extract class properties and their types
-  - [ ] `P2-003` Support for `int`, `float`, and `bool` types
-  - [ ] `P2-004` Handle type hints and default values
-  - [ ] `P2-005` Support exported variables (@export)
+### 📋 Detailed Plan
 
-- [ ] **Table Generation** (P2-006 to P2-010)
-  - [ ] `P2-006` Create "Generate from Class" dialog
-  - [ ] `P2-007` Allow class file selection
-  - [ ] `P2-008` Display detected properties and types
-  - [ ] `P2-009` Generate table structure from class
-  - [ ] `P2-010` Map GDScript types to column types
+**See [PLAN_IMPLEMENTATION_2.md](PLAN_IMPLEMENTATION_2.md) for the complete detailed plan with 128 tasks across 12 phases.**
 
-- [ ] **Class Synchronization** (P2-011 to P2-014)
-  - [ ] `P2-011` Detect when source class changes
-  - [ ] `P2-012` Offer to update table structure
-  - [ ] `P2-013` Handle added/removed properties
-  - [ ] `P2-014` Preserve existing data when possible
+### Quick Overview of Phases
 
-- [ ] **Bidirectional Support** (P2-015 to P2-017)
-  - [ ] `P2-015` Generate GDScript class from existing table
-  - [ ] `P2-016` Create typed array wrapper classes
-  - [ ] `P2-017` Add helper methods for data access
+1. **Phase 1: Foundation & Code Duplication** (P2-001 to P2-012) - Copy and adapt Implementation 1 files
+2. **Phase 2: GDScript Class Parser** (P2-013 to P2-025) - Build class parsing functionality
+3. **Phase 3: Class-to-Table Generation** (P2-026 to P2-038) - Generate tables from classes
+4. **Phase 4: Type-Safe Editing** (P2-039 to P2-048) - Enforce type constraints
+5. **Phase 5: Class Synchronization** (P2-049 to P2-060) - Detect and sync class changes
+6. **Phase 6: Advanced Type Support** (P2-061 to P2-073) - Vector, Color, Enum, Resource types
+7. **Phase 7: Bidirectional Class Generation** (P2-074 to P2-084) - Generate classes from tables
+8. **Phase 8: Typed Array & Helper Methods** (P2-085 to P2-093) - Query helpers and wrappers
+9. **Phase 9: CSV Export/Import with Types** (P2-094 to P2-103) - Type-aware CSV handling
+10. **Phase 10: UI Polish & Workflow** (P2-104 to P2-112) - Enhanced user experience
+11. **Phase 11: Documentation & Examples** (P2-113 to P2-120) - Comprehensive docs
+12. **Phase 12: Testing & Refinement** (P2-121 to P2-128) - Thorough testing
 
-- [ ] **Advanced Type Support** (P2-018 to P2-022)
-  - [ ] `P2-018` Add support for `String` type
-  - [ ] `P2-019` Add support for `Vector2` and `Vector3`
-  - [ ] `P2-020` Add support for `Color`
-  - [ ] `P2-021` Add support for enums
-  - [ ] `P2-022` Add support for resource references
+### Timeline Summary
 
-- [ ] **CSV Export/Import** (P2-023 to P2-026)
-  - [ ] `P2-023` Implement CSV export with type information in header
-  - [ ] `P2-024` Export typed data to CSV (comma-separated)
-  - [ ] `P2-025` Implement CSV import with type validation
-  - [ ] `P2-026` Import CSV and validate against class schema
-
-- [ ] **Documentation** (P2-027 to P2-030)
-  - [ ] `P2-027` Document class-to-table workflow
-  - [ ] `P2-028` Provide example classes
-  - [ ] `P2-029` Add best practices guide
-  - [ ] `P2-030` Create migration guide from manual tables
+- **Total Tasks**: 128 (P2-001 to P2-128)
+- **Estimated Duration**: 5-6 weeks
+- **Key Milestones**:
+  - M1: Basic infrastructure copied (P2-012)
+  - M2: Class parser working (P2-025)
+  - M3: First table generated from class (P2-038)
+  - M4: Type-safe editing functional (P2-048)
+  - M5: Class sync working (P2-060)
+  - M6: All types supported (P2-073)
+  - M7: Bidirectional generation (P2-084)
+  - M8: Helper methods generated (P2-093)
+  - M9: CSV with types (P2-103)
+  - M10: UI polished (P2-112)
+  - M11: Documentation complete (P2-120)
+  - M12: All tests passing (P2-128)
 
 ---
 
