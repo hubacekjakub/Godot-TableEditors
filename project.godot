@@ -24,7 +24,7 @@ window/size/resizable=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/sheet_editor/plugin.cfg")
+enabled=PackedStringArray("res://addons/class_table_editor/plugin.cfg", "res://addons/resource_collection_editor/plugin.cfg", "res://addons/sheet_editor/plugin.cfg")
 
 [input]
 

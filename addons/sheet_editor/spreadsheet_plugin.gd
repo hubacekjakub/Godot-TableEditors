@@ -4,7 +4,7 @@ extends EditorPlugin
 class_name SpreadsheetPlugin
 
 # Preload the dock scene
-const DOCK_SCENE := preload("res://addons/sheet_editor/spreadsheet/spreadsheet_dock.tscn")
+const DOCK_SCENE := preload("res://addons/sheet_editor/spreadsheet_dock.tscn")
 
 var button_2d: Button
 var button_3d: Button

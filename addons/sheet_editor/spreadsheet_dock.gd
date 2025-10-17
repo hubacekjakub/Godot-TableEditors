@@ -3,7 +3,7 @@ extends VBoxContainer
 
 ## Spreadsheet Dock UI Controller - Implementation 1: Excel-Style Table Editor
 
-const CREATE_TABLE_SCENE := preload("res://addons/sheet_editor/spreadsheet/create_table_dialog.tscn")
+const CREATE_TABLE_SCENE := preload("res://addons/sheet_editor/create_table_dialog.tscn")
 
 signal column_added
 signal row_added
@@ -51,13 +51,13 @@ func _ready() -> void:
 func _setup_csv_dialogs() -> void:
 	"""Setup CSV export/import dialogs"""
 	# Create CSV export dialog
-	var CSVExportDialog := load("res://addons/sheet_editor/spreadsheet/csv_export_dialog.gd")
+	var CSVExportDialog := load("res://addons/sheet_editor/csv_export_dialog.gd")
 	csv_export_dialog = CSVExportDialog.new()
 	csv_export_dialog.export_confirmed.connect(_on_csv_export_confirmed)
 	add_child.call_deferred(csv_export_dialog)
 
 	# Create CSV import dialog
-	var CSVImportDialog := load("res://addons/sheet_editor/spreadsheet/csv_import_dialog.gd")
+	var CSVImportDialog := load("res://addons/sheet_editor/csv_import_dialog.gd")
 	csv_import_dialog = CSVImportDialog.new()
 	csv_import_dialog.import_confirmed.connect(_on_csv_import_confirmed)
 	add_child.call_deferred(csv_import_dialog)

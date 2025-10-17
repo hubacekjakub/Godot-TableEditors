@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dq7x8y5m3kn4v"]
 
-[ext_resource type="Script" uid="uid://byx77302g0bhk" path="res://addons/sheet_editor/spreadsheet/spreadsheet_dock.gd" id="1_abc123"]
+[ext_resource type="Script" uid="uid://byx77302g0bhk" path="res://addons/sheet_editor/spreadsheet_dock.gd" id="1_abc123"]
 
 [node name="SheetEditorDock" type="VBoxContainer"]
 offset_right = 1152.0

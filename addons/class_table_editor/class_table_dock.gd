@@ -31,8 +31,6 @@ signal create_table_requested(table_name: String, file_name: String, rows: int, 
 @onready var grid_container: GridContainer = %GridContainer
 
 var class_select_dialog: ConfirmationDialog = null
-var csv_export_dialog: FileDialog = null
-var csv_import_dialog: FileDialog = null
 
 var current_sheet: Resource = null
 var current_focused_row: int = -1
@@ -43,26 +41,8 @@ const MAX_RECENT_SHEETS = 10
 
 func _ready() -> void:
 	_setup_menus()
-	_setup_csv_dialogs()
 	_connect_signals()
 	_update_recent_sheets_list()
-
-
-func _setup_csv_dialogs() -> void:
-	"""Setup CSV export/import dialogs"""
-	# Create CSV export dialog
-	var CSVExportDialog := load("res://addons/class_table_editor/csv_export_dialog.gd")
-	if CSVExportDialog:
-		csv_export_dialog = CSVExportDialog.new()
-		csv_export_dialog.export_confirmed.connect(_on_csv_export_confirmed)
-		add_child.call_deferred(csv_export_dialog)
-
-	# Create CSV import dialog
-	var CSVImportDialog := load("res://addons/class_table_editor/csv_import_dialog.gd")
-	if CSVImportDialog:
-		csv_import_dialog = CSVImportDialog.new()
-		csv_import_dialog.import_confirmed.connect(_on_csv_import_confirmed)
-		add_child.call_deferred(csv_import_dialog)
 
 
 func _setup_menus() -> void:
@@ -73,10 +53,7 @@ func _setup_menus() -> void:
 	file_popup.add_item("Load", 1)
 	file_popup.add_item("Save", 2)
 	file_popup.add_separator()
-	file_popup.add_item("Export to CSV", 3)
-	file_popup.add_item("Import from CSV", 4)
-	file_popup.add_separator()
-	file_popup.add_item("Close", 5)
+	file_popup.add_item("Close", 3)
 	file_popup.id_pressed.connect(_on_file_menu_pressed)
 
 	# Setup Edit menu
@@ -347,57 +324,8 @@ func _on_file_menu_pressed(id: int) -> void:
 			load_requested.emit()
 		2:  # Save
 			save_requested.emit()
-		3:  # Export to CSV
-			_on_export_csv_pressed()
-		4:  # Import from CSV
-			_on_import_csv_pressed()
-		5:  # Close
+		3:  # Close
 			close_requested.emit()
-
-
-func _on_export_csv_pressed() -> void:
-	"""Show CSV export dialog"""
-	if not current_sheet or not current_sheet is ClassTableResource:
-		push_warning("No sheet loaded to export")
-		return
-
-	if csv_export_dialog:
-		csv_export_dialog.show_dialog()
-
-
-func _on_import_csv_pressed() -> void:
-	"""Show CSV import dialog"""
-	if not current_sheet or not current_sheet is ClassTableResource:
-		push_warning("No sheet loaded to import into")
-		return
-
-	if csv_import_dialog:
-		csv_import_dialog.show_dialog()
-
-
-func _on_csv_export_confirmed(file_path: String) -> void:
-	"""Handle CSV export confirmation"""
-	if not current_sheet or not current_sheet is ClassTableResource:
-		return
-
-	var sheet := current_sheet as ClassTableResource
-	if sheet.export_to_csv(file_path):
-		print("Successfully exported to: " + file_path)
-	else:
-		push_error("Failed to export CSV to: " + file_path)
-
-
-func _on_csv_import_confirmed(file_path: String) -> void:
-	"""Handle CSV import confirmation"""
-	if not current_sheet or not current_sheet is ClassTableResource:
-		return
-
-	var sheet := current_sheet as ClassTableResource
-	if sheet.import_from_csv(file_path):
-		print("Successfully imported from: " + file_path)
-		update_ui.call_deferred()  # Refresh the UI to show imported data
-	else:
-		push_error("Failed to import CSV from: " + file_path)
 
 
 func _on_edit_menu_pressed(id: int) -> void:
