@@ -542,9 +542,9 @@ func _show_create_table_dialog() -> void:
 		create_table_dialog.table_creation_confirmed.connect(_on_create_table_confirmed)
 
 		# Add as child of the dock to ensure proper modal behavior
-		add_child.call_deferred(create_table_dialog)
+		add_child(create_table_dialog)
 
-	# Reset dialog to default values
+	# Reset dialog to default values after it's in the tree
 	create_table_dialog.reset_to_defaults()
 
 	# Show the dialog as modal and ensure it gets focus

@@ -1,26 +1,89 @@
 # Godot Sheet Editor - Development Plan
 
-This document outlines the development roadmap for the Godot Sheet Editor plugin. The project is divided into **three separate implementations** for academic purposes, each demonstrating a different approach to data table editing in Godot.
+This document outlines the development roadmap for the Godot Sheet Editor project. The project is divided into **three separate standalone plugins** for academic purposes, each demonstrating a different approach to data table editing in Godot.
 
 > **Note**: Each task has a unique ID (e.g., `P1-001`) for easy reference in discussions and commits.
 
 ---
 
-## Overview: Three Implementation Approaches
+## Overview: Three Independent Plugins
 
-This plugin explores three distinct ways to use a data table editor in Godot:
+This project explores three distinct ways to use a data table editor in Godot, implemented as **completely independent, installable plugins** that can be enabled/disabled separately:
 
-1. **Implementation 1: Excel-Style Table Editor** - A standalone spreadsheet-like editor for creating arbitrary data tables with CSV support
-2. **Implementation 2: GDScript Class Integration** - Generate tables automatically from GDScript class definitions with type safety
-3. **Implementation 3: Resource Collection Editor** - Edit multiple resource files of the same type in a unified table view
+1. **Plugin 1: Data Spreadsheet** (aka "Sheet Editor" / "Spreadsheet Editor")
+   - A standalone spreadsheet-like editor for creating arbitrary data tables with CSV support
+   - Alternative names: *Data Spreadsheet*, *Simple Sheet Editor*, *Table Creator*
 
-Each implementation will be **independently functional** and can be kept or removed separately. Code may be copied and adapted between implementations, but they remain distinct plugins/modes.
+2. **Plugin 2: Class Table Editor** (aka "Typed Table Editor" / "Class Schema Editor")
+   - Automatically generate and maintain data tables based on GDScript class definitions with type safety
+   - Alternative names: *Typed Data Editor*, *Class-Based Tables*, *Schema Editor*
+
+3. **Plugin 3: Resource Collection Editor** (aka "Bulk Resource Editor" / "Resource Browser")
+   - Edit multiple resource files of the same type in a unified table view
+   - Alternative names: *Resource Batch Editor*, *Multi-Resource Editor*, *Resource Collection Manager*
+
+Each plugin will be **completely independent, fully functional, and installable separately** in `addons/`. They will:
+- Have their own `plugin.cfg` file
+- Have their own folder structure
+- Have zero dependencies on each other
+- Can be enabled/disabled independently in Godot's Plugin Manager
+- Maintain their own complete codebase (no shared code between plugins)
 
 ---
 
-## Implementation 1: Excel-Style Table Editor ✅ (In Progress)
+## Plugin Architecture
 
-**Approach**: A standalone spreadsheet-like editor for creating arbitrary data tables, similar to Excel or Google Sheets.
+Each plugin is **completely self-contained** with its own folder and configuration:
+
+```
+addons/
+├── sheet_editor/                          # Plugin 1: Data Spreadsheet
+│   ├── plugin.cfg                         # Entry point for this plugin
+│   ├── spreadsheet_plugin.gd              # Main EditorPlugin class
+│   ├── spreadsheet_dock.gd                # Main UI dock
+│   ├── spreadsheet_dock.tscn              # Dock scene
+│   ├── spreadsheet_resource.gd            # Sheet resource class
+│   ├── create_table_dialog.gd             # Create new sheet dialog
+│   ├── create_table_dialog.tscn           # Dialog scene
+│   ├── csv_export_dialog.gd               # CSV export functionality
+│   └── csv_import_dialog.gd               # CSV import functionality
+│
+├── class_table_editor/                    # Plugin 2: Class Table Editor
+│   ├── plugin.cfg                         # Entry point for this plugin
+│   ├── class_table_plugin.gd              # Main EditorPlugin class
+│   ├── class_table_dock.gd                # Main UI dock (adapted from P1)
+│   ├── class_table_dock.tscn              # Dock scene (adapted from P1)
+│   ├── class_table_resource.gd            # Typed sheet resource class
+│   ├── class_select_dialog.gd             # Select class to edit dialog
+│   ├── class_select_dialog.tscn           # Dialog scene
+│   ├── class_parser.gd                    # Parse GDScript classes
+│   ├── class_sync.gd                      # Sync class ↔ table
+│   ├── class_generator.gd                 # Generate classes from tables
+│   ├── csv_export_dialog.gd               # CSV export with type info
+│   └── csv_import_dialog.gd               # CSV import with validation
+│
+└── resource_collection_editor/            # Plugin 3: Resource Collection Editor
+    ├── plugin.cfg                         # Entry point for this plugin
+    ├── resource_editor_plugin.gd          # Main EditorPlugin class
+    ├── resource_editor_dock.gd            # Main UI dock (adapted from P1)
+    ├── resource_editor_dock.tscn          # Dock scene (adapted from P1)
+    ├── open_collection_dialog.gd          # Open folder dialog
+    ├── open_collection_dialog.tscn        # Dialog scene
+    ├── resource_scanner.gd                # Scan folders for resources
+    ├── resource_loader.gd                 # Load multiple resources
+    └── resource_writer.gd                 # Save changes to resources
+```
+
+**Key Points:**
+- Each plugin is in its own top-level folder within `addons/`
+- Each plugin has its own independent `plugin.cfg`
+- No shared code between plugins (all UI/logic is duplicated)
+- Plugins can be enabled/disabled independently in Godot's Plugin Manager
+- Zero runtime dependencies between plugins
+
+---
+
+## Plugin 1: Data Spreadsheet (✅ Complete - Migration in Progress)
 
 **Use Case**: Creating game data tables (item lists, enemy stats, dialogue trees) without predefined schemas. Users manually define columns and rows, then export to CSV or save as Godot resources.
 
@@ -73,6 +136,93 @@ Each implementation will be **independently functional** and can be kept or remo
   - [x] `P1-024` Rename files with `spreadsheet_` prefix
   - [x] `P1-025` Update plugin.cfg and plugin entry point for mode switching
   - [x] `P1-026` Test Implementation 1 works independently in new structure
+
+---
+
+## Plugin 2: Class Table Editor (In Planning/Early Development)
+
+**Use Case**: Type-safe data management where the table structure mirrors a GDScript class. For example, an `ItemData` class with properties like `name: String`, `damage: int`, `icon: Texture2D` generates a table with corresponding columns. Changes to the class can update the table structure.
+
+**Key Features**:
+- Parse GDScript classes and extract typed properties
+- Generate table columns from class properties
+- Bidirectional sync: class → table and table → class
+- Type enforcement based on GDScript types
+- CSV export/import with type preservation
+- Completely separate codebase from Plugin 1
+
+**Status**: Not started. Will begin with copying Plugin 1 files and adapting them.
+
+**Note**: This plugin will have its own dialogs, dock UI, and all necessary code duplicated and adapted from Plugin 1. No code sharing between plugins to maintain independence.
+
+### Migration Plan (Phase 0: Setup) ✅ **COMPLETE**
+
+- [x] **Create Plugin 2 Folder Structure**
+  - [x] `M2-001` Create `addons/class_table_editor/` folder
+  - [x] `M2-002` Create `plugin.cfg` for Class Table Editor
+  - [x] `M2-003` Copy and adapt all Plugin 1 files to Plugin 2 folder
+  - [x] `M2-004` Rename all copied files with `class_table_` prefix
+  - [x] `M2-005` Update all class references (SpreadsheetResource → ClassTableResource, etc.)
+  - [x] `M2-006` Update plugin entry point in `plugin.cfg`
+  - [ ] `M2-007` Test Plugin 2 loads independently (next: run in Godot)
+  - [x] `M2-008` Remove Plugin 2 code from Plugin 1 (clean separation)
+  - [ ] `M2-009` Test both plugins work independently (next: run in Godot)
+
+---
+
+## Plugin 3: Resource Collection Editor (Planning)
+
+**Use Case**: Managing collections of similar resources. For example, you have 50 `Enemy.tres` files (Goblin.tres, Dragon.tres, etc.), each with properties like `health: int`, `speed: float`, `texture: Texture2D`. The editor displays all enemies in one table, with each row being one enemy file.
+
+**Key Features**:
+- Load multiple resource files of the same class
+- Display as table: rows = resource files, columns = properties
+- Edit properties directly in the table
+- Save changes back to individual .tres files
+- Add/remove resource files from collection
+- Completely separate codebase from other plugins
+
+**Note**: This plugin will have its own complete UI and logic, duplicated and adapted as needed. CSV export/import may be added later but is not a priority for this plugin.
+
+### Tasks
+
+- [ ] **Resource Discovery** (P3-001 to P3-005)
+  - [ ] `P3-001` Scan folder for resource files of same type
+  - [ ] `P3-002` Detect resource class and properties
+  - [ ] `P3-003` Filter resources by selected class type
+  - [ ] `P3-004` Handle resources without predefined structure
+  - [ ] `P3-005` Support custom Resource classes
+
+- [ ] **Table View Generation** (P3-006 to P3-010)
+  - [ ] `P3-006` Create "Open Resource Collection" dialog
+  - [ ] `P3-007` Map resource files to table rows
+  - [ ] `P3-008` Map resource properties to table columns
+  - [ ] `P3-009` Handle different property types in columns
+  - [ ] `P3-010` Display resource filename in first column
+
+- [ ] **Editing & Persistence** (P3-011 to P3-015)
+  - [ ] `P3-011` Edit property values in table cells
+  - [ ] `P3-012` Save changes back to .tres files individually
+  - [ ] `P3-013` Validate property types before saving
+  - [ ] `P3-014` Add new resource files to collection
+  - [ ] `P3-015` Support deleting resource files
+
+- [ ] **Advanced Features** (P3-016 to P3-020)
+  - [ ] `P3-016` Filter/search resources by property values
+  - [ ] `P3-017` Sort resources by column values
+  - [ ] `P3-018` Batch edit properties across multiple resources
+  - [ ] `P3-019` Generate new resource instances from template
+  - [ ] `P3-020` Duplicate resource files with variations
+
+- [ ] **UI & UX** (P3-021 to P3-024)
+  - [ ] `P3-021` Show resource file path in tooltip
+  - [ ] `P3-022` Highlight unsaved changes visually
+  - [ ] `P3-023` Add "Save All" button to save entire collection
+  - [ ] `P3-024` Support drag-and-drop of .tres files
+
+- [ ] **Documentation** (P3-025 to P3-026)
+  - [ ] `P3-025` Document resource collection workflow
+  - [ ] `P3-026` Provide example resource collections
 
 ---
 
@@ -193,13 +343,44 @@ Each implementation will be **independently functional** and can be kept or remo
 
 ---
 
-## Phase 4: Polish & Advanced Features (Cross-Implementation)
+## Summary: Plugin Restructuring Strategy
 
-**Goal**: Enhance user experience and add power-user features that can apply to any implementation.
+### Current State
+- **Plugin 1 (Data Spreadsheet)**: Located in `addons/sheet_editor/` (flat structure) ✅ Complete
+- **Plugin 2 (Class Table Editor)**: Currently nested in `addons/sheet_editor/class_table/` - **Needs separation**
+- **Plugin 3 (Resource Collection Editor)**: Not yet started
 
-### Potential Tasks
+### Next Steps: Migration Phase
 
-- [ ] **UI/UX Improvements**
+**Phase 0: Separate Plugin 2 (Class Table Editor)**
+1. Create new top-level folder: `addons/class_table_editor/`
+2. Move all files from `addons/sheet_editor/class_table/` to new location
+3. Create independent `plugin.cfg` for class table editor
+4. Remove Plugin 2 code from Plugin 1 to ensure zero dependencies
+5. Update main plugin entry point to only handle Plugin 1
+6. Test both plugins work independently in Godot Plugin Manager
+
+**Phase 1: Create Plugin 3 (Resource Collection Editor)**
+1. Create new top-level folder: `addons/resource_collection_editor/`
+2. Copy and adapt UI structures from Plugin 1
+3. Implement resource discovery and loading
+4. Build table view for resource collections
+5. Test Plugin 3 works independently
+
+### Final Structure
+```
+addons/
+├── sheet_editor/                    # Plugin 1: Data Spreadsheet
+├── class_table_editor/              # Plugin 2: Class Table Editor
+└── resource_collection_editor/      # Plugin 3: Resource Collection Editor
+```
+
+Each plugin will:
+- Have independent `plugin.cfg` files
+- Appear separately in Godot's Plugin Manager
+- Be enabled/disabled independently
+- Have zero runtime dependencies on each other
+- Maintain complete and self-contained codebases
   - [ ] `P4-001` Add keyboard shortcuts
   - [ ] `P4-002` Implement undo/redo system
   - [ ] `P4-003` Add search and filter functionality

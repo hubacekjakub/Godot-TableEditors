@@ -123,6 +123,11 @@ func _on_confirmed() -> void:
 
 func reset_to_defaults() -> void:
 	"""Reset all fields to default values"""
+	# Use call_deferred to ensure the dialog is in the tree and @onready vars are initialized
+	if not is_node_ready():
+		call_deferred("reset_to_defaults")
+		return
+
 	name_edit.text = "MyTable"
 	file_name_edit.text = "my_table.tres"
 	rows_spinbox.value = 10
