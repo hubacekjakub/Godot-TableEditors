@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://d5hn2mpqtu8vx"]
 
-[ext_resource type="Script" path="res://addons/sheet_editor/class_table/class_select_dialog.gd" id="1_class_select"]
+[ext_resource type="Script" path="res://addons/class_table_editor/class_select_dialog.gd" id="1_class_select"]
 
 [node name="ClassSelectDialog" type="ConfirmationDialog"]
 title = "Create Table from Class"

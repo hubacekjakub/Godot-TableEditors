@@ -12,9 +12,6 @@ var button_inspector: Button
 var sheet_editor_dock: Control
 var current_sheet: Resource
 
-# Class Table Plugin (Implementation 2)
-var class_table_plugin: EditorPlugin
-
 
 func _enter_tree() -> void:
 	_add_toolbar_buttons()
@@ -22,28 +19,15 @@ func _enter_tree() -> void:
 	add_control_to_bottom_panel(sheet_editor_dock, "Sheet Editor")
 	print("Sheet Editor Plugin loaded")
 
-	# Initialize Class Table Plugin (Implementation 2)
-	_initialize_class_table_plugin()
-
 
 func _handles(object: Object) -> bool:
-	"""Handle SpreadsheetResource, forward ClassTableResource to class_table_plugin"""
+	"""Only handle SpreadsheetResource resources"""
 	if _is_object_sheet_resource(object):
 		return true
-
-	# Forward to class_table_plugin
-	if class_table_plugin and class_table_plugin._handles(object):
-		return true
-
 	return false
 
 func _edit(object: Object) -> void:
-	"""Edit resource, forwarding to appropriate plugin based on type"""
-	# Check if this is a ClassTableResource - forward to class_table_plugin
-	if class_table_plugin and class_table_plugin._handles(object):
-		class_table_plugin._edit(object)
-		return
-
+	"""Edit a SpreadsheetResource when selected"""
 	# Handle SpreadsheetResource
 	if not _is_object_sheet_resource(object):
 		print("Not a SpreadsheetResource resource, hiding dock")
@@ -365,27 +349,8 @@ func _on_create_table_requested(table_name: String, file_name: String, rows: int
 		push_error("Sheet Editor: Failed to save new table - error code: " + str(error))
 
 
-func _initialize_class_table_plugin() -> void:
-	"""Initialize and activate the Class Table plugin (Implementation 2)"""
-	var ClassTablePluginScript = load("res://addons/sheet_editor/class_table/class_table_plugin.gd")
-	if ClassTablePluginScript:
-		class_table_plugin = ClassTablePluginScript.new()
-		# Add as child to get EditorPlugin functionality
-		add_child(class_table_plugin)
-		class_table_plugin._enter_tree()
-		print("Class Table Plugin initialized from Spreadsheet Plugin")
-	else:
-		push_error("Failed to load ClassTablePlugin script")
-
-
 func _exit_tree() -> void:
-	# Clean up Class Table Plugin first
-	if class_table_plugin:
-		class_table_plugin._exit_tree()
-		remove_child(class_table_plugin)
-		class_table_plugin.queue_free()
-		class_table_plugin = null
-
+	"""Clean up when plugin is disabled"""
 	remove_control_from_container(EditorPlugin.CONTAINER_CANVAS_EDITOR_MENU, button_2d)
 	button_2d.queue_free()
 

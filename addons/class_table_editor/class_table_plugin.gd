@@ -4,7 +4,7 @@ extends EditorPlugin
 class_name ClassTablePlugin
 
 # Preload the dock scene
-const DOCK_SCENE := preload("res://addons/sheet_editor/class_table/class_table_dock.tscn")
+const DOCK_SCENE := preload("res://addons/class_table_editor/class_table_dock.tscn")
 
 var button_2d: Button
 var button_3d: Button

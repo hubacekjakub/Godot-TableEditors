@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c8vx9y6n4lo5w"]
 
-[ext_resource type="Script" path="res://addons/sheet_editor/class_table/class_table_dock.gd" id="1_class_table_dock"]
+[ext_resource type="Script" path="res://addons/class_table_editor/class_table_dock.gd" id="1_class_table_dock"]
 
 [node name="ClassTableDock" type="VBoxContainer"]
 offset_right = 1152.0

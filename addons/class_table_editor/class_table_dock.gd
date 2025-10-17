@@ -1,9 +1,9 @@
 @tool
 extends VBoxContainer
 
-## Class Table Dock UI Controller - Implementation 2: GDScript Class Integration
+## Class Table Dock UI Controller - Plugin 2: GDScript Class Integration
 
-const CLASS_SELECT_SCENE := preload("res://addons/sheet_editor/class_table/class_select_dialog.tscn")
+const CLASS_SELECT_SCENE := preload("res://addons/class_table_editor/class_select_dialog.tscn")
 
 signal column_added
 signal row_added
@@ -51,16 +51,18 @@ func _ready() -> void:
 func _setup_csv_dialogs() -> void:
 	"""Setup CSV export/import dialogs"""
 	# Create CSV export dialog
-	var CSVExportDialog := load("res://addons/sheet_editor/class_table/csv_export_dialog.gd")
-	csv_export_dialog = CSVExportDialog.new()
-	csv_export_dialog.export_confirmed.connect(_on_csv_export_confirmed)
-	add_child.call_deferred(csv_export_dialog)
+	var CSVExportDialog := load("res://addons/class_table_editor/csv_export_dialog.gd")
+	if CSVExportDialog:
+		csv_export_dialog = CSVExportDialog.new()
+		csv_export_dialog.export_confirmed.connect(_on_csv_export_confirmed)
+		add_child.call_deferred(csv_export_dialog)
 
 	# Create CSV import dialog
-	var CSVImportDialog := load("res://addons/sheet_editor/class_table/csv_import_dialog.gd")
-	csv_import_dialog = CSVImportDialog.new()
-	csv_import_dialog.import_confirmed.connect(_on_csv_import_confirmed)
-	add_child.call_deferred(csv_import_dialog)
+	var CSVImportDialog := load("res://addons/class_table_editor/csv_import_dialog.gd")
+	if CSVImportDialog:
+		csv_import_dialog = CSVImportDialog.new()
+		csv_import_dialog.import_confirmed.connect(_on_csv_import_confirmed)
+		add_child.call_deferred(csv_import_dialog)
 
 
 func _setup_menus() -> void:

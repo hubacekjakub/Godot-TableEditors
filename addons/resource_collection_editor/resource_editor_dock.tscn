@@ -1,0 +1,107 @@
+[gd_scene load_steps=2 format=3 uid="uid://dvy37jmq8k3lw"]
+
+[ext_resource type="Script" path="res://addons/resource_collection_editor/resource_editor_dock.gd" id="1_resource_editor_dock"]
+
+[node name="ResourceEditorDock" type="VBoxContainer"]
+offset_right = 1152.0
+offset_bottom = 648.0
+script = ExtResource("1_resource_editor_dock")
+
+[node name="MenuBar" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="FileMenu" type="MenuButton" parent="MenuBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "File"
+item_count = 4
+popup/item_0/text = "New Collection"
+popup/item_0/id = 0
+popup/item_1/text = "Load Collection"
+popup/item_1/id = 1
+popup/item_2/text = "Save"
+popup/item_2/id = 2
+popup/item_3/id = -1
+popup/item_3/separator = true
+popup/item_4/text = "Close"
+popup/item_4/id = 3
+
+[node name="ToolsMenu" type="MenuButton" parent="MenuBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Tools"
+item_count = 4
+popup/item_0/text = "Scan Folder for Resources"
+popup/item_0/id = 0
+popup/item_1/text = "Refresh Collection"
+popup/item_1/id = 1
+popup/item_2/id = -1
+popup/item_2/separator = true
+popup/item_3/text = "Clear Collection"
+popup/item_3/id = 2
+
+[node name="Spacer1" type="Control" parent="MenuBar"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="AddResourceBtn" type="Button" parent="MenuBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "+ Add Resource"
+
+[node name="RemoveResourceBtn" type="Button" parent="MenuBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "- Remove Resource"
+
+[node name="Spacer2" type="Control" parent="MenuBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CollectionInfoLabel" type="Label" parent="MenuBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Collection: Untitled"
+
+[node name="ResourcesCountLabel" type="Label" parent="MenuBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Resources: 0"
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="MainContainer" type="HSplitContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SidePanel" type="PanelContainer" parent="MainContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+
+[node name="PanelBg" type="Panel" parent="MainContainer/SidePanel"]
+modulate = Color(0.15, 0.15, 0.15, 1)
+self_modulate = Color(0.15, 0.15, 0.15, 1)
+layout_mode = 2
+
+[node name="SidePanelContent" type="VBoxContainer" parent="MainContainer/SidePanel"]
+layout_mode = 2
+
+[node name="RecentCollectionsList" type="ItemList" parent="MainContainer/SidePanel/SidePanelContent"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ResourcesTable" type="GridContainer" parent="MainContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 2

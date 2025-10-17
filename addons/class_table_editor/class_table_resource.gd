@@ -2,7 +2,7 @@
 extends Resource
 class_name ClassTableResource
 
-## Class Table data structure for Implementation 2: GDScript Class Integration
+## Class Table data structure for Plugin 2: GDScript Class Integration
 ## Stores table data generated from GDScript class definitions with type enforcement
 
 @export var sheet_name: String = "Untitled"
