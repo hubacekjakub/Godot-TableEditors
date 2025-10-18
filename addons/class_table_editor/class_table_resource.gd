@@ -13,6 +13,11 @@ class_name ClassTableResource
 @export var row_names: Array[String] = []  # Custom row names
 @export var source_class_path: String = ""  # Path to the source GDScript class file
 
+## NEW: Type metadata for class-based tables
+@export var source_class_name: String = ""  # Class this table represents (fully-qualified name)
+@export var class_file_path: String = ""  # Path to the source .gd file
+@export var columns_metadata: Array[Dictionary] = []  # Type info: {name, type, default, is_exported, type_hint}
+
 
 func get_cell(row: int, col: int) -> String:
 	"""Get the value of a cell at the specified position"""
@@ -126,6 +131,18 @@ func delete_row(row: int) -> void:
 
 	cells = new_cells
 	row_count -= 1
+
+
+func add_row(row_name: String = "") -> void:
+	"""Add a new row at the end of the table"""
+	row_names.append(row_name)
+	row_count += 1
+
+
+func add_column(col_name: String = "") -> void:
+	"""Add a new column at the end of the table"""
+	column_names.append(col_name)
+	column_count += 1
 
 
 func _get_column_letter(col_index: int) -> String:
@@ -278,3 +295,86 @@ func _parse_csv_line(line: String) -> PackedStringArray:
 	values.append(current_value)
 
 	return values
+
+
+## === NEW: Type-Based Methods for P2 Implementation ===
+
+## Add a column with type information
+func add_column_with_type(col_name: String, col_type: String, default_value: Variant = null, is_exported: bool = false) -> void:
+	var column_meta = {
+		"name": col_name,
+		"type": col_type,
+		"default": default_value,
+		"is_exported": is_exported,
+		"is_required": false,
+		"type_hint": col_type,
+		"script_hint": ""
+	}
+	columns_metadata.append(column_meta)
+	set_column_name(column_count, col_name)
+	column_count += 1
+
+
+## Add a column from a PropertyInfo dictionary (from ClassParser)
+func add_column_from_property(prop: Dictionary) -> void:
+	var col_name = prop.get("name", "")
+	var col_type = prop.get("type", "Variant")
+	var default_value = prop.get("default")
+	var is_exported = prop.get("is_exported", false)
+
+	add_column_with_type(col_name, col_type, default_value, is_exported)
+
+
+## Get type info for a column
+func get_column_type_info(col: int) -> Dictionary:
+	if col >= 0 and col < columns_metadata.size():
+		return columns_metadata[col]
+	return {}
+
+
+## Validate a cell value against column type
+func validate_cell(row_index: int, col_index: int, value: Variant) -> bool:
+	var type_info = get_column_type_info(col_index)
+	if type_info.is_empty():
+		return false
+
+	var col_type = type_info.get("type", "Variant")
+	return _is_valid_type(value, col_type)
+
+
+## Type validation helper
+func _is_valid_type(value: Variant, type_name: String) -> bool:
+	if value == null:
+		return true  # Allow null for now
+
+	match type_name:
+		"String":
+			return value is String
+		"int":
+			return value is int
+		"float":
+			return value is float
+		"bool":
+			return value is bool
+		"Color":
+			return value is Color
+		"Vector2":
+			return value is Vector2
+		"Vector3":
+			return value is Vector3
+		"Vector4":
+			return value is Vector4
+		_:
+			# For Resource types and others, just allow
+			return true
+
+
+## Get resource metadata
+func get_metadata() -> Dictionary:
+	return {
+		"class_name": source_class_name,
+		"class_file_path": class_file_path,
+		"sheet_name": sheet_name,
+		"column_count": column_count,
+		"row_count": row_count
+	}
