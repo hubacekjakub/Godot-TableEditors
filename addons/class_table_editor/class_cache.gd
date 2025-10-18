@@ -2,13 +2,13 @@
 class_name ClassCache
 extends RefCounted
 
-## Cache for parsed GDScript classes to prevent re-parsing unchanged files
+## Cache for inspected GDScript classes to prevent re-parsing unchanged files
+## Uses ClassInspector with native Godot property introspection API
 
-var _cache: Dictionary = {}  # {file_path: {parsed_data, file_mtime}}
-var _parser: ClassParser = ClassParser.new()
+var _cache: Dictionary = {}  # {file_path: {inspected_data, file_mtime}}
 
 
-## Get parsed class data, using cache if file hasn't changed
+## Get inspected class data, using cache if file hasn't changed
 func get_parsed_class(file_path: String) -> Dictionary:
 	var current_mtime = _get_file_mtime(file_path)
 
@@ -18,21 +18,24 @@ func get_parsed_class(file_path: String) -> Dictionary:
 		if cached.get("mtime") == current_mtime:
 			return cached.get("data", {})
 
-	# Parse the file
-	var parsed_data = _parser.parse_class(file_path)
+	# Inspect the class
+	var inspected_data = ClassInspector.new().inspect_class(file_path)
 
 	# Store in cache
 	_cache[file_path] = {
-		"data": parsed_data,
+		"data": inspected_data,
 		"mtime": current_mtime
 	}
 
-	return parsed_data
+	return inspected_data
 
 
 ## Get parsed class data from code string (never cached)
+## DEPRECATED: Native API doesn't support code strings, use load() with file instead
 func parse_code(code: String, file_path: String = "") -> Dictionary:
-	return _parser.parse_code(code, file_path)
+	# Code parsing no longer supported - use file-based inspection instead
+	push_warning("ClassCache.parse_code() is deprecated. Use inspect_class() with a file path instead.")
+	return {}
 
 
 ## Invalidate cache for a specific file

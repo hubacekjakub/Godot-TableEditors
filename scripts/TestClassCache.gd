@@ -36,19 +36,10 @@ func test_cache() -> void:
 	print("  Cache size after invalidate: ", stats_after["cached_files"])
 	assert(stats_after["cached_files"] == 0, "Cache should be empty after invalidate")
 
-	# Test 4: Parse code (never cached)
-	print("\nTest 4: Parsing code string (not cached)...")
-	var code_result = cache.parse_code("class_name TestClass\n@export var test: String")
-	print("  Class name from code: ", code_result.get("class_name"))
-
-	var stats_code = cache.get_stats()
-	print("  Cache size after code parse: ", stats_code["cached_files"])
-	assert(stats_code["cached_files"] == 0, "Code parsing should not add to cache")
-
-	# Test 5: Clear entire cache
-	print("\nTest 5: Caching multiple files...")
+	# Test 4: Parse multiple files and test cache clearing
+	print("\nTest 4: Caching multiple files...")
 	cache.get_parsed_class("res://scripts/TestItemData.gd")
-	cache.get_parsed_class("res://scripts/TestClassParser.gd")  # Different file if it exists
+	cache.get_parsed_class("res://scripts/TestAll.gd")  # Different file
 
 	var stats_multi = cache.get_stats()
 	print("  Cache size with multiple files: ", stats_multi["cached_files"])

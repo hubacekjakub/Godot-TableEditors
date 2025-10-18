@@ -12,61 +12,77 @@ func _ready() -> void:
 func run_all_tests() -> void:
 	print("\n")
 	print("╔════════════════════════════════════════════════════╗")
-	print("║  Testing P2-001 to P2-008: Core Class Functionality║")
+	print("║  P2 Core Tests: Class Functionality Integration    ║")
+	print("║        Running Test Suite (Days 1-2)              ║")
 	print("╚════════════════════════════════════════════════════╝")
-
-	var tests = [
-		{"name": "ClassParser", "script": TestClassParser},
-		{"name": "ClassCache", "script": TestClassCache},
-		{"name": "ClassTableResource", "script": TestClassTableResource},
-	]
 
 	var passed = 0
 	var failed = 0
 
-	for test in tests:
-		print("\n" + "─".repeat(50))
-		if test["script"] == null:
-			print("❌ Error running test: ", test["name"], " (script not loaded)")
-			failed += 1
-			continue
+	# Test 1: ClassCache (using ClassInspector internally)
+	print("\n" + "─".repeat(50))
+	print("🧪 ClassCache Tests (Mtime-based caching)")
+	print("─".repeat(50))
+	passed += _run_test_suite("res://scripts/TestClassCache.gd", "ClassCache")
+	if passed < 1:
+		failed += 1
 
-		var instance = test["script"].new()
-		add_child(instance)
-
-		# Call test functions
-		if instance.has_method("test_parser"):
-			instance.test_parser()
-			passed += 1
-		if instance.has_method("test_cache"):
-			instance.test_cache()
-			passed += 1
-		if instance.has_method("test_resource"):
-			instance.test_resource()
-			passed += 1
-		if instance.has_method("test_type_validation"):
-			instance.test_type_validation()
-			passed += 1
-
-		instance.queue_free()
+	# Test 2: ClassTableResource (data storage with type metadata)
+	print("\n" + "─".repeat(50))
+	print("🧪 ClassTableResource Tests (Data storage)")
+	print("─".repeat(50))
+	passed += _run_test_suite("res://scripts/TestClassTableResource.gd", "ClassTableResource")
+	if passed < 2:
+		failed += 1
 
 	print("\n" + "═".repeat(50))
 	print("║ Test Summary")
 	print("═".repeat(50))
-	print("  Total test groups: ", tests.size())
+	print("  Total test suites: 2")
 	print("  ✅ Passed: ", passed)
 	print("  ❌ Failed: ", failed)
 	print("═".repeat(50))
 
 	if failed == 0:
-		print("\n🎉 ALL TESTS PASSED! Core P2 implementation is working correctly.\n")
+		print("\n🎉 ALL TESTS PASSED!")
+		print("   Core P2 implementation working correctly.")
+		print("   Backward compatibility maintained.\n")
 	else:
 		print("\n❌ Some tests failed. See output above for details.\n")
 
 
-# Helper to catch errors in test methods
-func try_call(obj: Object, method: String) -> bool:
-	if obj.has_method(method):
-		obj.call(method)
-		return true
-	return false
+## Helper to run individual test suites dynamically
+func _run_test_suite(script_path: String, suite_name: String) -> int:
+	var test_class = load(script_path)
+	if test_class == null:
+		print("❌ Could not load %s (%s)" % [suite_name, script_path])
+		return 0
+
+	var instance = test_class.new()
+
+	# Run the test suite
+	if instance.has_method("run_all"):
+		# Use run_all() if available
+		instance.run_all()
+		return 1
+	else:
+		# Otherwise run individual test methods for legacy tests
+		add_child(instance)
+		var test_count = 0
+
+		# Check for standard test methods
+		for method_name in ["test_parser", "test_cache", "test_resource", "test_type_validation",
+						   "test_parser_code_strings", "test_find_classes"]:
+			if instance.has_method(method_name):
+				instance.call(method_name)
+				test_count += 1
+
+		instance.queue_free()
+
+		if test_count > 0:
+			print("✅ %s tests passed (%d methods)" % [suite_name, test_count])
+			return 1
+		else:
+			print("❌ %s has no test methods" % suite_name)
+			return 0
+

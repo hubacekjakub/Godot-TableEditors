@@ -13,10 +13,10 @@ class_name ClassTableResource
 @export var row_names: Array[String] = []  # Custom row names
 @export var source_class_path: String = ""  # Path to the source GDScript class file
 
-## NEW: Type metadata for class-based tables
+## NEW: Type metadata for class-based tables (uses PropertyInspector native types)
 @export var source_class_name: String = ""  # Class this table represents (fully-qualified name)
 @export var class_file_path: String = ""  # Path to the source .gd file
-@export var columns_metadata: Array[Dictionary] = []  # Type info: {name, type, default, is_exported, type_hint}
+@export var columns_metadata: Array[Dictionary] = []  # Enhanced type info from PropertyInspector: {name, type, type_name, usage, exported, default, hint, hint_string}
 
 
 func get_cell(row: int, col: int) -> String:
@@ -297,25 +297,82 @@ func _parse_csv_line(line: String) -> PackedStringArray:
 	return values
 
 
-## === NEW: Type-Based Methods for P2 Implementation ===
+## === NEW: Type-Based Methods using PropertyInspector native API ===
 
-## Add a column with type information
-func add_column_with_type(col_name: String, col_type: String, default_value: Variant = null, is_exported: bool = false) -> void:
+## Create table columns from a GDScript class using PropertyInspector
+func create_columns_from_class(script_path: String) -> bool:
+	var metadata = PropertyInspector.get_property_metadata(script_path)
+	if metadata.is_empty():
+		push_error("Failed to load class metadata from: " + script_path)
+		return false
+
+	# Clear existing columns
+	columns_metadata.clear()
+	column_names.clear()
+	column_count = 0
+
+	# Add column for each exported property
+	for prop_meta in metadata:
+		add_column_from_property_metadata(prop_meta)
+
+	# Store class information
+	var script = load(script_path)
+	source_class_name = script.resource_name if script else script_path.get_file().trim_suffix(".gd")
+	class_file_path = script_path
+
+	return true
+
+
+## Add a column from PropertyInspector metadata dictionary
+## Metadata format: {name, type (int), type_name (String), usage, exported, default, hint, hint_string}
+func add_column_from_property_metadata(prop_meta: Dictionary) -> void:
+	var col_name = prop_meta.get("name", "unknown")
+	var col_type_id = prop_meta.get("type", TYPE_NIL)
+	var col_type_name = prop_meta.get("type_name", "Variant")
+	var default_value = prop_meta.get("default", null)
+	var usage_flags = prop_meta.get("usage", 0)
+	var is_exported = prop_meta.get("exported", false)
+
+	# Create enhanced metadata entry
 	var column_meta = {
 		"name": col_name,
-		"type": col_type,
+		"type": col_type_id,  # Godot type ID (TYPE_INT, TYPE_STRING, etc.)
+		"type_name": col_type_name,  # Human-readable type name
 		"default": default_value,
-		"is_exported": is_exported,
+		"exported": is_exported,
+		"usage": usage_flags,
+		"hint": prop_meta.get("hint", 0),
+		"hint_string": prop_meta.get("hint_string", ""),
 		"is_required": false,
-		"type_hint": col_type,
-		"script_hint": ""
+	}
+
+	columns_metadata.append(column_meta)
+	set_column_name(column_count, col_name)
+	column_count += 1
+
+
+## Add a column with type information (legacy method, uses PropertyInspector internally)
+func add_column_with_type(col_name: String, col_type: String, default_value: Variant = null, is_exported: bool = false) -> void:
+	# Convert type name to Godot type ID
+	var type_id = _type_name_to_id(col_type)
+
+	var column_meta = {
+		"name": col_name,
+		"type": type_id,
+		"type_name": col_type,
+		"default": default_value,
+		"exported": is_exported,
+		"usage": PROPERTY_USAGE_SCRIPT_VARIABLE if is_exported else 0,
+		"hint": 0,
+		"hint_string": "",
+		"is_required": false,
 	}
 	columns_metadata.append(column_meta)
 	set_column_name(column_count, col_name)
 	column_count += 1
 
 
-## Add a column from a PropertyInfo dictionary (from ClassParser)
+## Add a column from a PropertyInfo dictionary (legacy method from old ClassParser)
 func add_column_from_property(prop: Dictionary) -> void:
 	var col_name = prop.get("name", "")
 	var col_type = prop.get("type", "Variant")
@@ -332,41 +389,87 @@ func get_column_type_info(col: int) -> Dictionary:
 	return {}
 
 
-## Validate a cell value against column type
+## Get type name for a column (human-readable)
+func get_column_type_name(col: int) -> String:
+	var type_info = get_column_type_info(col)
+	return type_info.get("type_name", "Unknown")
+
+
+## Get Godot type ID for a column
+func get_column_type_id(col: int) -> int:
+	var type_info = get_column_type_info(col)
+	return type_info.get("type", TYPE_NIL)
+
+
+## Validate a cell value against column type using native Godot types
 func validate_cell(row_index: int, col_index: int, value: Variant) -> bool:
 	var type_info = get_column_type_info(col_index)
 	if type_info.is_empty():
 		return false
 
-	var col_type = type_info.get("type", "Variant")
-	return _is_valid_type(value, col_type)
+	var type_id = type_info.get("type", TYPE_NIL)
+	return _is_valid_type_id(value, type_id)
 
 
-## Type validation helper
-func _is_valid_type(value: Variant, type_name: String) -> bool:
+## Type validation using Godot type IDs
+func _is_valid_type_id(value: Variant, type_id: int) -> bool:
 	if value == null:
 		return true  # Allow null for now
 
-	match type_name:
-		"String":
-			return value is String
-		"int":
-			return value is int
-		"float":
-			return value is float
-		"bool":
+	# Use Godot's type checking
+	match type_id:
+		TYPE_NIL:
+			return value == null
+		TYPE_BOOL:
 			return value is bool
-		"Color":
-			return value is Color
-		"Vector2":
+		TYPE_INT:
+			return value is int
+		TYPE_FLOAT:
+			return value is float
+		TYPE_STRING:
+			return value is String
+		TYPE_VECTOR2:
 			return value is Vector2
-		"Vector3":
+		TYPE_VECTOR3:
 			return value is Vector3
-		"Vector4":
-			return value is Vector4
+		TYPE_COLOR:
+			return value is Color
+		TYPE_OBJECT:
+			return value is Object
+		TYPE_ARRAY:
+			return value is Array
+		TYPE_DICTIONARY:
+			return value is Dictionary
 		_:
-			# For Resource types and others, just allow
+			# For unsupported types, allow
 			return true
+
+
+## Type validation helper (legacy, uses _is_valid_type_id internally)
+func _is_valid_type(value: Variant, type_name: String) -> bool:
+	var type_id = _type_name_to_id(type_name)
+	return _is_valid_type_id(value, type_id)
+
+
+## Convert type name to Godot type ID
+func _type_name_to_id(type_name: String) -> int:
+	match type_name:
+		"bool": return TYPE_BOOL
+		"int": return TYPE_INT
+		"float": return TYPE_FLOAT
+		"String": return TYPE_STRING
+		"Vector2": return TYPE_VECTOR2
+		"Vector3": return TYPE_VECTOR3
+		"Color": return TYPE_COLOR
+		"Array": return TYPE_ARRAY
+		"Dictionary": return TYPE_DICTIONARY
+		"Object": return TYPE_OBJECT
+		_: return TYPE_NIL
+
+
+## Check if a property type is supported for table storage
+func is_supported_type(type_id: int) -> bool:
+	return PropertyInspector.is_supported_type(type_id)
 
 
 ## Get resource metadata
@@ -376,5 +479,6 @@ func get_metadata() -> Dictionary:
 		"class_file_path": class_file_path,
 		"sheet_name": sheet_name,
 		"column_count": column_count,
-		"row_count": row_count
+		"row_count": row_count,
+		"columns": columns_metadata.size()
 	}

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://test_validator_scene"]
+
+[ext_resource type="Script" path="res://scripts/TestValidator.gd" id="1_validator"]
+
+[node name="TestValidator" type="Node"]
+script = ExtResource("1_validator")

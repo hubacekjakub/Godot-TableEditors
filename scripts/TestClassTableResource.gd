@@ -33,14 +33,14 @@ func test_resource() -> void:
 	# Test 3: Verify column type metadata
 	print("\nTest 3: Verifying column type metadata...")
 	var col0 = resource.get_column_type_info(0)
-	print("  Column 0: ", col0["name"], " (type: ", col0["type"], ", default: ", col0["default"], ")")
+	print("  Column 0: ", col0["name"], " (type: ", col0["type_name"], ", default: ", col0["default"], ")")
 	assert(col0["name"] == "item_name", "Column 0 name mismatch")
-	assert(col0["type"] == "String", "Column 0 type mismatch")
-	assert(col0["is_exported"] == true, "Column 0 should be exported")
+	assert(col0["type_name"] == "String", "Column 0 type mismatch")
+	assert(col0["exported"] == true, "Column 0 should be exported")
 
 	var col1 = resource.get_column_type_info(1)
-	print("  Column 1: ", col1["name"], " (type: ", col1["type"], ", default: ", col1["default"], ")")
-	assert(col1["type"] == "int", "Column 1 type should be int")
+	print("  Column 1: ", col1["name"], " (type: ", col1["type_name"], ", default: ", col1["default"], ")")
+	assert(col1["type_name"] == "int", "Column 1 type should be int")
 	assert(col1["default"] == 10, "Column 1 default should be 10")
 
 	# Test 4: Add rows and set cells

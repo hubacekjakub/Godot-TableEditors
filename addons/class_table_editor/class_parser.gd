@@ -1,8 +1,11 @@
 @tool
+## ClassParser - DEPRECATED: Use ClassInspector instead
+##
+## This class is maintained for backward compatibility only.
+## All new code should use ClassInspector with PropertyInspector for native property introspection.
+
 class_name ClassParser
 extends RefCounted
-
-## GDScript class parser utility for extracting class properties and metadata
 
 ## Pattern to match variable declarations with type annotations
 ## Matches: var name: Type or var name: Type = default
@@ -16,21 +19,33 @@ const CLASS_PATTERN = r"^class_name\s+(\w+)"
 
 
 ## Parse a GDScript file and extract class structure
+## DEPRECATED: Use ClassInspector.inspect_class() instead
 ## Returns: {
 ##   "class_name": String,
 ##   "properties": Array[Dictionary]  # Each: {name, type, default, is_exported}
 ## }
 func parse_class(file_path: String) -> Dictionary:
-	var file = FileAccess.open(file_path, FileAccess.READ)
-	if file == null:
-		push_error("Failed to open file: ", file_path)
-		return {}
+	var result = ClassInspector.new().inspect_class(file_path)
 
-	var code = file.get_as_text()
-	return parse_code(code, file_path)
+	# Convert from native format to legacy format for compatibility
+	var properties: Array[Dictionary] = []
+	for prop in result.get("properties", []):
+		properties.append({
+			"name": prop.get("name", ""),
+			"type": PropertyInspector._type_to_string(prop.get("type", TYPE_NIL)),
+			"default": prop.get("default", null),
+			"is_exported": true,  # All properties we return are exported
+		})
+
+	return {
+		"class_name": result.get("class_name", ""),
+		"file_path": file_path,
+		"properties": properties
+	}
 
 
 ## Parse GDScript code directly (useful for testing)
+## DEPRECATED: This relies on regex and is less accurate than native API
 func parse_code(code: String, file_path: String = "") -> Dictionary:
 	var extracted_class_name = _extract_class_name(code)
 	var properties = extract_properties(code)
@@ -43,6 +58,7 @@ func parse_code(code: String, file_path: String = "") -> Dictionary:
 
 
 ## Extract all class properties from code
+## DEPRECATED: Use PropertyInspector.get_exported_properties() instead
 func extract_properties(code: String) -> Array[Dictionary]:
 	var properties: Array[Dictionary] = []
 	var lines = code.split("\n")
@@ -118,47 +134,10 @@ func _parse_default_value(value_str: String) -> Variant:
 
 ## Get list of all GDScript files in project
 static func find_gdscript_files(search_path: String = "res://") -> Array[String]:
-	var gdscript_files: Array[String] = []
-	var dir = DirAccess.open(search_path)
-
-	if dir == null:
-		return gdscript_files
-
-	dir.list_dir_begin()
-	var file_name = dir.get_next()
-
-	while file_name != "":
-		# Skip hidden files and addons
-		if file_name.begins_with("."):
-			file_name = dir.get_next()
-			continue
-
-		var full_path = search_path.path_join(file_name)
-
-		if dir.current_is_dir():
-			# Recurse into directories (except addons)
-			if file_name != "addons":
-				gdscript_files.append_array(find_gdscript_files(full_path))
-		else:
-			# Add .gd files
-			if file_name.ends_with(".gd"):
-				gdscript_files.append(full_path)
-
-		file_name = dir.get_next()
-
-	return gdscript_files
+	return ClassInspector.find_gdscript_files(search_path)
 
 
 ## Get list of GDScript classes in project
 ## Returns: Array of {class_name, file_path, properties}
 static func find_gdscript_classes(search_path: String = "res://") -> Array[Dictionary]:
-	var classes: Array[Dictionary] = []
-	var files = find_gdscript_files(search_path)
-	var parser = ClassParser.new()
-
-	for file_path in files:
-		var result = parser.parse_class(file_path)
-		if result.get("class_name", "") != "":
-			classes.append(result)
-
-	return classes
+	return ClassInspector.find_gdscript_classes(search_path)
