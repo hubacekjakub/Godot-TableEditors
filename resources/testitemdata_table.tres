@@ -1,0 +1,66 @@
+[gd_resource type="Resource" script_class="ClassTableResource" load_steps=2 format=3 uid="uid://cu16u2v5h1tet"]
+
+[ext_resource type="Script" uid="uid://0cxe8rqi2rrw" path="res://addons/class_table_editor/class_table_resource.gd" id="1_p4q5l"]
+
+[resource]
+script = ExtResource("1_p4q5l")
+sheet_name = "TestItemDataTable"
+row_count = 0
+column_count = 5
+cells = {}
+column_names = Array[String](["item_name", "damage", "armor", "is_stackable", "rarity"])
+row_names = Array[String]([])
+source_class_path = ""
+source_class_name = ""
+class_file_path = "res://scripts/TestItemData.gd"
+columns_metadata = Array[Dictionary]([{
+"default": null,
+"exported": true,
+"hint": 0,
+"hint_string": "",
+"is_required": false,
+"name": "item_name",
+"type": 4,
+"type_name": "String",
+"usage": 4102
+}, {
+"default": null,
+"exported": true,
+"hint": 0,
+"hint_string": "",
+"is_required": false,
+"name": "damage",
+"type": 2,
+"type_name": "int",
+"usage": 4102
+}, {
+"default": null,
+"exported": true,
+"hint": 0,
+"hint_string": "",
+"is_required": false,
+"name": "armor",
+"type": 3,
+"type_name": "float",
+"usage": 4102
+}, {
+"default": null,
+"exported": true,
+"hint": 0,
+"hint_string": "",
+"is_required": false,
+"name": "is_stackable",
+"type": 1,
+"type_name": "bool",
+"usage": 4102
+}, {
+"default": null,
+"exported": true,
+"hint": 0,
+"hint_string": "",
+"is_required": false,
+"name": "rarity",
+"type": 3,
+"type_name": "float",
+"usage": 4102
+}])

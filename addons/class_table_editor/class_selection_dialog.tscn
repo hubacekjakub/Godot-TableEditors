@@ -1,0 +1,82 @@
+[gd_scene load_steps=2 format=3 uid="uid://ra5i7p7pjcjo"]
+
+[ext_resource type="Script" uid="uid://b6j3crxppkh8j" path="res://addons/class_table_editor/class_selection_dialog.gd" id="1_selection"]
+
+[node name="ClassSelectionDialog" type="ConfirmationDialog"]
+title = "Create Table from GDScript Class"
+initial_position = 1
+size = Vector2i(495, 300)
+min_size = Vector2i(495, 300)
+visible = true
+ok_button_text = "Create"
+script = ExtResource("1_selection")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+custom_minimum_size = Vector2(450, 180)
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 487.0
+offset_bottom = 253.0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="ScriptLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "GDScript Class:"
+
+[node name="ScriptContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ClassList" type="ItemList" parent="MarginContainer/VBoxContainer/ScriptContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RefreshButton" type="Button" parent="MarginContainer/VBoxContainer/ScriptContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "🔄 Refresh"
+
+[node name="Spacer1" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Table Name:"
+
+[node name="NameEdit" type="LineEdit" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Enter table name..."
+
+[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="PathLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Save Path:"
+
+[node name="PathContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PathEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/PathContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "res://resources/"
+placeholder_text = "res://resources/"
+
+[node name="BrowseButton" type="Button" parent="MarginContainer/VBoxContainer/PathContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Browse..."

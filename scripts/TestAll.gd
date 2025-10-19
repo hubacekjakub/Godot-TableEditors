@@ -35,10 +35,18 @@ func run_all_tests() -> void:
 	if passed < 2:
 		failed += 1
 
+	# Test 3: ClassSelector (class discovery and selection - P2-009 to P2-010)
+	print("\n" + "─".repeat(50))
+	print("🧪 ClassSelector Tests (Class discovery)")
+	print("─".repeat(50))
+	passed += _run_test_suite("res://scripts/TestClassSelector.gd", "ClassSelector")
+	if passed < 3:
+		failed += 1
+
 	print("\n" + "═".repeat(50))
 	print("║ Test Summary")
 	print("═".repeat(50))
-	print("  Total test suites: 2")
+	print("  Total test suites: 3")
 	print("  ✅ Passed: ", passed)
 	print("  ❌ Failed: ", failed)
 	print("═".repeat(50))

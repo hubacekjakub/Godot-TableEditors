@@ -3,7 +3,7 @@ extends VBoxContainer
 
 ## Class Table Dock UI Controller - Plugin 2: GDScript Class Integration
 
-const CLASS_SELECT_SCENE := preload("res://addons/class_table_editor/class_select_dialog.tscn")
+const CLASS_SELECTION_SCENE := preload("res://addons/class_table_editor/class_selection_dialog.tscn")
 
 signal column_added
 signal row_added
@@ -463,26 +463,31 @@ func _on_recent_sheet_selected(index: int) -> void:
 
 
 func _show_class_select_dialog() -> void:
-	"""Show the Class Select dialog"""
-	# Instantiate dialog if it doesn't exist
+	"""Show the Class Selection dialog for P2-009"""
+	# Instantiate new class selection dialog if it doesn't exist
 	if not class_select_dialog:
-		class_select_dialog = CLASS_SELECT_SCENE.instantiate()
+		class_select_dialog = CLASS_SELECTION_SCENE.instantiate()
 
-		# Connect to the dialog's custom signal
-		class_select_dialog.table_creation_confirmed.connect(_on_create_table_confirmed)
+		# Connect signals from the new dialog
+		class_select_dialog.table_created.connect(_on_class_table_created)
 
 		# Add as child of the dock to ensure proper modal behavior
-		add_child.call_deferred(class_select_dialog)
+		add_child(class_select_dialog)
 
-	# Reset dialog to default values
+	# Reset and show the dialog
 	class_select_dialog.reset_to_defaults()
-
-	# Show the dialog as modal and ensure it gets focus
-	class_select_dialog.popup_centered()
+	class_select_dialog.popup_centered_ratio(0.7)
 	class_select_dialog.grab_focus()
 
 
-func _on_create_table_confirmed(table_name: String, file_name: String, num_rows: int, num_columns: int, save_path: String) -> void:
-	"""Handle Create Table dialog confirmation"""
-	# Emit signal with parameters for the plugin to handle
-	create_table_requested.emit(table_name, file_name, num_rows, num_columns, save_path)
+func _on_class_table_created(resource_path: String, class_info: Dictionary) -> void:
+	"""Handle class table creation from class selection dialog"""
+	print("Class table created: %s" % resource_path)
+	print("  From class: %s" % class_info.get("class_name", ""))
+
+	# Load and display the newly created table
+	var table_resource = load(resource_path) as ClassTableResource
+	if table_resource:
+		set_sheet(table_resource)
+		add_to_recent_sheets(resource_path)
+		print("Table loaded and displayed in dock")
