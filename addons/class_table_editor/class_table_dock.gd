@@ -476,7 +476,7 @@ func _show_class_select_dialog() -> void:
 
 	# Reset and show the dialog
 	class_select_dialog.reset_to_defaults()
-	class_select_dialog.popup_centered_ratio(0.7)
+	class_select_dialog.popup_centered()
 	class_select_dialog.grab_focus()
 
 

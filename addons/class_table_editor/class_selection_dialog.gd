@@ -5,6 +5,9 @@ signal class_selected(class_info: Dictionary)
 signal table_created(resource_path: String, class_info: Dictionary)
 
 @onready var class_list: ItemList = %ClassList
+@onready var class_name_label: Label = %ClassNameLabel
+@onready var properties_count_label: Label = %PropertiesCountLabel
+@onready var properties_list: ItemList = %PropertiesList
 @onready var name_edit: LineEdit = %NameEdit
 @onready var path_edit: LineEdit = %PathEdit
 @onready var browse_button: Button = %BrowseButton
@@ -86,16 +89,37 @@ func _update_properties_display() -> void:
 	"""Update the table name based on selected class"""
 	if selected_class_info.is_empty():
 		name_edit.text = ""
+		class_name_label.text = "Class: (none selected)"
+		properties_count_label.text = "Properties: 0"
+		properties_list.clear()
 		return
 
 	var cls_name: String = selected_class_info.get("class_name", "Unknown")
+	var file_path: String = selected_class_info.get("file_path", "")
+	var parent: String = selected_class_info.get("parent_class", "")
+	var properties: Array = selected_class_info.get("properties", [])
+
+	# Update class name label
+	var class_text: String = "Class: %s" % cls_name
+	if not parent.is_empty():
+		class_text += " (extends %s)" % parent
+	class_name_label.text = class_text
+
+	# Update properties count
+	properties_count_label.text = "Properties: %d" % properties.size()
+
+	# Populate properties list
+	properties_list.clear()
+	for prop in properties:
+		var prop_name: String = prop.get("name", "?")
+		var prop_type: String = prop.get("type_name", "?")
+		var item_text: String = "%s: %s" % [prop_type, prop_name]
+		properties_list.add_item(item_text)
 
 	# Auto-generate table name from class name
 	name_edit.text = cls_name + "Table"
 
 	_validate_inputs()
-
-
 func _on_input_changed(_text: String = "") -> void:
 	"""Validate inputs whenever they change"""
 	_validate_inputs()

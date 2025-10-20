@@ -5,18 +5,18 @@
 [node name="ClassSelectionDialog" type="ConfirmationDialog"]
 title = "Create Table from GDScript Class"
 initial_position = 1
-size = Vector2i(495, 300)
-min_size = Vector2i(495, 300)
+size = Vector2i(495, 420)
+min_size = Vector2i(495, 420)
 visible = true
 ok_button_text = "Create"
 script = ExtResource("1_selection")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-custom_minimum_size = Vector2(450, 180)
+custom_minimum_size = Vector2(450, 300)
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 487.0
-offset_bottom = 253.0
+offset_bottom = 373.0
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
@@ -37,12 +37,32 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_horizontal = 3
+item_count = 1
+item_0/text = "TestItemData (5 properties)"
 
 [node name="RefreshButton" type="Button" parent="MarginContainer/VBoxContainer/ScriptContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "🔄 Refresh"
+
+[node name="ClassNameLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Class: (none selected)"
+
+[node name="PropertiesCountLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 10
+text = "Properties: 0"
+
+[node name="PropertiesList" type="ItemList" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
 
 [node name="Spacer1" type="Control" parent="MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 10)
