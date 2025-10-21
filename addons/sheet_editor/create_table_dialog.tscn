@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cgr1rlkptl5ur"]
 
-[ext_resource type="Script" path="res://addons/sheet_editor/create_table_dialog.gd" id="1_yh8k3"]
+[ext_resource type="Script" uid="uid://b23u3ajq5axya" path="res://addons/sheet_editor/create_table_dialog.gd" id="1_yh8k3"]
 
 [node name="CreateTable" type="ConfirmationDialog"]
 title = "Create New Table"

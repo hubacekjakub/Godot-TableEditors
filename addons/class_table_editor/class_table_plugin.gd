@@ -5,18 +5,25 @@ class_name ClassTablePlugin
 
 # Preload the dock scene
 const DOCK_SCENE := preload("res://addons/class_table_editor/class_table_dock.tscn")
+const TABLE_HANDLE_INSPECTOR_PLUGIN := preload("res://addons/class_table_editor/table_handle_inspector_plugin.gd")
 
 var button_2d: Button
 var button_3d: Button
 var button_inspector: Button
 var class_table_dock: Control
 var current_sheet: Resource
+var table_handle_inspector: EditorInspectorPlugin
 
 
 func _enter_tree() -> void:
 	_add_toolbar_buttons()
 	_create_class_table_dock()
 	add_control_to_bottom_panel(class_table_dock, "Class Table")
+
+	# Register TableHandle inspector plugin
+	table_handle_inspector = TABLE_HANDLE_INSPECTOR_PLUGIN.new()
+	add_inspector_plugin(table_handle_inspector)
+
 	print("Class Table Plugin loaded")
 
 
@@ -361,6 +368,10 @@ func _on_create_table_requested(table_name: String, file_name: String, rows: int
 
 func _exit_tree() -> void:
 	"""Clean up when plugin is disabled"""
+	# Remove TableHandle inspector plugin
+	if table_handle_inspector:
+		remove_inspector_plugin(table_handle_inspector)
+
 	remove_control_from_container(EditorPlugin.CONTAINER_CANVAS_EDITOR_MENU, button_2d)
 	button_2d.queue_free()
 

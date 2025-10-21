@@ -1,0 +1,14 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8qqvt3xh36jb"]
+
+[ext_resource type="Script" uid="uid://cwi28at0nd0um" path="res://scripts/TableHandleTest.gd" id="1_test"]
+[ext_resource type="Script" uid="uid://b3r0fm6iltfvb" path="res://addons/class_table_editor/table_handle.gd" id="2_ud8bi"]
+[ext_resource type="Resource" uid="uid://cu16u2v5h1tet" path="res://resources/testitemdata_table.tres" id="3_63j8e"]
+
+[sub_resource type="Resource" id="Resource_gph4q"]
+script = ExtResource("2_ud8bi")
+table_resource = ExtResource("3_63j8e")
+row_name = "shield"
+
+[node name="TableHandleTest" type="Node"]
+script = ExtResource("1_test")
+item_handle = SubResource("Resource_gph4q")
