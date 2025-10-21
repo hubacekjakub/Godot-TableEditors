@@ -43,10 +43,18 @@ func run_all_tests() -> void:
 	if passed < 3:
 		failed += 1
 
+	# Test 4: Typed Cell Editors (P2-019 to P2-028)
+	print("\n" + "─".repeat(50))
+	print("🧪 Typed Cell Editor Tests (Type-safe editing)")
+	print("─".repeat(50))
+	passed += _run_test_suite("res://scripts/TestTypedCellEditors.gd", "TypedCellEditors")
+	if passed < 4:
+		failed += 1
+
 	print("\n" + "═".repeat(50))
 	print("║ Test Summary")
 	print("═".repeat(50))
-	print("  Total test suites: 3")
+	print("  Total test suites: 4")
 	print("  ✅ Passed: ", passed)
 	print("  ❌ Failed: ", failed)
 	print("═".repeat(50))
@@ -54,6 +62,7 @@ func run_all_tests() -> void:
 	if failed == 0:
 		print("\n🎉 ALL TESTS PASSED!")
 		print("   Core P2 implementation working correctly.")
+		print("   Type-safe editing (P2-019 to P2-028) verified.")
 		print("   Backward compatibility maintained.\n")
 	else:
 		print("\n❌ Some tests failed. See output above for details.\n")
@@ -69,8 +78,12 @@ func _run_test_suite(script_path: String, suite_name: String) -> int:
 	var instance = test_class.new()
 
 	# Run the test suite
-	if instance.has_method("run_all"):
-		# Use run_all() if available
+	if instance.has_method("run_all_tests"):
+		# Use run_all_tests() if available (new style)
+		instance.run_all_tests()
+		return 1
+	elif instance.has_method("run_all"):
+		# Use run_all() if available (legacy style)
 		instance.run_all()
 		return 1
 	else:

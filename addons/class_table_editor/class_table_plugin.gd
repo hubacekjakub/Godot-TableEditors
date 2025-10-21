@@ -87,6 +87,10 @@ func _create_class_table_dock() -> void:
 	"""Create and initialize the class table dock with signal connections"""
 	class_table_dock = DOCK_SCENE.instantiate()
 
+	# Pass editor interface to dock so it can register resources
+	if class_table_dock.has_method("set") and "editor_interface" in class_table_dock:
+		class_table_dock.editor_interface = get_editor_interface()
+
 	# Connect signals from the dock
 	class_table_dock.column_added.connect(_on_add_column_pressed)
 	class_table_dock.row_added.connect(_on_add_row_pressed)

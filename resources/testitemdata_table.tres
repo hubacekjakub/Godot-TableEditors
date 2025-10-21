@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_p4q5l")
-sheet_name = "TestItemDataTable"
+sheet_name = "TestItemDataTable2"
 row_count = 0
 column_count = 5
 cells = {}

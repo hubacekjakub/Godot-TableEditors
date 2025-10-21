@@ -4,6 +4,7 @@ extends VBoxContainer
 ## Class Table Dock UI Controller - Plugin 2: GDScript Class Integration
 
 const CLASS_SELECTION_SCENE := preload("res://addons/class_table_editor/class_selection_dialog.tscn")
+const TYPED_CELL_EDITOR_FACTORY = preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
 
 signal column_added
 signal row_added
@@ -31,6 +32,7 @@ signal create_table_requested(table_name: String, file_name: String, rows: int, 
 @onready var grid_container: GridContainer = %GridContainer
 
 var class_select_dialog: ConfirmationDialog = null
+var editor_interface: EditorInterface = null  # Reference to editor interface
 
 var current_sheet: Resource = null
 var current_focused_row: int = -1
@@ -142,15 +144,23 @@ func _rebuild_grid() -> void:
 	# Create editable column headers with Excel-style letters (A, B, C...)
 	for col in range(sheet.column_count):
 		var header_edit := LineEdit.new()
-		header_edit.text = sheet.get_column_name(col)
+
+		# Get type info for this column
+		var type_info = sheet.get_column_type_info(col)
+		var col_type_name = type_info.get("type_name", "Variant")
+		var col_name = sheet.get_column_name(col)
+
+		# Display column name with type hint (P2-028)
+		header_edit.text = col_name
+		header_edit.tooltip_text = "Type: %s" % col_type_name
 		header_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		header_edit.custom_minimum_size = Vector2(100, 30)
-		header_edit.placeholder_text = _get_column_letter(col)
+		header_edit.placeholder_text = "%s (%s)" % [_get_column_letter(col), col_type_name]
 		header_edit.set_meta("column_index", col)
 
-		# Style column headers like Excel
+		# Style column headers like Excel with type-based color coding (P2-019)
 		var header_style := StyleBoxFlat.new()
-		header_style.bg_color = Color(0.22, 0.22, 0.22, 1)
+		header_style.bg_color = _get_type_header_color(type_info.get("type", TYPE_NIL))
 		header_style.border_width_right = 1
 		header_style.border_width_bottom = 2
 		header_style.border_color = Color(0.4, 0.4, 0.4, 1)
@@ -190,10 +200,21 @@ func _rebuild_grid() -> void:
 
 		# Create data cells for this row
 		for col in range(sheet.column_count):
-			var line_edit := LineEdit.new()
-			line_edit.text = sheet.get_cell(row, col)
-			line_edit.custom_minimum_size = Vector2(100, 30)
-			line_edit.placeholder_text = "..."
+			# Get type info for this column (P2-020)
+			var type_info = sheet.get_column_type_info(col)
+			var type_id = type_info.get("type", TYPE_NIL)
+			var type_name = type_info.get("type_name", "Variant")
+
+			# Create type-specific editor (P2-020, P2-023, P2-024, P2-025)
+			var cell_editor = TYPED_CELL_EDITOR_FACTORY.create_editor(type_id, type_name, type_info)
+			cell_editor.set_meta("row", row)
+			cell_editor.set_meta("col", col)
+			cell_editor.set_meta("type_id", type_id)
+			cell_editor.set_meta("type_name", type_name)
+
+			# Set current value
+			var current_value = sheet.get_cell(row, col)
+			TYPED_CELL_EDITOR_FACTORY.set_editor_value(cell_editor, current_value)
 
 			# Style data cells with subtle alternating row colors
 			var cell_style := StyleBoxFlat.new()
@@ -205,27 +226,48 @@ func _rebuild_grid() -> void:
 			cell_style.border_width_right = 1
 			cell_style.border_width_bottom = 1
 			cell_style.border_color = Color(0.3, 0.3, 0.3, 1)
-			line_edit.add_theme_stylebox_override("normal", cell_style)
 
-			# Focus style with highlight
-			var focus_style := StyleBoxFlat.new()
-			focus_style.bg_color = Color(0.25, 0.35, 0.45, 1)
-			focus_style.border_width_left = 2
-			focus_style.border_width_right = 2
-			focus_style.border_width_top = 2
-			focus_style.border_width_bottom = 2
-			focus_style.border_color = Color(0.4, 0.6, 0.8, 1)
-			line_edit.add_theme_stylebox_override("focus", focus_style)
+			# Apply styles based on control type
+			if cell_editor is LineEdit:
+				cell_editor.add_theme_stylebox_override("normal", cell_style)
+				var focus_style := StyleBoxFlat.new()
+				focus_style.bg_color = Color(0.25, 0.35, 0.45, 1)
+				focus_style.border_width_left = 2
+				focus_style.border_width_right = 2
+				focus_style.border_width_top = 2
+				focus_style.border_width_bottom = 2
+				focus_style.border_color = Color(0.4, 0.6, 0.8, 1)
+				cell_editor.add_theme_stylebox_override("focus", focus_style)
+			elif cell_editor is Panel or cell_editor is PanelContainer:
+				cell_editor.add_theme_stylebox_override("panel", cell_style)
 
-			line_edit.set_meta("row", row)
-			line_edit.set_meta("col", col)
+			# Connect signals based on control type (P2-019, P2-026, P2-027)
+			if cell_editor is LineEdit:
+				cell_editor.text_changed.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
+				cell_editor.text_submitted.connect(_on_typed_cell_submitted.bind(row, col, cell_editor))
+				cell_editor.focus_entered.connect(_on_cell_focus_entered.bind(row, col, cell_editor))
+				cell_editor.gui_input.connect(_on_cell_gui_input.bind(row, col))
+			elif cell_editor is CheckBox:
+				cell_editor.toggled.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
+				cell_editor.focus_entered.connect(_on_cell_focus_entered.bind(row, col, cell_editor))
+				cell_editor.gui_input.connect(_on_cell_gui_input.bind(row, col))
+			elif cell_editor is SpinBox:
+				cell_editor.value_changed.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
+				cell_editor.get_line_edit().focus_entered.connect(_on_cell_focus_entered.bind(row, col, cell_editor))
+				cell_editor.gui_input.connect(_on_cell_gui_input.bind(row, col))
+			elif cell_editor is ColorPickerButton:
+				cell_editor.color_changed.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
+				cell_editor.focus_entered.connect(_on_cell_focus_entered.bind(row, col, cell_editor))
+				cell_editor.gui_input.connect(_on_cell_gui_input.bind(row, col))
+			elif cell_editor is HBoxContainer:
+				# Vector2/Vector3 editors
+				cell_editor.gui_input.connect(_on_cell_gui_input.bind(row, col))
+				for child in cell_editor.get_children():
+					if child is SpinBox:
+						child.value_changed.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
+						child.get_line_edit().focus_entered.connect(_on_cell_focus_entered.bind(row, col, cell_editor))
 
-			line_edit.text_changed.connect(_on_cell_text_changed.bind(row, col))
-			line_edit.text_submitted.connect(_on_cell_text_submitted.bind(row, col, line_edit))
-			line_edit.focus_entered.connect(_on_cell_focus_entered.bind(row, col, line_edit))
-			line_edit.gui_input.connect(_on_cell_gui_input.bind(row, col))
-
-			grid_container.add_child(line_edit)
+			grid_container.add_child(cell_editor)
 
 
 func _get_column_letter(col_index: int) -> String:
@@ -257,11 +299,13 @@ func _on_cell_text_submitted(new_text: String, row: int, col: int, current_cell:
 	_move_to_cell(row + 1, col)
 
 
-func _on_cell_focus_entered(row: int, col: int, cell: LineEdit) -> void:
+func _on_cell_focus_entered(row: int, col: int, cell: Control) -> void:
 	"""Track focused cell and select all text for easy editing"""
 	current_focused_row = row
 	current_focused_col = col
-	cell.select_all()
+	# Only select all text for LineEdit controls
+	if cell is LineEdit:
+		cell.select_all()
 
 
 func _on_cell_gui_input(event: InputEvent, row: int, col: int) -> void:
@@ -403,7 +447,7 @@ func _show_column_context_menu(col: int, position: Vector2) -> void:
 			column_deleted.emit(col)
 		popup.queue_free()
 	)
-	add_child.call_deferred(popup)
+	add_child(popup)
 	popup.popup(Rect2i(position, Vector2i(150, 50)))
 
 
@@ -416,7 +460,7 @@ func _show_row_context_menu(row: int, position: Vector2) -> void:
 			row_deleted.emit(row)
 		popup.queue_free()
 	)
-	add_child.call_deferred(popup)
+	add_child(popup)
 	popup.popup(Rect2i(position, Vector2i(150, 50)))
 
 
@@ -491,3 +535,130 @@ func _on_class_table_created(resource_path: String, class_info: Dictionary) -> v
 		set_sheet(table_resource)
 		add_to_recent_sheets(resource_path)
 		print("Table loaded and displayed in dock")
+
+		# IMPORTANT: Make the plugin aware of this resource by editing it
+		# This will trigger the plugin's _edit() method which sets current_sheet
+		if editor_interface:
+			editor_interface.edit_resource(table_resource)
+			print("Resource registered with editor")
+		else:
+			push_warning("Editor interface not available - plugin may not be aware of new table")
+
+
+## === NEW: Type-Safe Editing Methods (P2-019 to P2-028) ===
+
+## Handle cell value changes with type validation (P2-019, P2-021, P2-022, P2-026, P2-027)
+func _on_typed_cell_changed(new_value: Variant, row: int, col: int, editor: Control) -> void:
+	"""Update cell data when typed value changes with validation"""
+	if not current_sheet or not current_sheet is ClassTableResource:
+		return
+
+	var sheet := current_sheet as ClassTableResource
+	var type_id = editor.get_meta("type_id", TYPE_NIL)
+
+	# Get value from editor
+	var value = TYPED_CELL_EDITOR_FACTORY.get_editor_value(editor)
+
+	# Validate value (P2-019, P2-026)
+	var validation = TYPED_CELL_EDITOR_FACTORY.validate_value(type_id, value)
+	if not validation["valid"]:
+		# Show validation error (P2-026)
+		_show_validation_error(editor, validation["error"])
+		return
+
+	# Clear any previous validation error display
+	_clear_validation_error(editor)
+
+	# Convert value to string for storage
+	var value_str = _value_to_string(value, type_id)
+	sheet.set_cell(row, col, value_str)
+
+
+## Handle cell submission (Enter key)
+func _on_typed_cell_submitted(new_value: Variant, row: int, col: int, editor: Control) -> void:
+	"""Move to next row when Enter is pressed"""
+	_move_to_cell(row + 1, col)
+
+
+## Show validation error in UI (P2-026)
+func _show_validation_error(editor: Control, error_message: String) -> void:
+	"""Display validation error for a cell editor"""
+	# Add error border styling
+	if editor is LineEdit:
+		var error_style := StyleBoxFlat.new()
+		error_style.bg_color = Color(0.4, 0.2, 0.2, 1)  # Red tint
+		error_style.border_width_left = 2
+		error_style.border_width_right = 2
+		error_style.border_width_top = 2
+		error_style.border_width_bottom = 2
+		error_style.border_color = Color(1.0, 0.3, 0.3, 1)  # Bright red border
+		editor.add_theme_stylebox_override("normal", error_style)
+
+	# Set tooltip with error message
+	editor.tooltip_text = "Error: " + error_message
+
+	# TODO: Could show error panel at bottom of dock in future
+
+
+## Clear validation error display
+func _clear_validation_error(editor: Control) -> void:
+	"""Clear validation error styling from cell editor"""
+	if editor is LineEdit:
+		# Restore normal styling
+		var row = editor.get_meta("row", 0)
+		var cell_style := StyleBoxFlat.new()
+		if row % 2 == 0:
+			cell_style.bg_color = Color(0.24, 0.24, 0.24, 1)
+		else:
+			cell_style.bg_color = Color(0.22, 0.22, 0.22, 1)
+		cell_style.border_width_right = 1
+		cell_style.border_width_bottom = 1
+		cell_style.border_color = Color(0.3, 0.3, 0.3, 1)
+		editor.add_theme_stylebox_override("normal", cell_style)
+
+	# Restore tooltip to show type info
+	var type_name = editor.get_meta("type_name", "Variant")
+	editor.tooltip_text = "Type: " + type_name
+
+
+## Convert typed value to string for storage
+func _value_to_string(value: Variant, type_id: int) -> String:
+	if value == null:
+		return ""
+
+	match type_id:
+		TYPE_BOOL:
+			return "true" if value else "false"
+		TYPE_INT, TYPE_FLOAT:
+			return str(value)
+		TYPE_STRING:
+			return value
+		TYPE_VECTOR2:
+			return "(%s, %s)" % [value.x, value.y]
+		TYPE_VECTOR3:
+			return "(%s, %s, %s)" % [value.x, value.y, value.z]
+		TYPE_COLOR:
+			return value.to_html()
+		_:
+			return str(value)
+
+
+## Get header color based on type (P2-019)
+func _get_type_header_color(type_id: int) -> Color:
+	"""Return color-coded background for column headers based on type"""
+	match type_id:
+		TYPE_BOOL:
+			return Color(0.25, 0.22, 0.28, 1)  # Purple tint
+		TYPE_INT:
+			return Color(0.22, 0.25, 0.28, 1)  # Blue tint
+		TYPE_FLOAT:
+			return Color(0.22, 0.28, 0.25, 1)  # Green tint
+		TYPE_STRING:
+			return Color(0.28, 0.25, 0.22, 1)  # Orange tint
+		TYPE_VECTOR2, TYPE_VECTOR3:
+			return Color(0.25, 0.28, 0.22, 1)  # Yellow-green tint
+		TYPE_COLOR:
+			return Color(0.28, 0.22, 0.25, 1)  # Pink tint
+		_:
+			return Color(0.22, 0.22, 0.22, 1)  # Default gray
+
