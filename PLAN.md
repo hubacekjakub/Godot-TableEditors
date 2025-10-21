@@ -187,17 +187,17 @@ addons/
   - [x] `P2-008` ✅ Implement file modification tracking for cache invalidation
   - **Status**: ✅ **COMPLETE** - Using native Godot PropertyInfo API instead of regex parsing
 
-- [ ] **Class-to-Table Generation** (P2-009 to P2-018)
-  - [ ] `P2-009` Create "Select Class" dialog for choosing classes
-  - [ ] `P2-010` Detect GDScript classes in the project
-  - [ ] `P2-011` Parse and extract class properties (using ClassInspector)
-  - [ ] `P2-012` Auto-generate table columns from class properties
-  - [ ] `P2-013` Map property types to column types (String, int, float, bool, Color, Vector2, etc.)
-  - [ ] `P2-014` Set initial values from class defaults (PropertyInfo default values)
-  - [ ] `P2-015` Handle custom Resource classes
-  - [ ] `P2-016` Handle class inheritance chains
-  - [ ] `P2-017` Create new class table instances from selected class
-  - [ ] `P2-018` Store class reference in table metadata
+- [x] **Class-to-Table Generation** (P2-009 to P2-018) ✅ **COMPLETE**
+  - [x] `P2-009` Create "Select Class" dialog for choosing classes
+  - [x] `P2-010` Detect GDScript classes in the project
+  - [x] `P2-011` Parse and extract class properties (using ClassInspector)
+  - [x] `P2-012` Auto-generate table columns from class properties
+  - [x] `P2-013` Map property types to column types (String, int, float, bool, Color, Vector2, etc.)
+  - [x] `P2-014` Set initial values from class defaults (PropertyInfo default values)
+  - [x] `P2-015` Handle custom Resource classes
+  - [x] `P2-016` Handle class inheritance chains
+  - [x] `P2-017` Create new class table instances from selected class
+  - [x] `P2-018` Store class reference in table metadata
 
 - [ ] **Type-Safe Editing** (P2-019 to P2-028)
   - [ ] `P2-019` Implement type validation for cell edits

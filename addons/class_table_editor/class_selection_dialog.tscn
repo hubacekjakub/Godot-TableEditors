@@ -1,6 +1,18 @@
-[gd_scene load_steps=4 format=3 uid="uid://ra5i7p7pjcjo"]
+[gd_scene load_steps=5 format=3 uid="uid://ra5i7p7pjcjo"]
 
 [ext_resource type="Script" uid="uid://b6j3crxppkh8j" path="res://addons/class_table_editor/class_selection_dialog.gd" id="1_selection"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_knvl7"]
+bg_color = Color(0.160784, 0.160784, 0.160784, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.254902, 0.321569, 0.388235, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="2"]
 content_margin_left = 6.0
@@ -19,7 +31,7 @@ corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
 [sub_resource type="StyleBoxFlat" id="1"]
-bg_color = Color(0.15, 0.18, 0.22, 1)
+bg_color = Color(0.160784, 0.160784, 0.160784, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -70,6 +82,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_knvl7")
 item_count = 1
 item_0/text = "TestItemData (5 properties)"
 
