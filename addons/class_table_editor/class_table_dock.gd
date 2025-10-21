@@ -110,8 +110,8 @@ func _rebuild_grid() -> void:
 
 	var sheet := current_sheet as ClassTableResource
 
-	# Set grid columns (add 1 for row headers)
-	grid_container.columns = max(1, sheet.column_count + 1)
+	# Set grid columns (no row header column anymore)
+	grid_container.columns = max(1, sheet.column_count)
 
 	# Add spacing between cells for a cleaner look
 	grid_container.add_theme_constant_override("h_separation", 0)
@@ -123,23 +123,6 @@ func _rebuild_grid() -> void:
 		label.text = "Add columns and rows to start editing"
 		grid_container.add_child(label)
 		return
-
-	# Create header row - first cell is empty (top-left corner)
-	var corner_label := Label.new()
-	corner_label.text = ""
-	corner_label.custom_minimum_size = Vector2(40, 30)
-	corner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	corner_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-
-	# Add subtle border styling
-	var corner_style := StyleBoxFlat.new()
-	corner_style.bg_color = Color(0.25, 0.25, 0.25, 1)
-	corner_style.border_width_right = 1
-	corner_style.border_width_bottom = 2
-	corner_style.border_color = Color(0.4, 0.4, 0.4, 1)
-	corner_label.add_theme_stylebox_override("normal", corner_style)
-
-	grid_container.add_child(corner_label)
 
 	# Create editable column headers with Excel-style letters (A, B, C...)
 	for col in range(sheet.column_count):
@@ -154,7 +137,9 @@ func _rebuild_grid() -> void:
 		header_edit.text = col_name
 		header_edit.tooltip_text = "Type: %s" % col_type_name
 		header_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		header_edit.custom_minimum_size = Vector2(100, 30)
+		# Make columns wider to accommodate longer property names
+		var column_width = max(120, col_name.length() * 8)
+		header_edit.custom_minimum_size = Vector2(column_width, 30)
 		header_edit.placeholder_text = "%s (%s)" % [_get_column_letter(col), col_type_name]
 		header_edit.set_meta("column_index", col)
 
@@ -173,31 +158,8 @@ func _rebuild_grid() -> void:
 
 		grid_container.add_child(header_edit)
 
-	# Create data rows with editable row headers
+	# Create data rows (no row headers)
 	for row in range(sheet.row_count):
-		# Row header with numbering (1, 2, 3...)
-		var row_edit := LineEdit.new()
-		row_edit.text = sheet.get_row_name(row)
-		row_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		row_edit.custom_minimum_size = Vector2(40, 30)
-		row_edit.placeholder_text = str(row + 1)
-		row_edit.set_meta("row_index", row)
-
-		# Style row headers like Excel
-		var row_style := StyleBoxFlat.new()
-		row_style.bg_color = Color(0.22, 0.22, 0.22, 1)
-		row_style.border_width_right = 1
-		row_style.border_width_bottom = 1
-		row_style.border_color = Color(0.4, 0.4, 0.4, 1)
-		row_edit.add_theme_stylebox_override("normal", row_style)
-		row_edit.add_theme_stylebox_override("focus", row_style)
-
-		row_edit.text_submitted.connect(_on_row_renamed.bind(row))
-		row_edit.focus_exited.connect(_on_row_header_focus_exited.bind(row, row_edit))
-		row_edit.gui_input.connect(_on_row_header_gui_input.bind(row))
-
-		grid_container.add_child(row_edit)
-
 		# Create data cells for this row
 		for col in range(sheet.column_count):
 			# Get type info for this column (P2-020)
@@ -211,6 +173,11 @@ func _rebuild_grid() -> void:
 			cell_editor.set_meta("col", col)
 			cell_editor.set_meta("type_id", type_id)
 			cell_editor.set_meta("type_name", type_name)
+
+			# Make cells match column width
+			var col_name = sheet.get_column_name(col)
+			var cell_width = max(120, col_name.length() * 8)
+			cell_editor.custom_minimum_size = Vector2(cell_width, 30)
 
 			# Set current value
 			var current_value = sheet.get_cell(row, col)
@@ -350,8 +317,8 @@ func _move_to_cell(target_row: int, target_col: int) -> void:
 		return
 
 	# Calculate cell index in grid layout
-	# Grid: [corner] [col headers...] [row1 header] [row1 cells...] [row2 header] [row2 cells...]
-	var cell_index := (1 + sheet.column_count) + (target_row * (sheet.column_count + 1)) + 1 + target_col
+	# Grid: [col headers...] [row1 cells...] [row2 cells...]
+	var cell_index := sheet.column_count + (target_row * sheet.column_count) + target_col
 
 	var children := grid_container.get_children()
 	if cell_index >= 0 and cell_index < children.size():

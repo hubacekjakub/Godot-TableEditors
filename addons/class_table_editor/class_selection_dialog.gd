@@ -190,6 +190,9 @@ func _on_confirmed() -> void:
 	table_resource.source_class_name = cls_name
 	table_resource.class_file_path = class_file_path
 
+	# Add "name" column as first column
+	table_resource.add_column_with_type("name", "String", "", true)
+
 	# P2-012: Auto-generate table columns from class properties
 	if not table_resource.create_columns_from_class(class_file_path):
 		push_error("Failed to create columns from class: " + class_file_path)
@@ -198,6 +201,10 @@ func _on_confirmed() -> void:
 	# P2-017: Create new class table instances with initial rows
 	table_resource.row_count = 0
 	table_resource.column_count = table_resource.columns_metadata.size()
+
+	# Add 3 default rows
+	for i in range(3):
+		table_resource.add_row("Row " + str(i + 1))
 
 	# Save the resource
 	var error: int = ResourceSaver.save(table_resource, full_path)

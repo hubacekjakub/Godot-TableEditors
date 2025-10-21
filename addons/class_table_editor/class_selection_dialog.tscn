@@ -45,18 +45,19 @@ corner_radius_bottom_left = 3
 [node name="ClassSelectionDialog" type="ConfirmationDialog"]
 title = "Create Table from GDScript Class"
 initial_position = 1
-size = Vector2i(495, 460)
+size = Vector2i(495, 540)
 visible = true
-min_size = Vector2i(495, 420)
+min_size = Vector2i(495, 500)
 ok_button_text = "Create"
 script = ExtResource("1_selection")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-custom_minimum_size = Vector2(450, 300)
+custom_minimum_size = Vector2(450, 380)
+layout_mode = 2
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 487.0
-offset_bottom = 411.0
+offset_bottom = 491.0
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
@@ -116,8 +117,9 @@ text = "📝 Properties: 0"
 
 [node name="PropertiesList" type="ItemList" parent="MarginContainer/VBoxContainer/ClassInfoPanel/ClassInfoVBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 80)
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_styles/panel = SubResource("1")
 
 [node name="Spacer1" type="Control" parent="MarginContainer/VBoxContainer"]
