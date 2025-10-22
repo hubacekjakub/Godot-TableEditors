@@ -184,7 +184,8 @@ func export_to_csv(file_path: String) -> bool:
 		file.store_line(",".join(data_row))
 
 	file.close()
-	print("Sheet exported to CSV: " + file_path)
+	if OS.is_debug_build():
+		print("Sheet exported to CSV: " + file_path)
 	return true
 
 
@@ -248,7 +249,8 @@ func import_from_csv(file_path: String) -> bool:
 		line_number += 1
 
 	file.close()
-	print("Sheet imported from CSV: " + file_path + " (" + str(row_count) + " rows, " + str(column_count) + " columns, row names: " + str(has_row_names) + ")")
+	if OS.is_debug_build():
+		print("Sheet imported from CSV: " + file_path + " (" + str(row_count) + " rows, " + str(column_count) + " columns, row names: " + str(has_row_names) + ")")
 	return true
 
 

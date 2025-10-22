@@ -7,8 +7,6 @@
 ##
 ## Example usage:
 ##   var props = PropertyInspector.get_exported_properties("res://scripts/my_class.gd")
-##   for prop in props:
-##       print("%s: %s" % [prop.name, PropertyInspector._type_to_string(prop.type)])
 
 class_name PropertyInspector
 extends RefCounted

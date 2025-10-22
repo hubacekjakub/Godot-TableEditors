@@ -38,11 +38,13 @@ func _handles(object: Object) -> bool:
 func _edit(object: Object) -> void:
 	"""Edit a ClassTableResource when selected"""
 	if not _is_object_class_table_resource(object):
-		print("Not a ClassTableResource, hiding dock")
+		if OS.is_debug_build():
+			print("Not a ClassTableResource, hiding dock")
 		_hide_dock()
 		return
 
-	print("Editing ClassTableResource")
+	if OS.is_debug_build():
+		print("Editing ClassTableResource")
 	current_sheet = object
 	_show_dock()
 
@@ -234,7 +236,8 @@ func _save_sheet() -> void:
 
 	var error := ResourceSaver.save(current_sheet, path)
 	if error == OK:
-		print("Class Table saved to: ", path)
+		if OS.is_debug_build():
+			print("Class Table saved to: ", path)
 	else:
 		push_error("Class Table: Failed to save sheet - error code: " + str(error))
 
@@ -271,7 +274,8 @@ func _on_save_file_selected(path: String) -> void:
 
 	var error := ResourceSaver.save(current_sheet, path)
 	if error == OK:
-		print("Class Table saved to: ", path)
+		if OS.is_debug_build():
+			print("Class Table saved to: ", path)
 		current_sheet.resource_path = path
 		get_editor_interface().get_resource_filesystem().scan()
 
@@ -318,7 +322,8 @@ func _load_sheet_from_path(path: String) -> void:
 		push_error("Class Table: File is not a ClassTableResource: " + path)
 		return
 
-	print("Class Table loaded from: ", path)
+	if OS.is_debug_build():
+		print("Class Table loaded from: ", path)
 
 	current_sheet = loaded_resource
 	_show_dock()
@@ -351,7 +356,8 @@ func _on_create_table_requested(table_name: String, file_name: String, rows: int
 	# Save the sheet
 	var error := ResourceSaver.save(new_sheet, full_path)
 	if error == OK:
-		print("New class table created and saved to: ", full_path)
+		if OS.is_debug_build():
+			print("New class table created and saved to: ", full_path)
 		new_sheet.resource_path = full_path
 		get_editor_interface().get_resource_filesystem().scan()
 

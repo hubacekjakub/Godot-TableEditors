@@ -5,6 +5,8 @@ extends VBoxContainer
 
 const CLASS_SELECTION_SCENE := preload("res://addons/class_table_editor/class_selection_dialog.tscn")
 const TYPED_CELL_EDITOR_FACTORY = preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
+const GridBuilder = preload("res://addons/class_table_editor/grid_builder.gd")
+const CellManager = preload("res://addons/class_table_editor/cell_manager.gd")
 
 signal column_added
 signal row_added
@@ -40,11 +42,29 @@ var current_focused_col: int = -1
 var recent_sheets: Array[String] = []  # Store recent sheet paths
 const MAX_RECENT_SHEETS = 10
 
+# Grid management components
+var grid_builder: GridBuilder
+var cell_manager: CellManager
+
 
 func _ready() -> void:
 	_setup_menus()
 	_connect_signals()
 	_update_recent_sheets_list()
+
+	# Initialize grid management components
+	grid_builder = GridBuilder.new(grid_container, CellManager.new(self))
+
+	# Connect GridBuilder signals
+	grid_builder.column_renamed.connect(_on_column_renamed)
+	grid_builder.column_header_focus_exited.connect(_on_column_header_focus_exited)
+	grid_builder.column_header_gui_input.connect(_on_column_header_gui_input)
+
+	# Connect CellManager signals
+	grid_builder.cell_manager.typed_cell_changed.connect(_on_typed_cell_changed)
+	grid_builder.cell_manager.typed_cell_submitted.connect(_on_typed_cell_submitted)
+	grid_builder.cell_manager.cell_focus_entered.connect(_on_cell_focus_entered)
+	grid_builder.cell_manager.cell_gui_input.connect(_on_cell_gui_input)
 
 
 func _setup_menus() -> void:
@@ -77,6 +97,7 @@ func _connect_signals() -> void:
 func set_sheet(sheet: Resource) -> void:
 	"""Set the current sheet and update the UI"""
 	current_sheet = sheet
+	grid_builder.set_sheet(sheet)
 	update_ui()
 
 
@@ -85,156 +106,15 @@ func update_ui() -> void:
 	if not current_sheet or not current_sheet is ClassTableResource:
 		columns_label.text = "Columns: 0"
 		rows_label.text = "Rows: 0"
-		_rebuild_grid.call_deferred()
+		grid_builder.rebuild_grid()
 		_update_recent_sheets_list()
 		return
 
 	var sheet := current_sheet as ClassTableResource
 	columns_label.text = "Columns: %d" % sheet.column_count
 	rows_label.text = "Rows: %d" % sheet.row_count
-	_rebuild_grid.call_deferred()
+	grid_builder.rebuild_grid()
 	_update_recent_sheets_list()
-
-
-func _rebuild_grid() -> void:
-	"""Rebuild the entire grid based on current sheet data"""
-	# Clear existing grid
-	for child in grid_container.get_children():
-		child.queue_free()
-
-	if not current_sheet or not current_sheet is ClassTableResource:
-		var label := Label.new()
-		label.text = "No sheet loaded"
-		grid_container.add_child(label)
-		return
-
-	var sheet := current_sheet as ClassTableResource
-
-	# Set grid columns (no row header column anymore)
-	grid_container.columns = max(1, sheet.column_count)
-
-	# Add spacing between cells for a cleaner look
-	grid_container.add_theme_constant_override("h_separation", 0)
-	grid_container.add_theme_constant_override("v_separation", 0)
-
-	# If empty sheet, show a placeholder
-	if sheet.column_count == 0 or sheet.row_count == 0:
-		var label := Label.new()
-		label.text = "Add columns and rows to start editing"
-		grid_container.add_child(label)
-		return
-
-	# Create editable column headers with Excel-style letters (A, B, C...)
-	for col in range(sheet.column_count):
-		var header_edit := LineEdit.new()
-
-		# Get type info for this column
-		var type_info = sheet.get_column_type_info(col)
-		var col_type_name = type_info.get("type_name", "Variant")
-		var col_name = sheet.get_column_name(col)
-
-		# Display column name with type hint (P2-028)
-		header_edit.text = col_name
-		header_edit.tooltip_text = "Type: %s" % col_type_name
-		header_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		# Make columns wider to accommodate longer property names
-		var column_width = max(120, col_name.length() * 8)
-		header_edit.custom_minimum_size = Vector2(column_width, 30)
-		header_edit.placeholder_text = "%s (%s)" % [_get_column_letter(col), col_type_name]
-		header_edit.set_meta("column_index", col)
-
-		# Style column headers like Excel with type-based color coding (P2-019)
-		var header_style := StyleBoxFlat.new()
-		header_style.bg_color = _get_type_header_color(type_info.get("type", TYPE_NIL))
-		header_style.border_width_right = 1
-		header_style.border_width_bottom = 2
-		header_style.border_color = Color(0.4, 0.4, 0.4, 1)
-		header_edit.add_theme_stylebox_override("normal", header_style)
-		header_edit.add_theme_stylebox_override("focus", header_style)
-
-		header_edit.text_submitted.connect(_on_column_renamed.bind(col))
-		header_edit.focus_exited.connect(_on_column_header_focus_exited.bind(col, header_edit))
-		header_edit.gui_input.connect(_on_column_header_gui_input.bind(col))
-
-		grid_container.add_child(header_edit)
-
-	# Create data rows (no row headers)
-	for row in range(sheet.row_count):
-		# Create data cells for this row
-		for col in range(sheet.column_count):
-			# Get type info for this column (P2-020)
-			var type_info = sheet.get_column_type_info(col)
-			var type_id = type_info.get("type", TYPE_NIL)
-			var type_name = type_info.get("type_name", "Variant")
-
-			# Create type-specific editor (P2-020, P2-023, P2-024, P2-025)
-			var cell_editor = TYPED_CELL_EDITOR_FACTORY.create_editor(type_id, type_name, type_info)
-			cell_editor.set_meta("row", row)
-			cell_editor.set_meta("col", col)
-			cell_editor.set_meta("type_id", type_id)
-			cell_editor.set_meta("type_name", type_name)
-
-			# Make cells match column width
-			var col_name = sheet.get_column_name(col)
-			var cell_width = max(120, col_name.length() * 8)
-			cell_editor.custom_minimum_size = Vector2(cell_width, 30)
-
-			# Set current value
-			var current_value = sheet.get_cell(row, col)
-			TYPED_CELL_EDITOR_FACTORY.set_editor_value(cell_editor, current_value)
-
-			# Style data cells with subtle alternating row colors
-			var cell_style := StyleBoxFlat.new()
-			# Use standard Godot theme colors with subtle alternation
-			if row % 2 == 0:
-				cell_style.bg_color = Color(0.24, 0.24, 0.24, 1)  # Slightly lighter
-			else:
-				cell_style.bg_color = Color(0.22, 0.22, 0.22, 1)  # Standard
-			cell_style.border_width_right = 1
-			cell_style.border_width_bottom = 1
-			cell_style.border_color = Color(0.3, 0.3, 0.3, 1)
-
-			# Apply styles based on control type
-			if cell_editor is LineEdit:
-				cell_editor.add_theme_stylebox_override("normal", cell_style)
-				var focus_style := StyleBoxFlat.new()
-				focus_style.bg_color = Color(0.25, 0.35, 0.45, 1)
-				focus_style.border_width_left = 2
-				focus_style.border_width_right = 2
-				focus_style.border_width_top = 2
-				focus_style.border_width_bottom = 2
-				focus_style.border_color = Color(0.4, 0.6, 0.8, 1)
-				cell_editor.add_theme_stylebox_override("focus", focus_style)
-			elif cell_editor is Panel or cell_editor is PanelContainer:
-				cell_editor.add_theme_stylebox_override("panel", cell_style)
-
-			# Connect signals based on control type (P2-019, P2-026, P2-027)
-			if cell_editor is LineEdit:
-				cell_editor.text_changed.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
-				cell_editor.text_submitted.connect(_on_typed_cell_submitted.bind(row, col, cell_editor))
-				cell_editor.focus_entered.connect(_on_cell_focus_entered.bind(row, col, cell_editor))
-				cell_editor.gui_input.connect(_on_cell_gui_input.bind(row, col))
-			elif cell_editor is CheckBox:
-				cell_editor.toggled.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
-				cell_editor.focus_entered.connect(_on_cell_focus_entered.bind(row, col, cell_editor))
-				cell_editor.gui_input.connect(_on_cell_gui_input.bind(row, col))
-			elif cell_editor is SpinBox:
-				cell_editor.value_changed.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
-				cell_editor.get_line_edit().focus_entered.connect(_on_cell_focus_entered.bind(row, col, cell_editor))
-				cell_editor.gui_input.connect(_on_cell_gui_input.bind(row, col))
-			elif cell_editor is ColorPickerButton:
-				cell_editor.color_changed.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
-				cell_editor.focus_entered.connect(_on_cell_focus_entered.bind(row, col, cell_editor))
-				cell_editor.gui_input.connect(_on_cell_gui_input.bind(row, col))
-			elif cell_editor is HBoxContainer:
-				# Vector2/Vector3 editors
-				cell_editor.gui_input.connect(_on_cell_gui_input.bind(row, col))
-				for child in cell_editor.get_children():
-					if child is SpinBox:
-						child.value_changed.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
-						child.get_line_edit().focus_entered.connect(_on_cell_focus_entered.bind(row, col, cell_editor))
-
-			grid_container.add_child(cell_editor)
 
 
 func _get_column_letter(col_index: int) -> String:
@@ -608,24 +488,4 @@ func _value_to_string(value: Variant, type_id: int) -> String:
 			return value.to_html()
 		_:
 			return str(value)
-
-
-## Get header color based on type (P2-019)
-func _get_type_header_color(type_id: int) -> Color:
-	"""Return color-coded background for column headers based on type"""
-	match type_id:
-		TYPE_BOOL:
-			return Color(0.25, 0.22, 0.28, 1)  # Purple tint
-		TYPE_INT:
-			return Color(0.22, 0.25, 0.28, 1)  # Blue tint
-		TYPE_FLOAT:
-			return Color(0.22, 0.28, 0.25, 1)  # Green tint
-		TYPE_STRING:
-			return Color(0.28, 0.25, 0.22, 1)  # Orange tint
-		TYPE_VECTOR2, TYPE_VECTOR3:
-			return Color(0.25, 0.28, 0.22, 1)  # Yellow-green tint
-		TYPE_COLOR:
-			return Color(0.28, 0.22, 0.25, 1)  # Pink tint
-		_:
-			return Color(0.22, 0.22, 0.22, 1)  # Default gray
 

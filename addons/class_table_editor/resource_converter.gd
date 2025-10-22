@@ -85,7 +85,8 @@ static func create_from_handle(handle: TableHandle, resource_class) -> Resource:
 	if mapped_count == 0:
 		push_warning("ResourceConverter: No properties were mapped. Check column names match property names.")
 	else:
-		print("ResourceConverter: Successfully mapped %d properties from table" % mapped_count)
+		if OS.is_debug_build():
+			print("ResourceConverter: Successfully mapped %d properties from table" % mapped_count)
 
 	return resource
 
