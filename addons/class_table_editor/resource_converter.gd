@@ -8,7 +8,7 @@ class_name ResourceConverter
 ##
 ## Usage:
 ##   var item = ResourceConverter.create_from_handle(handle, TestItemData)
-##   print(item.item_name)  # Automatically mapped from table
+##   # Properties automatically mapped from table columns
 ##
 ## Requirements:
 ##   - Table column names must match Resource property names exactly

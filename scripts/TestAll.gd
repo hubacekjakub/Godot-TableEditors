@@ -106,4 +106,3 @@ func _run_test_suite(script_path: String, suite_name: String) -> int:
 		else:
 			print("❌ %s has no test methods" % suite_name)
 			return 0
-

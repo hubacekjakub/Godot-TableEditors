@@ -445,12 +445,6 @@ func _is_valid_type_id(value: Variant, type_id: int) -> bool:
 			return true
 
 
-## Type validation helper (legacy, uses _is_valid_type_id internally)
-func _is_valid_type(value: Variant, type_name: String) -> bool:
-	var type_id = _type_name_to_id(type_name)
-	return _is_valid_type_id(value, type_id)
-
-
 ## Convert type name to Godot type ID
 func _type_name_to_id(type_name: String) -> int:
 	match type_name:

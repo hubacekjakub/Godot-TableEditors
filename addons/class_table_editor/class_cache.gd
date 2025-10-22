@@ -30,14 +30,6 @@ func get_parsed_class(file_path: String) -> Dictionary:
 	return inspected_data
 
 
-## Get parsed class data from code string (never cached)
-## DEPRECATED: Native API doesn't support code strings, use load() with file instead
-func parse_code(code: String, file_path: String = "") -> Dictionary:
-	# Code parsing no longer supported - use file-based inspection instead
-	push_warning("ClassCache.parse_code() is deprecated. Use inspect_class() with a file path instead.")
-	return {}
-
-
 ## Invalidate cache for a specific file
 func invalidate_file(file_path: String) -> void:
 	if _cache.has(file_path):

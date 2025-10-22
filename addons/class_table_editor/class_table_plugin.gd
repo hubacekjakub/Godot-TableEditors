@@ -24,7 +24,8 @@ func _enter_tree() -> void:
 	table_handle_inspector = TABLE_HANDLE_INSPECTOR_PLUGIN.new()
 	add_inspector_plugin(table_handle_inspector)
 
-	print("Class Table Plugin loaded")
+	if OS.is_debug_build():
+		print("Class Table Plugin loaded")
 
 
 func _handles(object: Object) -> bool:
@@ -390,4 +391,5 @@ func _on_button_pressed() -> void:
 	if current_sheet:
 		make_bottom_panel_item_visible(class_table_dock)
 	else:
-		print("No class table selected")
+		if OS.is_debug_build():
+			print("No class table selected")
