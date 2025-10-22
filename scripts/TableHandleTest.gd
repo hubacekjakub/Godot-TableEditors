@@ -1,12 +1,12 @@
 extends Node
 
-## Test script demonstrating TableHandle usage
-## Shows how to convert table row data to TestItemData instance
+## Test script demonstrating TableHandle usage with ResourceConverter
+## Shows the simple one-liner approach to convert table data to Resource instances
 
 @export var item_handle: TableHandle
 
 func _ready():
-	print("=== TableHandle Test ===")
+	print("=== TableHandle ResourceConverter Test ===")
 
 	if not item_handle or not item_handle.is_valid():
 		print("ERROR: No valid TableHandle configured!")
@@ -18,7 +18,7 @@ func _ready():
 	print("  Row: %s" % item_handle.row_name)
 	print()
 
-	# Test getting individual cell values
+	# Test getting individual cell values (raw strings)
 	print("--- Raw Cell Values ---")
 	print("  item_name: %s" % item_handle.get_cell_value("item_name"))
 	print("  damage: %s" % item_handle.get_cell_value("damage"))
@@ -27,7 +27,7 @@ func _ready():
 	print("  rarity: %s" % item_handle.get_cell_value("rarity"))
 	print()
 
-	# Test getting typed values
+	# Test getting typed values (parsed by TableHandle)
 	print("--- Typed Values ---")
 	var damage_value = item_handle.get_typed_value("damage")
 	var armor_value = item_handle.get_typed_value("armor")
@@ -37,98 +37,46 @@ func _ready():
 	print("  is_stackable (bool): %s (type: %s)" % [is_stackable_value, type_string(typeof(is_stackable_value))])
 	print()
 
-	# Test getting all row data as Dictionary
-	print("--- Full Row Data Dictionary ---")
-	var row_data = item_handle.get_row_data()
-	for key in row_data:
-		print("  %s: %s" % [key, row_data[key]])
-	print()
+	# RECOMMENDED: Use ResourceConverter (one-liner!)
+	print("--- Using ResourceConverter ---")
+	var item = ResourceConverter.create_from_handle(item_handle, TestItemData)
 
-	# REAL WORLD EXAMPLE: Convert to TestItemData instance
-	print("--- Converting to TestItemData Instance ---")
-	var item_data = create_test_item_data_from_handle(item_handle)
-
-	if item_data:
+	if item:
 		print("✅ Successfully created TestItemData instance!")
-		print("  item_name: %s" % item_data.item_name)
-		print("  damage: %d" % item_data.damage)
-		print("  armor: %.2f" % item_data.armor)
-		print("  is_stackable: %s" % item_data.is_stackable)
-		print("  rarity: %.2f" % item_data.rarity)
+		print("  item_name: %s" % item.item_name)
+		print("  damage: %d" % item.damage)
+		print("  armor: %.2f" % item.armor)
+		print("  is_stackable: %s" % item.is_stackable)
+		print("  rarity: %.2f" % item.rarity)
 		print()
 
-		# Test the method on the instance
+		# Test instance method
 		print("--- Testing Instance Method ---")
-		print("  get_damage() = %d" % item_data.get_damage())
+		print("  get_damage() = %d" % item.get_damage())
 		print()
 	else:
 		print("❌ Failed to create TestItemData instance")
 
+	# Example: Load all items from table
+	print("--- Loading All Items From Table ---")
+	var all_items = load_all_items_from_table(item_handle.table_resource)
+	print("  Loaded %d items total" % all_items.size())
+	for loaded_item in all_items:
+		print("    - %s (damage: %d)" % [loaded_item.item_name, loaded_item.damage])
+
+	print()
 	print("=== Test Complete ===")
 
 
-## Convert TableHandle row data to TestItemData instance
-## This shows a real-world pattern for loading game data from tables
-func create_test_item_data_from_handle(handle: TableHandle) -> TestItemData:
-	if not handle or not handle.is_valid():
-		push_error("Invalid TableHandle")
-		return null
-
-	# Create new TestItemData instance
-	var item = TestItemData.new()
-
-	# Map table columns to TestItemData properties
-	# Using get_typed_value() for automatic type conversion
-	item.item_name = handle.get_typed_value("item_name")
-	item.damage = handle.get_typed_value("damage")
-	item.armor = handle.get_typed_value("armor")
-	item.is_stackable = handle.get_typed_value("is_stackable")
-	item.rarity = handle.get_typed_value("rarity")
-
-	print("test test test")
-	var item_data: Dictionary = handle.get_row_data();
-	for key in item_data.keys():
-		print("Mapping %s: %s" % [key, item_data[key]])
-
-	# Note: 'description' is not exported in TestItemData,
-	# so it won't be in the table, using default value
-
-	return item
-
-
-## Alternative: Generic function to create any Resource from TableHandle
-## This is more flexible and works with any Resource class
-func create_resource_from_handle(handle: TableHandle, resource_script: Script) -> Resource:
-	if not handle or not handle.is_valid():
-		push_error("Invalid TableHandle")
-		return null
-
-	if not resource_script:
-		push_error("No resource script provided")
-		return null
-
-	# Create instance
-	var resource = resource_script.new()
-
-	# Get all row data
-	var row_data = handle.get_row_data()
-
-	# Automatically set properties that exist in both table and resource
-	for prop_name in row_data.keys():
-		if prop_name in resource:
-			resource.set(prop_name, row_data[prop_name])
-
-	return resource
-
-
-## Example of loading multiple items at once
+## Example: Load all items from a table at once
+## Useful for loading item databases, quest lists, enemy stats, etc.
 func load_all_items_from_table(table: ClassTableResource) -> Array[TestItemData]:
 	var items: Array[TestItemData] = []
 
 	if not table:
 		return items
 
-	# Iterate through all rows (skipping header if needed)
+	# Iterate through all rows
 	for row in range(table.row_count):
 		var row_name = table.get_cell(row, 0)  # First column is "name"
 
@@ -137,8 +85,8 @@ func load_all_items_from_table(table: ClassTableResource) -> Array[TestItemData]
 		temp_handle.table_resource = table
 		temp_handle.row_name = row_name
 
-		# Convert to TestItemData
-		var item = create_test_item_data_from_handle(temp_handle)
+		# Convert to TestItemData using ResourceConverter (one-liner!)
+		var item = ResourceConverter.create_from_handle(temp_handle, TestItemData)
 		if item:
 			items.append(item)
 

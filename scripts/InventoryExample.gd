@@ -43,25 +43,11 @@ func load_starting_inventory():
 			push_warning("Skipping invalid TableHandle")
 			continue
 
-		var item = table_handle_to_item(handle)
+		# Use ResourceConverter for one-liner conversion
+		var item = ResourceConverter.create_from_handle(handle, TestItemData)
 		if item:
 			inventory.append(item)
 			print("  ✅ Loaded: %s (Damage: %d, Armor: %.1f)" % [item.item_name, item.damage, item.armor])
-
-
-## Convert TableHandle to TestItemData instance
-func table_handle_to_item(handle: TableHandle) -> TestItemData:
-	if not handle.is_valid():
-		return null
-
-	var item = TestItemData.new()
-	item.item_name = handle.get_typed_value("item_name")
-	item.damage = handle.get_typed_value("damage")
-	item.armor = handle.get_typed_value("armor")
-	item.is_stackable = handle.get_typed_value("is_stackable")
-	item.rarity = handle.get_typed_value("rarity")
-
-	return item
 
 
 ## Display all items in inventory
@@ -121,23 +107,17 @@ static func load_item_database(table_path: String) -> Dictionary:
 
 	# Load all items from table
 	for row in range(table.row_count):
-		var item_name = table.get_cell(row, 0)  # Assuming first column is "item_name"
+		var item_name = table.get_cell(row, 0)  # First column is "name"
 
 		# Create temporary handle
 		var handle = TableHandle.new()
 		handle.table_resource = table
 		handle.row_name = item_name
 
-		# Convert to TestItemData
-		var item = TestItemData.new()
-		item.item_name = handle.get_typed_value("item_name")
-		item.damage = handle.get_typed_value("damage")
-		item.armor = handle.get_typed_value("armor")
-		item.is_stackable = handle.get_typed_value("is_stackable")
-		item.rarity = handle.get_typed_value("rarity")
-
-		# Add to database
-		database[item_name] = item
+		# Use ResourceConverter for one-liner conversion
+		var item = ResourceConverter.create_from_handle(handle, TestItemData)
+		if item:
+			database[item_name] = item
 
 	return database
 
@@ -148,8 +128,11 @@ func spawn_item(item_name: String, database: Dictionary) -> TestItemData:
 		push_warning("Item not found in database: " + item_name)
 		return null
 
-	# Create a new instance (duplicate the template)
+	# Create a new instance from the template
 	var template = database[item_name] as TestItemData
+
+	# Use ResourceConverter with a temporary handle to duplicate
+	# Or simply duplicate properties manually for runtime instances
 	var new_item = TestItemData.new()
 	new_item.item_name = template.item_name
 	new_item.damage = template.damage
