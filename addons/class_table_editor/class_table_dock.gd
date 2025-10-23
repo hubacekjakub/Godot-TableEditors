@@ -25,7 +25,6 @@ signal create_table_requested(table_name: String, file_name: String, rows: int, 
 # UI References (automatically connected from scene)
 @onready var file_menu: MenuButton = %FileMenu
 @onready var edit_menu: MenuButton = %EditMenu
-@onready var add_column_btn: Button = %AddColumnBtn
 @onready var add_row_btn: Button = %AddRowBtn
 @onready var columns_label: Label = %ColumnsLabel
 @onready var rows_label: Label = %RowsLabel
@@ -81,15 +80,13 @@ func _setup_menus() -> void:
 	# Setup Edit menu
 	var edit_popup := edit_menu.get_popup()
 	edit_popup.clear()
-	edit_popup.add_item("Add Column", 0)
-	edit_popup.add_item("Add Row", 1)
+	edit_popup.add_item("Add Row", 0)
 	edit_popup.add_separator()
-	edit_popup.add_item("Clear All", 2)
+	edit_popup.add_item("Clear All", 1)
 	edit_popup.id_pressed.connect(_on_edit_menu_pressed)
 
 
 func _connect_signals() -> void:
-	add_column_btn.pressed.connect(_on_add_column_pressed)
 	add_row_btn.pressed.connect(_on_add_row_pressed)
 	recent_sheets_list.item_selected.connect(_on_recent_sheet_selected)
 
@@ -221,16 +218,10 @@ func _on_file_menu_pressed(id: int) -> void:
 
 func _on_edit_menu_pressed(id: int) -> void:
 	match id:
-		0:  # Add Column
-			_on_add_column_pressed()
-		1:  # Add Row
+		0:  # Add Row
 			_on_add_row_pressed()
-		2:  # Clear All
+		1:  # Clear All
 			data_cleared.emit()
-
-
-func _on_add_column_pressed() -> void:
-	column_added.emit()
 
 
 func _on_add_row_pressed() -> void:
@@ -254,11 +245,9 @@ func _on_column_header_focus_exited(col: int, header_edit: LineEdit) -> void:
 
 
 func _on_column_header_gui_input(event: InputEvent, col: int) -> void:
-	"""Show context menu on right-click for column operations"""
-	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_RIGHT:
-			_show_column_context_menu(col, event.global_position)
-			get_viewport().set_input_as_handled()
+	"""Handle column header input - disabled since columns cannot be added"""
+	# Column operations disabled
+	pass
 
 
 func _on_row_renamed(new_name: String, row: int) -> void:
@@ -283,19 +272,6 @@ func _on_row_header_gui_input(event: InputEvent, row: int) -> void:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			_show_row_context_menu(row, event.global_position)
 			get_viewport().set_input_as_handled()
-
-
-func _show_column_context_menu(col: int, position: Vector2) -> void:
-	"""Display context menu for column operations"""
-	var popup := PopupMenu.new()
-	popup.add_item("Delete Column", 0)
-	popup.id_pressed.connect(func(id):
-		if id == 0:
-			column_deleted.emit(col)
-		popup.queue_free()
-	)
-	add_child(popup)
-	popup.popup(Rect2i(position, Vector2i(150, 50)))
 
 
 func _show_row_context_menu(row: int, position: Vector2) -> void:
