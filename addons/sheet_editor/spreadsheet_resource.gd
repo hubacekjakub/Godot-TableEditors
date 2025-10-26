@@ -15,17 +15,26 @@ class_name SpreadsheetResource
 
 func get_cell(row: int, col: int) -> String:
 	"""Get the value of a cell at the specified position"""
-	var key := "%d,%d" % [row, col]
+	var key := _get_cell_key(row, col)
 	return cells.get(key, "")
+
+
+func get_cell_value(row: int, col: int, default: String = "") -> String:
+	"""Get cell value with bounds checking"""
+	if not _is_valid_cell_coordinate(row, col):
+		push_warning("SpreadsheetResource: Cell coordinates out of bounds: (%d, %d)" % [row, col])
+		return default
+	return get_cell(row, col)
 
 
 func set_cell(row: int, col: int, value: String) -> void:
 	"""Set the value of a cell at the specified position"""
-	var key := "%d,%d" % [row, col]
+	_validate_cell_coordinates(row, col)
+	var key := _get_cell_key(row, col)
 	if value.is_empty():
 		cells.erase(key)  # Remove empty cells to save memory
 	else:
-		cells[key] = value
+		cells[key] = value.strip_edges()  # Trim whitespace
 
 
 func clear_all_cells() -> void:
@@ -140,6 +149,24 @@ func _get_column_letter(col_index: int) -> String:
 		index -= 1
 
 	return result
+
+
+func _get_cell_key(row: int, col: int) -> String:
+	"""Generate cell key from coordinates"""
+	return "%d,%d" % [row, col]
+
+
+func _is_valid_cell_coordinate(row: int, col: int) -> bool:
+	"""Check if cell coordinates are within bounds"""
+	return row >= 0 and row < row_count and col >= 0 and col < column_count
+
+
+func _validate_cell_coordinates(row: int, col: int) -> void:
+	"""Validate cell coordinates and log errors if out of bounds"""
+	if row < 0 or row >= row_count:
+		push_error("SpreadsheetResource: Invalid row index: %d (must be 0-%d)" % [row, max(0, row_count - 1)])
+	if col < 0 or col >= column_count:
+		push_error("SpreadsheetResource: Invalid column index: %d (must be 0-%d)" % [col, max(0, column_count - 1)])
 
 
 ## CSV Export/Import Functions
