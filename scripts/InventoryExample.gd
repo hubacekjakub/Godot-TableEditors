@@ -43,8 +43,8 @@ func load_starting_inventory():
 			push_warning("Skipping invalid TableHandle")
 			continue
 
-		# Use ResourceConverter for one-liner conversion
-		var item = ResourceConverter.create_from_handle(handle, TestItemData)
+		# Use to_resource() for one-liner conversion
+		var item = handle.to_resource(TestItemData)
 		if item:
 			inventory.append(item)
 			print("  ✅ Loaded: %s (Damage: %d, Armor: %.1f)" % [item.item_name, item.damage, item.armor])
@@ -97,6 +97,7 @@ func get_rare_items() -> Array[TestItemData]:
 
 
 ## Example: Load entire item database from a table
+## Demonstrates batch loading with to_resource() method
 static func load_item_database(table_path: String) -> Dictionary:
 	var database = {}
 
@@ -114,8 +115,8 @@ static func load_item_database(table_path: String) -> Dictionary:
 		handle.table_resource = table
 		handle.row_name = item_name
 
-		# Use ResourceConverter for one-liner conversion
-		var item = ResourceConverter.create_from_handle(handle, TestItemData)
+		# Use to_resource() for one-liner conversion
+		var item = handle.to_resource(TestItemData)
 		if item:
 			database[item_name] = item
 
@@ -123,6 +124,7 @@ static func load_item_database(table_path: String) -> Dictionary:
 
 
 ## Example: Spawn item by name from database
+## For runtime instances, duplicate or create new instances manually
 func spawn_item(item_name: String, database: Dictionary) -> TestItemData:
 	if item_name not in database:
 		push_warning("Item not found in database: " + item_name)
@@ -131,8 +133,8 @@ func spawn_item(item_name: String, database: Dictionary) -> TestItemData:
 	# Create a new instance from the template
 	var template = database[item_name] as TestItemData
 
-	# Use ResourceConverter with a temporary handle to duplicate
-	# Or simply duplicate properties manually for runtime instances
+	# For runtime instances, duplicate properties manually
+	# (to_resource() is for loading from table, not cloning)
 	var new_item = TestItemData.new()
 	new_item.item_name = template.item_name
 	new_item.damage = template.damage

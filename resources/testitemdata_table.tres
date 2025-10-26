@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_p4q5l")
 sheet_name = "TestItemDataTable3"
-row_count = 3
+row_count = 5
 column_count = 5
 cells = {
 "0,0": "sword",
@@ -17,12 +17,20 @@ cells = {
 "1,4": "2.0",
 "2,0": "shield",
 "2,2": "10.0",
-"2,4": "10.0"
+"2,4": "10.0",
+"3,0": "axe",
+"3,1": "4.0",
+"3,2": "1.0",
+"3,3": "true",
+"3,4": "3.0",
+"4,0": "ass",
+"4,1": "11.0",
+"4,2": "1.0",
+"4,3": "true",
+"4,4": "111.0"
 }
 column_names = Array[String](["item_name", "damage", "armor", "is_stackable", "rarity"])
 row_names = Array[String](["Row 1", "Row 2", "Row 3"])
-source_class_path = ""
-source_class_name = ""
 class_file_path = "res://scripts/TestItemData.gd"
 columns_metadata = Array[Dictionary]([{
 "default": null,

@@ -1,12 +1,12 @@
 extends Node
 
-## Test script demonstrating TableHandle usage with ResourceConverter
+## Test script demonstrating TableHandle with to_resource() method
 ## Shows the simple one-liner approach to convert table data to Resource instances
 
 @export var item_handle: TableHandle
 
 func _ready():
-	print("=== TableHandle ResourceConverter Test ===")
+	print("=== TableHandle to_resource() Test ===")
 
 	if not item_handle or not item_handle.is_valid():
 		print("ERROR: No valid TableHandle configured!")
@@ -37,9 +37,9 @@ func _ready():
 	print("  is_stackable (bool): %s (type: %s)" % [is_stackable_value, type_string(typeof(is_stackable_value))])
 	print()
 
-	# RECOMMENDED: Use ResourceConverter (one-liner!)
-	print("--- Using ResourceConverter ---")
-	var item = ResourceConverter.create_from_handle(item_handle, TestItemData)
+	# RECOMMENDED: Use to_resource() method (one-liner!)
+	print("--- Converting to Resource ---")
+	var item = item_handle.to_resource(TestItemData)
 
 	if item:
 		print("✅ Successfully created TestItemData instance!")
@@ -70,6 +70,7 @@ func _ready():
 
 ## Example: Load all items from a table at once
 ## Useful for loading item databases, quest lists, enemy stats, etc.
+## Demonstrates using to_resource() in a loop
 func load_all_items_from_table(table: ClassTableResource) -> Array[TestItemData]:
 	var items: Array[TestItemData] = []
 
@@ -85,8 +86,8 @@ func load_all_items_from_table(table: ClassTableResource) -> Array[TestItemData]
 		temp_handle.table_resource = table
 		temp_handle.row_name = row_name
 
-		# Convert to TestItemData using ResourceConverter (one-liner!)
-		var item = ResourceConverter.create_from_handle(temp_handle, TestItemData)
+		# Convert to TestItemData using to_resource() method (one-liner!)
+		var item = temp_handle.to_resource(TestItemData)
 		if item:
 			items.append(item)
 

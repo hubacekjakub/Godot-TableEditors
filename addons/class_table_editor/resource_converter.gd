@@ -6,9 +6,12 @@ class_name ResourceConverter
 ## Automatically maps TableHandle row data to Resource properties using reflection.
 ## Works with any Resource class without modification.
 ##
-## Usage:
-##   var item = ResourceConverter.create_from_handle(handle, TestItemData)
+## Recommended Usage (via TableHandle):
+##   var item = handle.to_resource(TestItemData)
 ##   # Properties automatically mapped from table columns
+##
+## Direct Usage (less common):
+##   var item = ResourceConverter.create_from_handle(handle, TestItemData)
 ##
 ## Requirements:
 ##   - Table column names must match Resource property names exactly
