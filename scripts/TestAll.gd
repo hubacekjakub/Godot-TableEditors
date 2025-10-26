@@ -51,10 +51,18 @@ func run_all_tests() -> void:
 	if passed < 4:
 		failed += 1
 
+	# Test 5: TableHandle & ResourceConverter (P3-001 to P3-005)
+	print("\n" + "─".repeat(50))
+	print("🧪 TableHandle & ResourceConverter Tests (Resource conversion)")
+	print("─".repeat(50))
+	passed += _run_test_suite("res://scripts/TestTableHandleResourceConverter.gd", "TableHandleResourceConverter")
+	if passed < 5:
+		failed += 1
+
 	print("\n" + "═".repeat(50))
 	print("║ Test Summary")
 	print("═".repeat(50))
-	print("  Total test suites: 4")
+	print("  Total test suites: 5")
 	print("  ✅ Passed: ", passed)
 	print("  ❌ Failed: ", failed)
 	print("═".repeat(50))
@@ -63,6 +71,7 @@ func run_all_tests() -> void:
 		print("\n🎉 ALL TESTS PASSED!")
 		print("   Core P2 implementation working correctly.")
 		print("   Type-safe editing (P2-019 to P2-028) verified.")
+		print("   TableHandle & ResourceConverter API verified.")
 		print("   Backward compatibility maintained.\n")
 	else:
 		print("\n❌ Some tests failed. See output above for details.\n")
