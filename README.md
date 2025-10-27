@@ -119,7 +119,82 @@ This project includes convenient VS Code tasks:
 - **🐛 Debug Godot Editor** - Editor with debug visualizations
 - **🔍 Run Game with Remote Debug** - Game with remote debugging
 
-See [`.vscode/TASKS_REFERENCE.md`](.vscode/TASKS_REFERENCE.md) for detailed usage instructions.
+### Running Tests
+
+**Method 1: Play from Scene**
+```
+1. Open Godot Editor
+2. Open: scenes/TestRunner.tscn
+3. Press F5 (Play)
+4. Check Output tab for test results
+```
+
+**Method 2: Command Line**
+```bash
+python verify_tests.py
+```
+
+### Code Standards
+
+**GDScript Conventions:**
+- Use `snake_case` for variables and functions
+- Use `PascalCase` for classes
+- Use `SCREAMING_SNAKE_CASE` for constants
+- Always use explicit type hints
+- Prefix private methods with underscore (`_method`)
+- Use `@tool` directive in all editor plugin scripts
+- Add documentation comments for all public methods
+
+**File Organization:**
+```
+addons/my_plugin/
+├── plugin.cfg                      # Plugin configuration
+├── my_plugin.gd                    # Main EditorPlugin
+├── my_dock.gd                      # UI dock implementation
+├── my_dock.tscn                    # Dock scene
+├── my_resource.gd                  # Data resource class
+└── my_utility.gd                   # Helper utilities
+```
+
+### Contributing
+
+1. **Create a feature branch**:
+   ```bash
+   git checkout -b feature/P2-XXX-description
+   ```
+
+2. **Write tests first** (TDD approach)
+
+3. **Follow code standards** (see above)
+
+4. **Commit with task reference**:
+   ```bash
+   git commit -m "feat: description (P2-XXX)"
+   ```
+
+### Project Structure
+
+```
+Godot-SheetEditor/
+├── addons/
+│   ├── sheet_editor/              # Plugin 1: Spreadsheet
+│   ├── class_table_editor/        # Plugin 2: Class Table
+│   └── resource_collection_editor/# Plugin 3: Resource Editor (planned)
+├── scripts/                        # Test files
+├── scenes/                         # Test runner scenes
+├── resources/                      # Example tables
+├── docs/                           # Detailed documentation
+├── PLAN.md                         # Development roadmap
+└── README.md                       # This file
+```
+
+### Current Status
+
+- 🚧 **Plugin 1 (Spreadsheet)**: Core complete
+- ✅ **Plugin 2 (Class Table)**: Core complete, UI refactored
+- ⏳ **Plugin 3 (Resource Editor)**: Planned
+
+See [PLAN.md](PLAN.md) for detailed roadmap and task tracking.
 
 ## License
 
