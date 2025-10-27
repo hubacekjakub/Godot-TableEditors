@@ -12,7 +12,7 @@ func test_parser() -> void:
 
 	# Test 1: Parse the test class file
 	print("Test 1: Inspecting TestItemData.gd...")
-	var result = inspector.inspect_class("res://scripts/TestItemData.gd")
+	var result = inspector.inspect_class("res://scripts/plugin2_class_table_tests/TestItemData.gd")
 
 	print("  Class name: ", result.get("class_name"))
 	print("  File path: ", result.get("file_path"))

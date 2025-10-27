@@ -13,7 +13,7 @@ func test_resource() -> void:
 	# Test 1: Create resource with class metadata
 	print("Test 1: Creating resource with class metadata...")
 	resource.source_class_name = "ItemData"
-	resource.class_file_path = "res://scripts/TestItemData.gd"
+	resource.class_file_path = "res://scripts/plugin2_class_table_tests/TestItemData.gd"
 	resource.sheet_name = "Items"
 
 	print("  Class name: ", resource.source_class_name)
