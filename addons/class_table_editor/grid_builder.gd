@@ -7,10 +7,10 @@ class_name GridBuilder
 ## Extracts grid building logic from ClassTableDock to improve maintainability
 ## and separate concerns between UI coordination and grid construction.
 
-const TYPED_CELL_EDITOR_FACTORY = preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
+const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
 
 var grid_container: GridContainer
-var current_sheet: Resource
+var current_sheet: ClassTableResource
 var cell_manager: CellManager
 
 
@@ -19,24 +19,23 @@ func _init(p_grid_container: GridContainer, p_cell_manager: CellManager) -> void
 	cell_manager = p_cell_manager
 
 
-func set_sheet(sheet: Resource) -> void:
-	"""Set the current sheet for grid building"""
+func set_sheet(sheet: ClassTableResource = null) -> void:
+	## Set the current sheet for grid building.
 	current_sheet = sheet
 
 
 func rebuild_grid() -> void:
-	"""Rebuild the entire grid based on current sheet data"""
-	# Clear existing grid
+	## Rebuild the entire grid based on current sheet data.
 	for child in grid_container.get_children():
 		child.queue_free()
 
-	if not current_sheet or not current_sheet is ClassTableResource:
+	if not current_sheet:
 		var label := Label.new()
 		label.text = "No sheet loaded"
 		grid_container.add_child(label)
 		return
 
-	var sheet := current_sheet as ClassTableResource
+	var sheet := current_sheet
 
 	# Set grid columns (no row header column anymore)
 	grid_container.columns = max(1, sheet.column_count)
@@ -52,15 +51,12 @@ func rebuild_grid() -> void:
 		grid_container.add_child(label)
 		return
 
-	# Create editable column headers with Excel-style letters (A, B, C...)
 	_build_column_headers(sheet)
-
-	# Create data rows (no row headers)
 	_build_data_rows(sheet)
 
 
+## Create editable column headers with type styling.
 func _build_column_headers(sheet: ClassTableResource) -> void:
-	"""Create editable column headers with type styling"""
 	for col in range(sheet.column_count):
 		var header_edit := LineEdit.new()
 
@@ -97,8 +93,8 @@ func _build_column_headers(sheet: ClassTableResource) -> void:
 		grid_container.add_child(header_edit)
 
 
+## Create data rows with type-specific cell editors.
 func _build_data_rows(sheet: ClassTableResource) -> void:
-	"""Create data rows with type-specific cell editors"""
 	for row in range(sheet.row_count):
 		# Create data cells for this row
 		for col in range(sheet.column_count):
@@ -106,8 +102,8 @@ func _build_data_rows(sheet: ClassTableResource) -> void:
 			grid_container.add_child(cell_editor)
 
 
+## Convert column index to Excel-style letter (0=A, 1=B, ..., 26=AA, etc.).
 func _get_column_letter(col_index: int) -> String:
-	"""Convert column index to Excel-style letter (0=A, 1=B, ..., 26=AA, etc.)"""
 	var result := ""
 	var index := col_index
 
@@ -121,8 +117,8 @@ func _get_column_letter(col_index: int) -> String:
 	return result
 
 
+## Return color-coded background for column headers based on type.
 func _get_type_header_color(type_id: int) -> Color:
-	"""Return color-coded background for column headers based on type"""
 	match type_id:
 		TYPE_BOOL:
 			return Color(0.25, 0.22, 0.28, 1)  # Purple tint
@@ -156,3 +152,4 @@ func _on_column_header_focus_exited(col: int, header_edit: LineEdit) -> void:
 
 func _on_column_header_gui_input(event: InputEvent, col: int) -> void:
 	column_header_gui_input.emit(event, col)
+

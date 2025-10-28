@@ -42,8 +42,8 @@ func _init():
 	set_bottom_editor(container)
 
 
+## Called when the property value changes externally.
 func _update_property():
-	"""Called when the property value changes externally"""
 	if updating:
 		return
 
@@ -68,8 +68,8 @@ func _update_property():
 	updating = false
 
 
+## Called when table resource is changed in the picker.
 func _on_table_changed(resource: Resource):
-	"""Called when table resource is changed in the picker"""
 	if updating:
 		return
 
@@ -93,8 +93,8 @@ func _on_table_changed(resource: Resource):
 	updating = false
 
 
+## Called when a row is selected from the dropdown.
 func _on_row_selected(index: int):
-	"""Called when a row is selected from the dropdown"""
 	if updating or index < 0:
 		return
 
@@ -113,8 +113,8 @@ func _on_row_selected(index: int):
 	updating = false
 
 
+## Refresh the row selector with current table rows.
 func _refresh_row_list():
-	"""Refresh the row selector with current table rows"""
 	row_selector.clear()
 
 	if not current_handle or not current_handle.table_resource:
@@ -143,3 +143,4 @@ func _refresh_row_list():
 		row_selector.selected = selected_index
 	elif row_selector.item_count > 0:
 		row_selector.selected = 0
+

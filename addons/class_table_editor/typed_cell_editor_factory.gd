@@ -5,9 +5,6 @@ class_name TypedCellEditorFactory
 ## Factory for creating type-specific cell editors
 ## Creates LineEdit, SpinBox, CheckBox, ColorPicker, etc. based on column type
 
-const TypedCellEditor = preload("res://addons/class_table_editor/typed_cell_editor.gd")
-
-
 ## Create editor for a specific type
 static func create_editor(type_id: int, type_name: String, metadata: Dictionary = {}) -> Control:
 	match type_id:
@@ -249,11 +246,8 @@ static func set_editor_value(editor: Control, value: Variant) -> void:
 			editor.get_node("SpinBoxZ").value = vec.z
 
 
-## Validate value against type
+## Validate value against type and return `{valid, error}` dictionary.
 static func validate_value(type_id: int, value: Variant) -> Dictionary:
-	"""
-	Returns: {valid: bool, error: String}
-	"""
 	if value == null:
 		return {"valid": true, "error": ""}
 

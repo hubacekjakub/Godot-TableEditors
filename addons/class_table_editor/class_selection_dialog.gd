@@ -25,7 +25,7 @@ func _ready() -> void:
 
 
 func _setup_dialog() -> void:
-	"""Setup dialog properties"""
+	## Setup dialog properties.
 	confirmed.connect(_on_confirmed)
 
 	# Create EditorFileDialog for browsing directories
@@ -42,7 +42,7 @@ func _setup_dialog() -> void:
 
 
 func _connect_signals() -> void:
-	"""Connect UI signals"""
+	## Connect UI signals.
 	class_list.item_selected.connect(_on_class_selected)
 	browse_button.pressed.connect(_on_browse_pressed)
 	refresh_button.pressed.connect(_on_refresh_pressed)
@@ -53,7 +53,7 @@ func _connect_signals() -> void:
 
 
 func _load_classes() -> void:
-	"""Discover and load all available classes in project"""
+	## Discover and load all available classes in project.
 	if class_selector == null:
 		return
 
@@ -76,7 +76,7 @@ func _load_classes() -> void:
 
 
 func _on_class_selected(index: int) -> void:
-	"""Handle class selection from list"""
+	## Handle class selection from list.
 	if index < 0 or index >= class_list.item_count:
 		return
 
@@ -86,7 +86,7 @@ func _on_class_selected(index: int) -> void:
 
 
 func _update_properties_display() -> void:
-	"""Update the table name based on selected class"""
+	## Update the table name based on selected class.
 	if selected_class_info.is_empty():
 		name_edit.text = ""
 		class_name_label.text = "Class: (none selected)"
@@ -120,13 +120,15 @@ func _update_properties_display() -> void:
 	name_edit.text = cls_name + "Table"
 
 	_validate_inputs()
+
+
 func _on_input_changed(_text: String = "") -> void:
-	"""Validate inputs whenever they change"""
+	## Validate inputs whenever they change.
 	_validate_inputs()
 
 
 func _validate_inputs() -> void:
-	"""Validate user inputs and enable/disable OK button"""
+	## Validate user inputs and enable/disable OK button.
 	var is_valid: bool = true
 
 	# Must have a class selected
@@ -145,7 +147,7 @@ func _validate_inputs() -> void:
 
 
 func _on_browse_pressed() -> void:
-	"""Show directory picker dialog"""
+	## Show directory picker dialog.
 	if file_dialog:
 		var current_path: String = path_edit.text.strip_edges()
 		if current_path.begins_with("res://"):
@@ -154,19 +156,19 @@ func _on_browse_pressed() -> void:
 
 
 func _on_directory_selected(dir: String) -> void:
-	"""Handle directory selection from file dialog"""
+	## Handle directory selection from file dialog.
 	if not dir.ends_with("/"):
 		dir += "/"
 	path_edit.text = dir
 
 
 func _on_refresh_pressed() -> void:
-	"""Refresh the class list from disk"""
+	## Refresh the class list from disk.
 	_load_classes()
 
 
 func _on_confirmed() -> void:
-	"""Handle dialog confirmation - create table from selected class"""
+	## Handle dialog confirmation and create table from selected class.
 	if selected_class_info.is_empty():
 		push_error("No class selected")
 		return
@@ -222,7 +224,7 @@ func _on_confirmed() -> void:
 
 
 func reset_to_defaults() -> void:
-	"""Reset dialog to default state"""
+	## Reset dialog to default state.
 	if not is_node_ready():
 		call_deferred("reset_to_defaults")
 		return
@@ -232,3 +234,4 @@ func reset_to_defaults() -> void:
 	name_edit.text = ""
 	path_edit.text = "res://resources/"
 	_validate_inputs()
+

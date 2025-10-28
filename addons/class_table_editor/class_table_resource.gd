@@ -19,14 +19,14 @@ class_name ClassTableResource
 @export var columns_metadata: Array[Dictionary] = []  # Enhanced type info from PropertyInspector: {name, type, type_name, usage, exported, default, hint, hint_string}
 
 
+## Get the value of a cell at the specified position.
 func get_cell(row: int, col: int) -> String:
-	"""Get the value of a cell at the specified position"""
 	var key := "%d,%d" % [row, col]
 	return cells.get(key, "")
 
 
+## Set the value of a cell at the specified position.
 func set_cell(row: int, col: int, value: String) -> void:
-	"""Set the value of a cell at the specified position"""
 	var key := "%d,%d" % [row, col]
 	if value.is_empty():
 		cells.erase(key)  # Remove empty cells to save memory
@@ -34,13 +34,13 @@ func set_cell(row: int, col: int, value: String) -> void:
 		cells[key] = value
 
 
+## Clear all cell data.
 func clear_all_cells() -> void:
-	"""Clear all cell data"""
 	cells.clear()
 
 
+## Get the display name of a column or generate Excel-style letter if unnamed.
 func get_column_name(col: int) -> String:
-	"""Get the display name of a column, or generate Excel-style letter if unnamed"""
 	if col >= 0 and col < column_names.size():
 		var name := column_names[col]
 		if not name.is_empty():
@@ -48,16 +48,16 @@ func get_column_name(col: int) -> String:
 	return _get_column_letter(col)
 
 
+## Set a custom display name for a column.
 func set_column_name(col: int, name: String) -> void:
-	"""Set a custom display name for a column"""
 	# Resize array if needed
 	while column_names.size() <= col:
 		column_names.append("")
 	column_names[col] = name
 
 
+## Get the display name of a row or generate a number if unnamed.
 func get_row_name(row: int) -> String:
-	"""Get the display name of a row, or generate number if unnamed"""
 	if row >= 0 and row < row_names.size():
 		var name := row_names[row]
 		if not name.is_empty():
@@ -65,16 +65,16 @@ func get_row_name(row: int) -> String:
 	return str(row + 1)
 
 
+## Set a custom display name for a row.
 func set_row_name(row: int, name: String) -> void:
-	"""Set a custom display name for a row"""
 	# Resize array if needed
 	while row_names.size() <= row:
 		row_names.append("")
 	row_names[row] = name
 
 
+## Delete a column and shift remaining columns left.
 func delete_column(col: int) -> void:
-	"""Delete a column and shift remaining columns left"""
 	if col < 0 or col >= column_count:
 		return
 
@@ -103,8 +103,8 @@ func delete_column(col: int) -> void:
 	column_count -= 1
 
 
+## Delete a row and shift remaining rows up.
 func delete_row(row: int) -> void:
-	"""Delete a row and shift remaining rows up"""
 	if row < 0 or row >= row_count:
 		return
 
@@ -133,20 +133,20 @@ func delete_row(row: int) -> void:
 	row_count -= 1
 
 
+## Add a new row at the end of the table.
 func add_row(row_name: String = "") -> void:
-	"""Add a new row at the end of the table"""
 	row_names.append(row_name)
 	row_count += 1
 
 
+## Add a new column at the end of the table.
 func add_column(col_name: String = "") -> void:
-	"""Add a new column at the end of the table"""
 	column_names.append(col_name)
 	column_count += 1
 
 
+## Convert column index to Excel-style letter (0=A, 1=B, ..., 26=AA, etc.).
 func _get_column_letter(col_index: int) -> String:
-	"""Convert column index to Excel-style letter (0=A, 1=B, ..., 26=AA, etc.)"""
 	var result := ""
 	var index := col_index
 
@@ -162,8 +162,8 @@ func _get_column_letter(col_index: int) -> String:
 
 ## CSV Export/Import Functions
 
+## Export sheet data to CSV file (comma-separated with header row including row names).
 func export_to_csv(file_path: String) -> bool:
-	"""Export sheet data to CSV file (comma-separated with header row including row names)"""
 	var file := FileAccess.open(file_path, FileAccess.WRITE)
 	if file == null:
 		push_error("Failed to open file for writing: " + file_path)
@@ -189,8 +189,8 @@ func export_to_csv(file_path: String) -> bool:
 	return true
 
 
+## Import CSV file into sheet (supports row names in first column).
 func import_from_csv(file_path: String) -> bool:
-	"""Import CSV file into sheet (supports row names in first column)"""
 	var file := FileAccess.open(file_path, FileAccess.READ)
 	if file == null:
 		push_error("Failed to open file for reading: " + file_path)
@@ -254,8 +254,8 @@ func import_from_csv(file_path: String) -> bool:
 	return true
 
 
+## Escape a value for CSV format (minimal implementation).
 func _escape_csv_value(value: String) -> String:
-	"""Escape a value for CSV format (minimal implementation)"""
 	if value.is_empty():
 		return ""
 
@@ -266,8 +266,8 @@ func _escape_csv_value(value: String) -> String:
 	return value
 
 
+## Parse a CSV line into values (basic comma-separated parsing).
 func _parse_csv_line(line: String) -> PackedStringArray:
-	"""Parse a CSV line into values (basic comma-separated parsing)"""
 	var values: PackedStringArray = []
 	var current_value := ""
 	var in_quotes := false
@@ -478,3 +478,4 @@ func get_metadata() -> Dictionary:
 		"row_count": row_count,
 		"columns": columns_metadata.size()
 	}
+

@@ -7,7 +7,7 @@ class_name CellManager
 ## Extracts cell creation, styling, and event binding logic from ClassTableDock
 ## to improve maintainability and separate concerns.
 
-const TYPED_CELL_EDITOR_FACTORY = preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
+const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
 
 var dock: Control  # Reference to the dock for signal connections
 
@@ -16,8 +16,8 @@ func _init(p_dock: Control) -> void:
 	dock = p_dock
 
 
+## Create a type-specific cell editor for the given position.
 func create_cell_editor(row: int, col: int, sheet: ClassTableResource) -> Control:
-	"""Create a type-specific cell editor for the given position"""
 	# Get type info for this column (P2-020)
 	var type_info = sheet.get_column_type_info(col)
 	var type_id = type_info.get("type", TYPE_NIL)
@@ -48,8 +48,8 @@ func create_cell_editor(row: int, col: int, sheet: ClassTableResource) -> Contro
 	return cell_editor
 
 
+## Apply appropriate styling to the cell editor.
 func _apply_cell_styling(cell_editor: Control, row: int, col: int, type_id: int) -> void:
-	"""Apply appropriate styling to the cell editor"""
 	# Style data cells with subtle alternating row colors
 	var cell_style := StyleBoxFlat.new()
 	# Use standard Godot theme colors with subtle alternation
@@ -76,8 +76,8 @@ func _apply_cell_styling(cell_editor: Control, row: int, col: int, type_id: int)
 		cell_editor.add_theme_stylebox_override("panel", cell_style)
 
 
+## Connect appropriate events for the cell editor.
 func _connect_cell_events(cell_editor: Control, row: int, col: int) -> void:
-	"""Connect appropriate events for the cell editor"""
 	# Connect signals based on control type (P2-019, P2-026, P2-027)
 	if cell_editor is LineEdit:
 		cell_editor.text_changed.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
@@ -126,3 +126,4 @@ func _on_cell_focus_entered(row: int, col: int, cell: Control) -> void:
 
 func _on_cell_gui_input(event: InputEvent, row: int, col: int) -> void:
 	cell_gui_input.emit(event, row, col)
+

@@ -4,9 +4,9 @@ extends VBoxContainer
 ## Class Table Dock UI Controller - Plugin 2: GDScript Class Integration
 
 const CLASS_SELECTION_SCENE := preload("res://addons/class_table_editor/class_selection_dialog.tscn")
-const TYPED_CELL_EDITOR_FACTORY = preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
-const GridBuilder = preload("res://addons/class_table_editor/grid_builder.gd")
-const CellManager = preload("res://addons/class_table_editor/cell_manager.gd")
+const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
+const GRID_BUILDER := preload("res://addons/class_table_editor/grid_builder.gd")
+const CELL_MANAGER := preload("res://addons/class_table_editor/cell_manager.gd")
 
 signal column_added
 signal row_added
@@ -39,7 +39,7 @@ var current_sheet: Resource = null
 var current_focused_row: int = -1
 var current_focused_col: int = -1
 var recent_sheets: Array[String] = []  # Store recent sheet paths
-const MAX_RECENT_SHEETS = 10
+const MAX_RECENT_SHEETS := 10
 
 # Grid management components
 var grid_builder: GridBuilder
@@ -52,7 +52,7 @@ func _ready() -> void:
 	_update_recent_sheets_list()
 
 	# Initialize grid management components
-	grid_builder = GridBuilder.new(grid_container, CellManager.new(self))
+	grid_builder = GRID_BUILDER.new(grid_container, CELL_MANAGER.new(self))
 
 	# Connect GridBuilder signals
 	grid_builder.column_renamed.connect(_on_column_renamed)
@@ -91,31 +91,36 @@ func _connect_signals() -> void:
 	recent_sheets_list.item_selected.connect(_on_recent_sheet_selected)
 
 
+func _get_sheet() -> ClassTableResource:
+	if current_sheet is ClassTableResource:
+		return current_sheet as ClassTableResource
+	return null
+
+
 func set_sheet(sheet: Resource) -> void:
-	"""Set the current sheet and update the UI"""
+	## Set the current sheet and update the UI.
 	current_sheet = sheet
-	grid_builder.set_sheet(sheet)
+	grid_builder.set_sheet(_get_sheet())
 	update_ui()
 
 
 func update_ui() -> void:
-	"""Update the UI to reflect the current sheet data"""
-	if not current_sheet or not current_sheet is ClassTableResource:
+	## Update the UI to reflect the current sheet data.
+	var sheet := _get_sheet()
+	if not sheet:
 		columns_label.text = "Columns: 0"
 		rows_label.text = "Rows: 0"
 		grid_builder.rebuild_grid()
 		_update_recent_sheets_list()
 		return
 
-	var sheet := current_sheet as ClassTableResource
 	columns_label.text = "Columns: %d" % sheet.column_count
 	rows_label.text = "Rows: %d" % sheet.row_count
 	grid_builder.rebuild_grid()
 	_update_recent_sheets_list()
 
-
+## Convert column index to Excel-style letter (0=A, 1=B, ..., 26=AA, etc.).
 func _get_column_letter(col_index: int) -> String:
-	"""Convert column index to Excel-style letter (0=A, 1=B, ..., 26=AA, etc.)"""
 	var result := ""
 	var index := col_index
 
@@ -127,24 +132,8 @@ func _get_column_letter(col_index: int) -> String:
 		index -= 1
 
 	return result
-
-
-func _on_cell_text_changed(new_text: String, row: int, col: int) -> void:
-	"""Update cell data when text changes"""
-	if not current_sheet or not current_sheet is ClassTableResource:
-		return
-
-	var sheet := current_sheet as ClassTableResource
-	sheet.set_cell(row, col, new_text)
-
-
-func _on_cell_text_submitted(new_text: String, row: int, col: int, current_cell: LineEdit) -> void:
-	"""Move to next row when Enter is pressed"""
-	_move_to_cell(row + 1, col)
-
-
 func _on_cell_focus_entered(row: int, col: int, cell: Control) -> void:
-	"""Track focused cell and select all text for easy editing"""
+	## Track focused cell and select all text for easy editing.
 	current_focused_row = row
 	current_focused_col = col
 	# Only select all text for LineEdit controls
@@ -153,7 +142,7 @@ func _on_cell_focus_entered(row: int, col: int, cell: Control) -> void:
 
 
 func _on_cell_gui_input(event: InputEvent, row: int, col: int) -> void:
-	"""Handle keyboard navigation in cells"""
+	## Handle keyboard navigation in cells.
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_UP:
@@ -181,11 +170,10 @@ func _on_cell_gui_input(event: InputEvent, row: int, col: int) -> void:
 
 
 func _move_to_cell(target_row: int, target_col: int) -> void:
-	"""Move focus to a specific cell if it exists"""
-	if not current_sheet or not current_sheet is ClassTableResource:
+	## Move focus to a specific cell when it exists.
+	var sheet := _get_sheet()
+	if not sheet:
 		return
-
-	var sheet := current_sheet as ClassTableResource
 
 	# Validate target position
 	if target_row < 0 or target_row >= sheet.row_count:
@@ -228,54 +216,55 @@ func _on_add_row_pressed() -> void:
 	row_added.emit()
 
 
+
+## Forward column rename notifications.
 func _on_column_renamed(new_name: String, col: int) -> void:
-	"""Emit signal when column is renamed"""
 	column_renamed.emit(col, new_name)
 
 
+## Save column name when header loses focus.
 func _on_column_header_focus_exited(col: int, header_edit: LineEdit) -> void:
-	"""Save column name when header loses focus"""
 	var new_name := header_edit.text
-	if not current_sheet or not current_sheet is ClassTableResource:
+	var sheet := _get_sheet()
+	if not sheet:
 		return
 
-	var sheet := current_sheet as ClassTableResource
 	if new_name != sheet.get_column_name(col):
 		column_renamed.emit(col, new_name)
 
 
+## Handle column header input - disabled since columns cannot be added.
 func _on_column_header_gui_input(event: InputEvent, col: int) -> void:
-	"""Handle column header input - disabled since columns cannot be added"""
 	# Column operations disabled
 	pass
 
 
 func _on_row_renamed(new_name: String, row: int) -> void:
-	"""Emit signal when row is renamed"""
+	## Forward row rename notifications.
 	row_renamed.emit(row, new_name)
 
 
 func _on_row_header_focus_exited(row: int, header_edit: LineEdit) -> void:
-	"""Save row name when header loses focus"""
+	## Save row name when header loses focus.
 	var new_name := header_edit.text
-	if not current_sheet or not current_sheet is ClassTableResource:
+	var sheet := _get_sheet()
+	if not sheet:
 		return
 
-	var sheet := current_sheet as ClassTableResource
 	if new_name != sheet.get_row_name(row):
 		row_renamed.emit(row, new_name)
 
 
 func _on_row_header_gui_input(event: InputEvent, row: int) -> void:
-	"""Show context menu on right-click for row operations"""
+	## Show context menu on right-click for row operations.
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			_show_row_context_menu(row, event.global_position)
 			get_viewport().set_input_as_handled()
 
 
+## Display context menu for row operations.
 func _show_row_context_menu(row: int, position: Vector2) -> void:
-	"""Display context menu for row operations"""
 	var popup := PopupMenu.new()
 	popup.add_item("Delete Row", 0)
 	popup.id_pressed.connect(func(id):
@@ -287,27 +276,24 @@ func _show_row_context_menu(row: int, position: Vector2) -> void:
 	popup.popup(Rect2i(position, Vector2i(150, 50)))
 
 
+## Add a sheet path to the recent sheets list.
 func add_to_recent_sheets(path: String) -> void:
-	"""Add a sheet path to the recent sheets list"""
 	if path.is_empty():
 		return
 
-	# Don't add if already exists (keep original order)
 	if path in recent_sheets:
-		return
+		recent_sheets.erase(path)
 
-	# Add to end of list
 	recent_sheets.append(path)
 
-	# Limit to MAX_RECENT_SHEETS
 	if recent_sheets.size() > MAX_RECENT_SHEETS:
-		recent_sheets.pop_front()  # Remove oldest
+		recent_sheets.pop_front()
 
 	_update_recent_sheets_list()
 
 
+## Update the ItemList display with recent sheets.
 func _update_recent_sheets_list() -> void:
-	"""Update the ItemList display with recent sheets"""
 	recent_sheets_list.clear()
 
 	for i in range(recent_sheets.size()):
@@ -322,15 +308,15 @@ func _update_recent_sheets_list() -> void:
 			recent_sheets_list.set_item_custom_fg_color(i, Color(1, 1, 1, 1))  # White text for contrast
 
 
+## Handle selection of a recent sheet from the list.
 func _on_recent_sheet_selected(index: int) -> void:
-	"""Handle selection of a recent sheet from the list"""
 	if index >= 0 and index < recent_sheets.size():
 		var path := recent_sheets[index]
 		sheet_selected.emit(path)
 
 
+## Show the Class Selection dialog for P2-009.
 func _show_class_select_dialog() -> void:
-	"""Show the Class Selection dialog for P2-009"""
 	# Instantiate new class selection dialog if it doesn't exist
 	if not class_select_dialog:
 		class_select_dialog = CLASS_SELECTION_SCENE.instantiate()
@@ -347,8 +333,8 @@ func _show_class_select_dialog() -> void:
 	class_select_dialog.grab_focus()
 
 
+## Handle class table creation from class selection dialog.
 func _on_class_table_created(resource_path: String, class_info: Dictionary) -> void:
-	"""Handle class table creation from class selection dialog"""
 	print("Class table created: %s" % resource_path)
 	print("  From class: %s" % class_info.get("class_name", ""))
 
@@ -370,13 +356,13 @@ func _on_class_table_created(resource_path: String, class_info: Dictionary) -> v
 
 ## === NEW: Type-Safe Editing Methods (P2-019 to P2-028) ===
 
-## Handle cell value changes with type validation (P2-019, P2-021, P2-022, P2-026, P2-027)
+
+## Handle cell value changes with type validation (P2-019, P2-021, P2-022, P2-026, P2-027).
 func _on_typed_cell_changed(new_value: Variant, row: int, col: int, editor: Control) -> void:
-	"""Update cell data when typed value changes with validation"""
-	if not current_sheet or not current_sheet is ClassTableResource:
+	var sheet := _get_sheet()
+	if not sheet:
 		return
 
-	var sheet := current_sheet as ClassTableResource
 	var type_id = editor.get_meta("type_id", TYPE_NIL)
 
 	# Get value from editor
@@ -399,13 +385,13 @@ func _on_typed_cell_changed(new_value: Variant, row: int, col: int, editor: Cont
 
 ## Handle cell submission (Enter key)
 func _on_typed_cell_submitted(new_value: Variant, row: int, col: int, editor: Control) -> void:
-	"""Move to next row when Enter is pressed"""
+	## Move to next row when Enter is pressed.
 	_move_to_cell(row + 1, col)
 
 
 ## Show validation error in UI (P2-026)
 func _show_validation_error(editor: Control, error_message: String) -> void:
-	"""Display validation error for a cell editor"""
+	## Display validation error for a cell editor.
 	# Add error border styling
 	if editor is LineEdit:
 		var error_style := StyleBoxFlat.new()
@@ -423,9 +409,8 @@ func _show_validation_error(editor: Control, error_message: String) -> void:
 	# TODO: Could show error panel at bottom of dock in future
 
 
-## Clear validation error display
+## Clear validation error display.
 func _clear_validation_error(editor: Control) -> void:
-	"""Clear validation error styling from cell editor"""
 	if editor is LineEdit:
 		# Restore normal styling
 		var row = editor.get_meta("row", 0)
@@ -444,7 +429,7 @@ func _clear_validation_error(editor: Control) -> void:
 	editor.tooltip_text = "Type: " + type_name
 
 
-## Convert typed value to string for storage
+## Convert typed value to string for storage.
 func _value_to_string(value: Variant, type_id: int) -> String:
 	if value == null:
 		return ""
@@ -464,4 +449,5 @@ func _value_to_string(value: Variant, type_id: int) -> String:
 			return value.to_html()
 		_:
 			return str(value)
+
 

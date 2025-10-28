@@ -39,9 +39,7 @@ func get_value() -> Variant:
 
 ## Validate the current value
 func validate(value: Variant) -> Dictionary:
-	"""
-	Returns: {valid: bool, error: String}
-	"""
+	## Returns `{valid, error}` dictionary.
 	return {"valid": true, "error": ""}
 
 
@@ -146,3 +144,4 @@ func _parse_color(text: String) -> Color:
 		var a = parts[3].to_float() if parts.size() >= 4 else 1.0
 		return Color(r, g, b, a)
 	return Color.WHITE
+
