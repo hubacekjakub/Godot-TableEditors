@@ -265,13 +265,12 @@ func add_to_recent_sheets(path: String) -> void:
 	if path.is_empty():
 		return
 
-	if path in recent_sheets:
-		recent_sheets.erase(path)
+	# Only add if not already in the list (don't reorder existing items)
+	if not path in recent_sheets:
+		recent_sheets.append(path)
 
-	recent_sheets.append(path)
-
-	if recent_sheets.size() > MAX_RECENT_SHEETS:
-		recent_sheets.pop_front()
+		if recent_sheets.size() > MAX_RECENT_SHEETS:
+			recent_sheets.pop_front()
 
 	_update_recent_sheets_list()
 
