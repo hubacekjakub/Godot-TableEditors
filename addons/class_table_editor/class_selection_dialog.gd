@@ -12,6 +12,7 @@ signal table_created(resource_path: String, class_info: Dictionary)
 @onready var path_edit: LineEdit = %PathEdit
 @onready var browse_button: Button = %BrowseButton
 @onready var refresh_button: Button = %RefreshButton
+@onready var warning_text: Label = %WarningText
 
 var file_dialog: EditorFileDialog = null
 var class_selector: ClassSelector = null
@@ -143,7 +144,40 @@ func _validate_inputs() -> void:
 	if path_edit.text.strip_edges().is_empty():
 		is_valid = false
 
+	# Check for file collision
+	var has_collision: bool = _check_file_collision()
+	if has_collision:
+		is_valid = false
+
 	get_ok_button().disabled = not is_valid
+
+
+func _check_file_collision() -> bool:
+	## Check if a file with the same name already exists and show warning.
+	## Returns true if collision detected.
+	var table_name: String = name_edit.text.strip_edges()
+	var save_path: String = path_edit.text.strip_edges()
+
+	if table_name.is_empty() or save_path.is_empty():
+		warning_text.visible = false
+		return false
+
+	# Ensure path ends with slash
+	if not save_path.ends_with("/"):
+		save_path += "/"
+
+	# Generate filename from table name
+	var file_name: String = table_name.to_snake_case() + ".tres"
+	var full_path: String = save_path + file_name
+
+	# Check if file exists
+	if FileAccess.file_exists(full_path):
+		warning_text.text = "⚠️ WARNING: File '%s' already exists!" % file_name
+		warning_text.visible = true
+		return true
+	else:
+		warning_text.visible = false
+		return false
 
 
 func _on_browse_pressed() -> void:
@@ -233,5 +267,6 @@ func reset_to_defaults() -> void:
 	selected_class_info = {}
 	name_edit.text = ""
 	path_edit.text = "res://resources/"
+	warning_text.visible = false
 	_validate_inputs()
 
