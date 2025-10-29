@@ -29,15 +29,12 @@ signal create_table_requested(table_name: String, file_name: String, rows: int, 
 @onready var columns_label: Label = %ColumnsLabel
 @onready var rows_label: Label = %RowsLabel
 @onready var recent_sheets_list: ItemList = %RecentSheetsList
-@onready var scroll_container: ScrollContainer = %ScrollContainer
 @onready var grid_container: GridContainer = %GridContainer
 
 var class_select_dialog: ConfirmationDialog = null
 var editor_interface: EditorInterface = null  # Reference to editor interface
 
 var current_sheet: Resource = null
-var current_focused_row: int = -1
-var current_focused_col: int = -1
 var recent_sheets: Array[String] = []  # Store recent sheet paths
 const MAX_RECENT_SHEETS := 10
 
@@ -120,22 +117,9 @@ func update_ui() -> void:
 	_update_recent_sheets_list()
 
 ## Convert column index to Excel-style letter (0=A, 1=B, ..., 26=AA, etc.).
-func _get_column_letter(col_index: int) -> String:
-	var result := ""
-	var index := col_index
 
-	while true:
-		result = char(65 + (index % 26)) + result
-		index = index / 26
-		if index == 0:
-			break
-		index -= 1
-
-	return result
 func _on_cell_focus_entered(row: int, col: int, cell: Control) -> void:
 	## Track focused cell and select all text for easy editing.
-	current_focused_row = row
-	current_focused_col = col
 	# Only select all text for LineEdit controls
 	if cell is LineEdit:
 		cell.select_all()

@@ -27,7 +27,6 @@ signal create_table_requested(table_name: String, file_name: String, rows: int, 
 @onready var columns_label: Label = %ColumnsLabel
 @onready var rows_label: Label = %RowsLabel
 @onready var recent_sheets_list: ItemList = %RecentSheetsList
-@onready var scroll_container: ScrollContainer = %ScrollContainer
 @onready var grid_container: GridContainer = %GridContainer
 
 var create_table_dialog: ConfirmationDialog = null
@@ -35,8 +34,6 @@ var csv_export_dialog: FileDialog = null
 var csv_import_dialog: FileDialog = null
 
 var current_sheet: Resource = null
-var current_focused_row: int = -1
-var current_focused_col: int = -1
 var recent_sheets: Array[String] = []  # Store recent sheet paths
 const MAX_RECENT_SHEETS = 10
 
@@ -280,8 +277,6 @@ func _on_cell_text_submitted(new_text: String, row: int, col: int, current_cell:
 
 func _on_cell_focus_entered(row: int, col: int, cell: LineEdit) -> void:
 	"""Track focused cell and select all text for easy editing"""
-	current_focused_row = row
-	current_focused_col = col
 	cell.select_all()
 
 
