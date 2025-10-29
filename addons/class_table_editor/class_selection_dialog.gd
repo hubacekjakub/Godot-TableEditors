@@ -182,8 +182,8 @@ func _on_confirmed() -> void:
 	if not save_path.ends_with("/"):
 		save_path += "/"
 
-	# Generate filename from class name
-	var file_name: String = cls_name.to_lower() + "_table.tres"
+	# Generate filename from table name instead of class name
+	var file_name: String = table_name.to_snake_case() + ".tres"
 	var full_path: String = save_path + file_name
 
 	# Create new ClassTableResource
