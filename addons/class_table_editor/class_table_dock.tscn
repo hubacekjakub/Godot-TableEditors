@@ -8,19 +8,19 @@ border_width_bottom = 1
 border_color = Color(0.12, 0.14, 0.16, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_separator"]
-bg_color = Color(0.12, 0.14, 0.16, 1)
 content_margin_top = 1.0
 content_margin_bottom = 1.0
+bg_color = Color(0.12, 0.14, 0.16, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sidepanel"]
-bg_color = Color(0.15, 0.17, 0.2, 1)
+bg_color = Color(0.18, 0.2, 0.23, 1)
 border_width_right = 1
 border_color = Color(0.12, 0.14, 0.16, 1)
 corner_radius_top_left = 3
 corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_itemlist"]
-bg_color = Color(0.15, 0.17, 0.2, 1)
+bg_color = Color(0.176471, 0.2, 0.243137, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -28,7 +28,7 @@ border_width_bottom = 1
 border_color = Color(0.12, 0.14, 0.16, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scroll"]
-bg_color = Color(0.18, 0.2, 0.23, 1)
+bg_color = Color(0.113725, 0.133333, 0.160784, 1)
 
 [node name="ClassTableDock" type="VBoxContainer"]
 offset_right = 1152.0
@@ -53,8 +53,8 @@ theme_override_constants/separation = 4
 [node name="FileMenu" type="MenuButton" parent="MenuBar/MenuBarBg/MenuBarContent"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
 theme_override_font_sizes/font_size = 13
 text = "File"
 flat = false
@@ -73,8 +73,8 @@ popup/item_4/id = 3
 [node name="EditMenu" type="MenuButton" parent="MenuBar/MenuBarBg/MenuBarContent"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
 theme_override_font_sizes/font_size = 13
 text = "Edit"
 flat = false
@@ -93,10 +93,10 @@ layout_mode = 2
 [node name="AddRowBtn" type="Button" parent="MenuBar/MenuBarBg/MenuBarContent"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_colors/icon_normal_color = Color(0.875, 0.875, 0.875, 1)
 theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
 theme_override_font_sizes/font_size = 13
 text = "➕ Add Row"
 
@@ -150,28 +150,17 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_sidepanel")
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="SidePanelHeader" type="PanelContainer" parent="MainContainer/SidePanel/SidePanelContent"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-
-[node name="HeaderLabel" type="Label" parent="MainContainer/SidePanel/SidePanelContent/SidePanelHeader"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
-theme_override_font_sizes/font_size = 13
-text = "  📋 Recent Tables"
-vertical_alignment = 1
-
 [node name="RecentSheetsList" type="ItemList" parent="MainContainer/SidePanel/SidePanelContent"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
-theme_override_colors/font_selected_color = Color(1, 1, 1, 1)
 theme_override_colors/guide_color = Color(0.12, 0.14, 0.16, 0.5)
+theme_override_colors/font_selected_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
 theme_override_constants/line_separation = 2
 theme_override_font_sizes/font_size = 12
-theme_override_styles/panel = SubResource("StyleBoxFlat_itemlist")
 theme_override_styles/focus = SubResource("StyleBoxFlat_itemlist")
+theme_override_styles/panel = SubResource("StyleBoxFlat_itemlist")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MainContainer"]
 unique_name_in_owner = true
