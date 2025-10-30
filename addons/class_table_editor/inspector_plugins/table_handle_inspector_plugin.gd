@@ -4,7 +4,7 @@ extends EditorInspectorPlugin
 ## Inspector plugin for TableHandle custom property editor
 ## Detects TableHandle properties and provides custom UI
 
-const TableHandleEditorProperty = preload("res://addons/class_table_editor/table_handle_editor_property.gd")
+const TableHandleEditorProperty = preload("res://addons/class_table_editor/inspector_plugins/table_handle_editor_property.gd")
 
 
 func _can_handle(object: Object) -> bool:

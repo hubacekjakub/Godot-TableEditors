@@ -3,8 +3,8 @@ extends EditorPlugin
 
 class_name ClassTablePlugin
 
-const DOCK_SCENE := preload("res://addons/class_table_editor/class_table_dock.tscn")
-const TABLE_HANDLE_INSPECTOR_PLUGIN := preload("res://addons/class_table_editor/table_handle_inspector_plugin.gd")
+const DOCK_SCENE := preload("res://addons/class_table_editor/ui/class_table_dock.tscn")
+const TABLE_HANDLE_INSPECTOR_PLUGIN := preload("res://addons/class_table_editor/inspector_plugins/table_handle_inspector_plugin.gd")
 
 const DEFAULT_COLUMN_COUNT := 3
 const DEFAULT_ROW_COUNT := 5

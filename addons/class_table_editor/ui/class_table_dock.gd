@@ -3,10 +3,10 @@ extends VBoxContainer
 
 ## Class Table Dock UI Controller - Plugin 2: GDScript Class Integration
 
-const CLASS_SELECTION_SCENE := preload("res://addons/class_table_editor/class_selection_dialog.tscn")
-const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
-const GRID_BUILDER := preload("res://addons/class_table_editor/grid_builder.gd")
-const CELL_MANAGER := preload("res://addons/class_table_editor/cell_manager.gd")
+const CLASS_SELECTION_SCENE := preload("res://addons/class_table_editor/ui/class_selection_dialog.tscn")
+const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/utils/typed_cell_editor_factory.gd")
+const GRID_BUILDER := preload("res://addons/class_table_editor/utils/grid_builder.gd")
+const CELL_MANAGER := preload("res://addons/class_table_editor/editors/cell_manager.gd")
 
 signal column_added
 signal row_added

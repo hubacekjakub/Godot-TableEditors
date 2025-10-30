@@ -7,7 +7,7 @@ class_name GridBuilder
 ## Extracts grid building logic from ClassTableDock to improve maintainability
 ## and separate concerns between UI coordination and grid construction.
 
-const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
+const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/utils/typed_cell_editor_factory.gd")
 
 var grid_container: GridContainer
 var current_sheet: ClassTableResource

@@ -7,7 +7,7 @@ class_name CellManager
 ## Extracts cell creation, styling, and event binding logic from ClassTableDock
 ## to improve maintainability and separate concerns.
 
-const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
+const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/utils/typed_cell_editor_factory.gd")
 
 var dock: Control  # Reference to the dock for signal connections
 

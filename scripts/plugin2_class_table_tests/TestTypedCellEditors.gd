@@ -4,7 +4,7 @@ extends RefCounted
 ## Unit Tests for Typed Cell Editors (P2-019 to P2-028)
 ## Tests type-safe editing, validation, and specialized controls
 
-const TypedCellEditorFactory = preload("res://addons/class_table_editor/typed_cell_editor_factory.gd")
+const TypedCellEditorFactory = preload("res://addons/class_table_editor/utils/typed_cell_editor_factory.gd")
 
 var test_results: Array[Dictionary] = []
 var passed_count: int = 0
