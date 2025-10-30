@@ -167,7 +167,7 @@ func _check_file_collision() -> bool:
 		save_path += "/"
 
 	# Generate filename from table name
-	var file_name: String = table_name.to_snake_case() + ".tres"
+	var file_name: String = table_name + ".tres"
 	var full_path: String = save_path + file_name
 
 	# Check if file exists
