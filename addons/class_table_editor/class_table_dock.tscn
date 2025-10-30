@@ -1,19 +1,63 @@
-[gd_scene load_steps=2 format=3 uid="uid://c8vyay6n4lo5w"]
+[gd_scene load_steps=7 format=3 uid="uid://c8vyay6n4lo5w"]
 
 [ext_resource type="Script" uid="uid://d10sl1vofx53c" path="res://addons/class_table_editor/class_table_dock.gd" id="1_class_table_dock"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_menubar"]
+bg_color = Color(0.2, 0.23, 0.27, 1)
+border_width_bottom = 1
+border_color = Color(0.12, 0.14, 0.16, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_separator"]
+bg_color = Color(0.12, 0.14, 0.16, 1)
+content_margin_top = 1.0
+content_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sidepanel"]
+bg_color = Color(0.15, 0.17, 0.2, 1)
+border_width_right = 1
+border_color = Color(0.12, 0.14, 0.16, 1)
+corner_radius_top_left = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_itemlist"]
+bg_color = Color(0.15, 0.17, 0.2, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.12, 0.14, 0.16, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scroll"]
+bg_color = Color(0.18, 0.2, 0.23, 1)
 
 [node name="ClassTableDock" type="VBoxContainer"]
 offset_right = 1152.0
 offset_bottom = 648.0
+theme_override_constants/separation = 0
 script = ExtResource("1_class_table_dock")
 
 [node name="MenuBar" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+theme_override_constants/separation = 0
 
-[node name="FileMenu" type="MenuButton" parent="MenuBar"]
+[node name="MenuBarBg" type="PanelContainer" parent="MenuBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_menubar")
+
+[node name="MenuBarContent" type="HBoxContainer" parent="MenuBar/MenuBarBg"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="FileMenu" type="MenuButton" parent="MenuBar/MenuBarBg/MenuBarContent"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "File"
+flat = false
 item_count = 5
 popup/item_0/text = "New"
 popup/item_0/id = 0
@@ -26,10 +70,14 @@ popup/item_3/separator = true
 popup/item_4/text = "Close"
 popup/item_4/id = 3
 
-[node name="EditMenu" type="MenuButton" parent="MenuBar"]
+[node name="EditMenu" type="MenuButton" parent="MenuBar/MenuBarBg/MenuBarContent"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
 text = "Edit"
+flat = false
 item_count = 3
 popup/item_0/text = "Add Row"
 popup/item_0/id = 0
@@ -38,62 +86,103 @@ popup/item_1/separator = true
 popup/item_2/text = "Clear All"
 popup/item_2/id = 1
 
-[node name="Spacer1" type="Control" parent="MenuBar"]
-custom_minimum_size = Vector2(20, 0)
+[node name="Spacer1" type="Control" parent="MenuBar/MenuBarBg/MenuBarContent"]
+custom_minimum_size = Vector2(16, 0)
 layout_mode = 2
 
-[node name="AddRowBtn" type="Button" parent="MenuBar"]
+[node name="AddRowBtn" type="Button" parent="MenuBar/MenuBarBg/MenuBarContent"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "+ Row"
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "➕ Add Row"
 
-[node name="Spacer2" type="Control" parent="MenuBar"]
+[node name="Spacer2" type="Control" parent="MenuBar/MenuBarBg/MenuBarContent"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ColumnsLabel" type="Label" parent="MenuBar"]
+[node name="ColumnsLabel" type="Label" parent="MenuBar/MenuBarBg/MenuBarContent"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 12
 text = "Columns: 0"
+vertical_alignment = 1
 
-[node name="RowsLabel" type="Label" parent="MenuBar"]
+[node name="VSeparator1" type="VSeparator" parent="MenuBar/MenuBarBg/MenuBarContent"]
+custom_minimum_size = Vector2(1, 20)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RowsLabel" type="Label" parent="MenuBar/MenuBarBg/MenuBarContent"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 12
 text = "Rows: 0"
+vertical_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="."]
+[node name="Spacer3" type="Control" parent="MenuBar/MenuBarBg/MenuBarContent"]
+custom_minimum_size = Vector2(8, 0)
 layout_mode = 2
+
+[node name="HSeparator" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_separator")
 
 [node name="MainContainer" type="HSplitContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+split_offset = 250
 
 [node name="SidePanel" type="PanelContainer" parent="MainContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 0)
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-
-[node name="PanelBg" type="Panel" parent="MainContainer/SidePanel"]
-modulate = Color(0.15, 0.15, 0.15, 1)
-self_modulate = Color(0.15, 0.15, 0.15, 1)
-layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sidepanel")
 
 [node name="SidePanelContent" type="VBoxContainer" parent="MainContainer/SidePanel"]
 layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SidePanelHeader" type="PanelContainer" parent="MainContainer/SidePanel/SidePanelContent"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+
+[node name="HeaderLabel" type="Label" parent="MainContainer/SidePanel/SidePanelContent/SidePanelHeader"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_font_sizes/font_size = 13
+text = "  📋 Recent Tables"
+vertical_alignment = 1
 
 [node name="RecentSheetsList" type="ItemList" parent="MainContainer/SidePanel/SidePanelContent"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_selected_color = Color(1, 1, 1, 1)
+theme_override_colors/guide_color = Color(0.12, 0.14, 0.16, 0.5)
+theme_override_constants/line_separation = 2
+theme_override_font_sizes/font_size = 12
+theme_override_styles/panel = SubResource("StyleBoxFlat_itemlist")
+theme_override_styles/focus = SubResource("StyleBoxFlat_itemlist")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MainContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_scroll")
 
 [node name="GridContainer" type="GridContainer" parent="MainContainer/ScrollContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/h_separation = 0
+theme_override_constants/v_separation = 0
