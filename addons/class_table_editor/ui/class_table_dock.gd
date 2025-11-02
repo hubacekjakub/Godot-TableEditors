@@ -275,6 +275,14 @@ func add_to_recent_sheets(path: String) -> void:
 	_update_recent_sheets_list()
 
 
+## Set the entire recent sheets list (for loading from settings).
+func set_recent_sheets(sheets: Array[String]) -> void:
+	recent_sheets = sheets.duplicate()
+	if recent_sheets.size() > MAX_RECENT_SHEETS:
+		recent_sheets = recent_sheets.slice(-MAX_RECENT_SHEETS)
+	_update_recent_sheets_list()
+
+
 ## Update the ItemList display with recent sheets.
 func _update_recent_sheets_list() -> void:
 	recent_sheets_list.clear()
@@ -325,7 +333,6 @@ func _on_class_table_created(resource_path: String, class_info: Dictionary) -> v
 	var table_resource = load(resource_path) as ClassTableResource
 	if table_resource:
 		set_sheet(table_resource)
-		add_to_recent_sheets(resource_path)
 		print("Table loaded and displayed in dock")
 
 		# IMPORTANT: Make the plugin aware of this resource by editing it

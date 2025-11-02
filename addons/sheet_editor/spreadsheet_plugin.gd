@@ -238,7 +238,7 @@ func _show_save_dialog() -> void:
 	if current_sheet is SpreadsheetResource:
 		var sheet := current_sheet as SpreadsheetResource
 		if not sheet.sheet_name.is_empty() and sheet.sheet_name != "Untitled Sheet":
-			default_name = sheet.sheet_name.to_snake_case() + ".tres"
+			default_name = sheet.sheet_name + ".tres"
 
 	save_dialog.current_file = default_name
 	save_dialog.current_dir = "res://"
@@ -300,11 +300,6 @@ func _show_load_dialog() -> void:
 
 	load_dialog.current_dir = "res://"
 	load_dialog.popup_centered_ratio(0.6)
-
-
-func _on_load_file_selected(path: String) -> void:
-	"""Load sheet from the selected file path"""
-	_load_sheet_from_path(path)
 
 
 func _load_sheet_from_path(path: String) -> void:
@@ -373,7 +368,7 @@ func _save_sheet_resource(sheet: SpreadsheetResource, path: String) -> bool:
 			if create_error != OK:
 				push_error("SpreadsheetPlugin: Failed to create directory '%s' - error: %d" % [dir_path, create_error])
 				return false
-	
+
 	var error := ResourceSaver.save(sheet, path)
 	if error != OK:
 		push_error("SpreadsheetPlugin: Failed to save sheet to %s - error: %d" % [path, error])
