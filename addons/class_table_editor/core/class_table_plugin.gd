@@ -9,7 +9,6 @@ const TABLE_HANDLE_INSPECTOR_PLUGIN := preload("res://addons/class_table_editor/
 const DEFAULT_COLUMN_COUNT := 3
 const DEFAULT_ROW_COUNT := 5
 const DEFAULT_SHEET_NAME := "Untitled Class Table"
-const MAX_RECENT_SHEETS := 10
 
 var button_2d: Button
 var button_3d: Button
@@ -17,8 +16,6 @@ var button_inspector: Button
 var class_table_dock: Control
 var current_sheet: ClassTableResource
 var table_handle_inspector: EditorInspectorPlugin
-var editor_settings: EditorSettings
-var recent_sheets: Array[String] = []
 
 # Dialog instances (reused to prevent memory leaks)
 var save_dialog: EditorFileDialog = null
@@ -26,20 +23,9 @@ var load_dialog: EditorFileDialog = null
 
 
 func _enter_tree() -> void:
-	editor_settings = get_editor_interface().get_editor_settings()
-	if editor_settings.has_setting("class_table_editor/recent_tables"):
-		var loaded = editor_settings.get_setting("class_table_editor/recent_tables")
-		if loaded is Array:
-			recent_sheets = loaded as Array[String]
-	if recent_sheets.size() > MAX_RECENT_SHEETS:
-		recent_sheets = recent_sheets.slice(-MAX_RECENT_SHEETS)
-
 	_add_toolbar_buttons()
 	_create_class_table_dock()
 	add_control_to_bottom_panel(class_table_dock, "Class Table")
-
-	if class_table_dock and class_table_dock.has_method("set_recent_sheets"):
-		class_table_dock.set_recent_sheets(recent_sheets)
 
 	table_handle_inspector = TABLE_HANDLE_INSPECTOR_PLUGIN.new()
 	add_inspector_plugin(table_handle_inspector)
@@ -47,9 +33,6 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
-	if editor_settings:
-		editor_settings.set_setting("class_table_editor/recent_tables", recent_sheets)
-
 	if table_handle_inspector:
 		remove_inspector_plugin(table_handle_inspector)
 
@@ -83,7 +66,6 @@ func _edit(object: Object) -> void:
 	current_sheet = object as ClassTableResource
 	_debug_log("Editing ClassTableResource")
 	_show_dock()
-	_add_to_recent(current_sheet.resource_path)
 
 
 ## Show the dock with the current sheet selected.
@@ -333,7 +315,6 @@ func _load_sheet_from_path(path: String) -> void:
 	current_sheet = sheet
 	_show_dock()
 	get_editor_interface().edit_resource(sheet)
-	_add_to_recent(path)
 
 
 ## Load a sheet selected from the recent list.
@@ -373,27 +354,6 @@ func _refresh_dock() -> void:
 		class_table_dock.update_ui()
 
 
-## Add a path to the dock's recent list when available.
-func _add_to_recent(path: String) -> void:
-	if path.is_empty():
-		return
-
-	# Update recent_sheets
-	if path in recent_sheets:
-		recent_sheets.erase(path)
-	recent_sheets.append(path)
-	if recent_sheets.size() > MAX_RECENT_SHEETS:
-		recent_sheets.pop_front()
-
-	# Save to settings
-	if editor_settings:
-		editor_settings.set_setting("class_table_editor/recent_tables", recent_sheets)
-
-	# Update dock
-	if class_table_dock and class_table_dock.has_method("add_to_recent_sheets"):
-		class_table_dock.add_to_recent_sheets(path)
-
-
 ## Retrieve the current sheet or emit a warning when missing.
 func _get_sheet_or_warn(warning: String = "") -> ClassTableResource:
 	if current_sheet is ClassTableResource:
@@ -430,7 +390,6 @@ func _save_sheet_to_path(sheet: ClassTableResource, target_path: String) -> int:
 
 	_debug_log("Class Table saved to: " + target_path)
 	sheet.resource_path = target_path
-	_add_to_recent(target_path)
 
 	var filesystem := get_editor_interface().get_resource_filesystem()
 	if filesystem:

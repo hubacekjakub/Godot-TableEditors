@@ -38,12 +38,31 @@ var current_sheet: Resource = null
 var recent_sheets: Array[String] = []  # Store recent sheet paths
 const MAX_RECENT_SHEETS := 10
 
+var editor_settings: EditorSettings
+
 # Grid management components
 var grid_builder: GridBuilder
 var cell_manager: CellManager
 
 
 func _ready() -> void:
+	if editor_interface:
+		editor_settings = editor_interface.get_editor_settings()
+		if editor_settings.has_setting("class_table_editor/recent_tables"):
+			var loaded = editor_settings.get_setting("class_table_editor/recent_tables")
+			if loaded is Array:
+				recent_sheets = loaded as Array[String]
+
+		# Validate recent sheets - remove any that don't exist
+		var valid_sheets: Array[String] = []
+		for path in recent_sheets:
+			if FileAccess.file_exists(path):
+				valid_sheets.append(path)
+		recent_sheets = valid_sheets
+
+		if recent_sheets.size() > MAX_RECENT_SHEETS:
+			recent_sheets = recent_sheets.slice(-MAX_RECENT_SHEETS)
+
 	_setup_menus()
 	_connect_signals()
 	_update_recent_sheets_list()
@@ -97,6 +116,8 @@ func _get_sheet() -> ClassTableResource:
 func set_sheet(sheet: Resource) -> void:
 	## Set the current sheet and update the UI.
 	current_sheet = sheet
+	if sheet and sheet.resource_path:
+		add_to_recent_sheets(sheet.resource_path)
 	grid_builder.set_sheet(_get_sheet())
 	update_ui()
 
@@ -274,6 +295,10 @@ func add_to_recent_sheets(path: String) -> void:
 
 	_update_recent_sheets_list()
 
+	# Save to settings
+	if editor_settings:
+		editor_settings.set_setting("class_table_editor/recent_tables", recent_sheets)
+
 
 ## Set the entire recent sheets list (for loading from settings).
 func set_recent_sheets(sheets: Array[String]) -> void:
@@ -281,6 +306,10 @@ func set_recent_sheets(sheets: Array[String]) -> void:
 	if recent_sheets.size() > MAX_RECENT_SHEETS:
 		recent_sheets = recent_sheets.slice(-MAX_RECENT_SHEETS)
 	_update_recent_sheets_list()
+
+	# Save to settings
+	if editor_settings:
+		editor_settings.set_setting("class_table_editor/recent_tables", recent_sheets)
 
 
 ## Update the ItemList display with recent sheets.
@@ -303,7 +332,14 @@ func _update_recent_sheets_list() -> void:
 func _on_recent_sheet_selected(index: int) -> void:
 	if index >= 0 and index < recent_sheets.size():
 		var path := recent_sheets[index]
-		sheet_selected.emit(path)
+		if FileAccess.file_exists(path):
+			sheet_selected.emit(path)
+		else:
+			# Remove invalid path from recent sheets
+			recent_sheets.remove_at(index)
+			_update_recent_sheets_list()
+			if editor_settings:
+				editor_settings.set_setting("class_table_editor/recent_tables", recent_sheets)
 
 
 ## Show the Class Selection dialog for P2-009.
