@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://cj8yv3xm5qp7w"]
 
-[ext_resource type="Script" uid="uid://dyydv6i8sss6p" path="res://addons/class_table_editor/example/AdvancedDemo.gd" id="1_h3k8v"]
+[ext_resource type="Script" uid="uid://bqrmetvjhk77p" path="res://addons/class_table_editor/example/AdvancedDemo.gd" id="1_h3k8v"]
 [ext_resource type="Script" uid="uid://b3r0fm6iltfvb" path="res://addons/class_table_editor/inspector_plugins/table_handle.gd" id="2_r5kc8"]
 [ext_resource type="Resource" uid="uid://d2nd0v6tqoisy" path="res://addons/class_table_editor/example/base_unit_table.tres" id="3_r5kc8"]
 

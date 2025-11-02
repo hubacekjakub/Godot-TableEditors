@@ -13,21 +13,25 @@ cells = {
 "0,2": "15.0",
 "0,3": "3.0",
 "0,4": "Unbreakable wall of steel and resolve",
+"0,5": "6699ffff",
 "1,0": "Shadow",
 "1,1": "70.0",
 "1,2": "45.0",
 "1,3": "6.0",
 "1,4": "Deadly shadow that strikes unseen",
+"1,5": "f86075ff",
 "2,0": "Mystic",
 "2,1": "90.0",
 "2,2": "25.0",
 "2,3": "4.0",
 "2,4": "Mystical force of wisdom and power",
+"2,5": "e4fd6aff",
 "3,0": "Ranger",
 "3,1": "110.0",
 "3,2": "20.0",
 "3,3": "5.0",
-"3,4": "Swift arrow that dances through battle"
+"3,4": "Swift arrow that dances through battle",
+"3,5": "69fd9aff"
 }
 column_names = Array[String](["unit_name", "max_health", "attack_damage", "movement_speed", "description", "unit_color"])
 row_names = Array[String](["Row 1", "Row 2", "Row 3"])
