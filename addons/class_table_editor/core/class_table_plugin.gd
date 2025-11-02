@@ -17,6 +17,10 @@ var class_table_dock: Control
 var current_sheet: ClassTableResource
 var table_handle_inspector: EditorInspectorPlugin
 
+# Dialog instances (reused to prevent memory leaks)
+var save_dialog: EditorFileDialog = null
+var load_dialog: EditorFileDialog = null
+
 
 func _enter_tree() -> void:
 	_add_toolbar_buttons()
@@ -39,6 +43,12 @@ func _exit_tree() -> void:
 	if class_table_dock:
 		remove_control_from_bottom_panel(class_table_dock)
 		class_table_dock.queue_free()
+
+	# Clean up dialogs
+	if save_dialog:
+		save_dialog.queue_free()
+	if load_dialog:
+		load_dialog.queue_free()
 
 
 ## Return true when the object is a ClassTableResource.
@@ -224,22 +234,23 @@ func _show_save_dialog() -> void:
 	if not sheet:
 		return
 
-	var dialog := EditorFileDialog.new()
-	dialog.file_mode = EditorFileDialog.FILE_MODE_SAVE_FILE
-	dialog.access = EditorFileDialog.ACCESS_RESOURCES
-	dialog.add_filter("*.tres", "Godot Resource")
-	dialog.title = "Save Class Table As"
+	if save_dialog == null:
+		save_dialog = EditorFileDialog.new()
+		save_dialog.file_mode = EditorFileDialog.FILE_MODE_SAVE_FILE
+		save_dialog.access = EditorFileDialog.ACCESS_RESOURCES
+		save_dialog.filters = PackedStringArray(["*.tres ; Godot Resource"])
+		save_dialog.title = "Save Class Table As"
+		save_dialog.file_selected.connect(_on_save_file_selected)
+		save_dialog.canceled.connect(_on_save_dialog_canceled)
+		get_editor_interface().get_base_control().add_child(save_dialog)
 
 	var default_name := "new_class_table.tres"
 	if sheet.sheet_name != DEFAULT_SHEET_NAME and not sheet.sheet_name.is_empty():
 		default_name = sheet.sheet_name.to_snake_case() + ".tres"
 
-	dialog.current_file = default_name
-	dialog.current_dir = "res://"
-	dialog.file_selected.connect(_on_save_file_selected)
-
-	get_editor_interface().get_base_control().add_child(dialog)
-	dialog.popup_centered_ratio(0.6)
+	save_dialog.current_file = default_name
+	save_dialog.current_dir = "res://"
+	save_dialog.popup_centered_ratio(0.6)
 
 
 ## Persist the sheet at the selected path.
@@ -259,21 +270,33 @@ func _load_sheet() -> void:
 
 ## Show a file dialog for choosing an existing sheet.
 func _show_load_dialog() -> void:
-	var dialog := EditorFileDialog.new()
-	dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
-	dialog.access = EditorFileDialog.ACCESS_RESOURCES
-	dialog.add_filter("*.tres", "Godot Resource")
-	dialog.title = "Load Class Table"
-	dialog.current_dir = "res://"
-	dialog.file_selected.connect(_on_load_file_selected)
+	if load_dialog == null:
+		load_dialog = EditorFileDialog.new()
+		load_dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
+		load_dialog.access = EditorFileDialog.ACCESS_RESOURCES
+		load_dialog.filters = PackedStringArray(["*.tres ; Godot Resource"])
+		load_dialog.title = "Load Class Table"
+		load_dialog.file_selected.connect(_on_load_file_selected)
+		load_dialog.canceled.connect(_on_load_dialog_canceled)
+		get_editor_interface().get_base_control().add_child(load_dialog)
 
-	get_editor_interface().get_base_control().add_child(dialog)
-	dialog.popup_centered_ratio(0.6)
+	load_dialog.current_dir = "res://"
+	load_dialog.popup_centered_ratio(0.6)
 
 
 ## Load the sheet at the chosen path.
 func _on_load_file_selected(path: String) -> void:
 	_load_sheet_from_path(path)
+
+
+## Handle save dialog cancellation (keeps dialog in memory for reuse).
+func _on_save_dialog_canceled() -> void:
+	pass  # Dialog remains in memory for reuse
+
+
+## Handle load dialog cancellation (keeps dialog in memory for reuse).
+func _on_load_dialog_canceled() -> void:
+	pass  # Dialog remains in memory for reuse
 
 
 ## Load a sheet from disk and begin editing it.

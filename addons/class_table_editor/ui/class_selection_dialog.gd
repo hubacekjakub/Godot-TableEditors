@@ -270,3 +270,8 @@ func reset_to_defaults() -> void:
 	warning_text.visible = false
 	_validate_inputs()
 
+
+## Clean up when dialog is exiting the tree.
+func _exit_tree() -> void:
+	if file_dialog:
+		file_dialog.queue_free()
