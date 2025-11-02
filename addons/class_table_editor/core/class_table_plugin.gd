@@ -9,6 +9,7 @@ const TABLE_HANDLE_INSPECTOR_PLUGIN := preload("res://addons/class_table_editor/
 const DEFAULT_COLUMN_COUNT := 3
 const DEFAULT_ROW_COUNT := 5
 const DEFAULT_SHEET_NAME := "Untitled Class Table"
+const MAX_RECENT_SHEETS := 10
 
 var button_2d: Button
 var button_3d: Button
@@ -16,6 +17,8 @@ var button_inspector: Button
 var class_table_dock: Control
 var current_sheet: ClassTableResource
 var table_handle_inspector: EditorInspectorPlugin
+var editor_settings: EditorSettings
+var recent_sheets: Array[String] = []
 
 # Dialog instances (reused to prevent memory leaks)
 var save_dialog: EditorFileDialog = null
@@ -23,9 +26,20 @@ var load_dialog: EditorFileDialog = null
 
 
 func _enter_tree() -> void:
+	editor_settings = get_editor_interface().get_editor_settings()
+	if editor_settings.has_setting("class_table_editor/recent_tables"):
+		var loaded = editor_settings.get_setting("class_table_editor/recent_tables")
+		if loaded is Array:
+			recent_sheets = loaded as Array[String]
+	if recent_sheets.size() > MAX_RECENT_SHEETS:
+		recent_sheets = recent_sheets.slice(-MAX_RECENT_SHEETS)
+
 	_add_toolbar_buttons()
 	_create_class_table_dock()
 	add_control_to_bottom_panel(class_table_dock, "Class Table")
+
+	if class_table_dock and class_table_dock.has_method("set_recent_sheets"):
+		class_table_dock.set_recent_sheets(recent_sheets)
 
 	table_handle_inspector = TABLE_HANDLE_INSPECTOR_PLUGIN.new()
 	add_inspector_plugin(table_handle_inspector)
@@ -33,6 +47,9 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
+	if editor_settings:
+		editor_settings.set_setting("class_table_editor/recent_tables", recent_sheets)
+
 	if table_handle_inspector:
 		remove_inspector_plugin(table_handle_inspector)
 
@@ -246,7 +263,7 @@ func _show_save_dialog() -> void:
 
 	var default_name := "new_class_table.tres"
 	if sheet.sheet_name != DEFAULT_SHEET_NAME and not sheet.sheet_name.is_empty():
-		default_name = sheet.sheet_name.to_snake_case() + ".tres"
+		default_name = sheet.sheet_name + ".tres"
 
 	save_dialog.current_file = default_name
 	save_dialog.current_dir = "res://"
@@ -358,9 +375,22 @@ func _refresh_dock() -> void:
 
 ## Add a path to the dock's recent list when available.
 func _add_to_recent(path: String) -> void:
-	if path.is_empty() or not class_table_dock:
+	if path.is_empty():
 		return
-	if class_table_dock.has_method("add_to_recent_sheets"):
+
+	# Update recent_sheets
+	if path in recent_sheets:
+		recent_sheets.erase(path)
+	recent_sheets.append(path)
+	if recent_sheets.size() > MAX_RECENT_SHEETS:
+		recent_sheets.pop_front()
+
+	# Save to settings
+	if editor_settings:
+		editor_settings.set_setting("class_table_editor/recent_tables", recent_sheets)
+
+	# Update dock
+	if class_table_dock and class_table_dock.has_method("add_to_recent_sheets"):
 		class_table_dock.add_to_recent_sheets(path)
 
 
