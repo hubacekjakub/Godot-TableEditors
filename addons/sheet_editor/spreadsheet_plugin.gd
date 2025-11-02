@@ -12,6 +12,10 @@ var button_inspector: Button
 var sheet_editor_dock: Control
 var current_sheet: Resource
 
+# Dialog instances (reused to avoid memory leaks)
+var save_dialog: EditorFileDialog = null
+var load_dialog: EditorFileDialog = null
+
 
 func _enter_tree() -> void:
 	_add_toolbar_buttons()
@@ -220,11 +224,15 @@ func _save_sheet() -> void:
 
 func _show_save_dialog() -> void:
 	"""Show file dialog to save sheet with a new path"""
-	var dialog := EditorFileDialog.new()
-	dialog.file_mode = EditorFileDialog.FILE_MODE_SAVE_FILE
-	dialog.access = EditorFileDialog.ACCESS_RESOURCES
-	dialog.add_filter("*.tres", "Godot Resource")
-	dialog.title = "Save Sheet As"
+	if save_dialog == null:
+		save_dialog = EditorFileDialog.new()
+		save_dialog.file_mode = EditorFileDialog.FILE_MODE_SAVE_FILE
+		save_dialog.access = EditorFileDialog.ACCESS_RESOURCES
+		save_dialog.filters = PackedStringArray(["*.tres ; Godot Resource"])
+		save_dialog.title = "Save Sheet As"
+		save_dialog.file_selected.connect(_on_save_file_selected)
+		save_dialog.canceled.connect(_on_save_dialog_canceled)
+		get_editor_interface().get_base_control().add_child(save_dialog)
 
 	var default_name := "new_sheet.tres"
 	if current_sheet is SpreadsheetResource:
@@ -232,12 +240,9 @@ func _show_save_dialog() -> void:
 		if not sheet.sheet_name.is_empty() and sheet.sheet_name != "Untitled Sheet":
 			default_name = sheet.sheet_name.to_snake_case() + ".tres"
 
-	dialog.current_file = default_name
-	dialog.current_dir = "res://"
-	dialog.file_selected.connect(_on_save_file_selected)
-
-	get_editor_interface().get_base_control().add_child(dialog)
-	dialog.popup_centered_ratio(0.6)
+	save_dialog.current_file = default_name
+	save_dialog.current_dir = "res://"
+	save_dialog.popup_centered_ratio(0.6)
 
 
 func _on_save_file_selected(path: String) -> void:
@@ -261,6 +266,21 @@ func _on_save_file_selected(path: String) -> void:
 		push_error("Sheet Editor: Failed to save sheet - error code: " + str(error))
 
 
+func _on_save_dialog_canceled() -> void:
+	"""Handle save dialog cancellation"""
+	pass  # Dialog remains in memory for reuse
+
+
+func _on_load_file_selected(path: String) -> void:
+	"""Load sheet from the selected file path"""
+	_load_sheet_from_path(path)
+
+
+func _on_load_dialog_canceled() -> void:
+	"""Handle load dialog cancellation"""
+	pass  # Dialog remains in memory for reuse
+
+
 func _load_sheet() -> void:
 	"""Show dialog to load a sheet from file"""
 	_show_load_dialog()
@@ -268,16 +288,18 @@ func _load_sheet() -> void:
 
 func _show_load_dialog() -> void:
 	"""Show file dialog to load an existing sheet"""
-	var dialog := EditorFileDialog.new()
-	dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
-	dialog.access = EditorFileDialog.ACCESS_RESOURCES
-	dialog.add_filter("*.tres", "Godot Resource")
-	dialog.title = "Load Sheet"
-	dialog.current_dir = "res://"
-	dialog.file_selected.connect(_on_load_file_selected)
+	if load_dialog == null:
+		load_dialog = EditorFileDialog.new()
+		load_dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
+		load_dialog.access = EditorFileDialog.ACCESS_RESOURCES
+		load_dialog.filters = PackedStringArray(["*.tres ; Godot Resource"])
+		load_dialog.title = "Load Sheet"
+		load_dialog.file_selected.connect(_on_load_file_selected)
+		load_dialog.canceled.connect(_on_load_dialog_canceled)
+		get_editor_interface().get_base_control().add_child(load_dialog)
 
-	get_editor_interface().get_base_control().add_child(dialog)
-	dialog.popup_centered_ratio(0.6)
+	load_dialog.current_dir = "res://"
+	load_dialog.popup_centered_ratio(0.6)
 
 
 func _on_load_file_selected(path: String) -> void:
@@ -341,6 +363,17 @@ func _build_save_path(save_path: String, file_name: String) -> String:
 
 func _save_sheet_resource(sheet: SpreadsheetResource, path: String) -> bool:
 	"""Save a sheet resource to the specified path"""
+	# Ensure destination directory exists
+	var dir_path := path.get_basename().get_basename()  # Get directory without filename
+	if not dir_path.is_empty():
+		var dir_access := DirAccess.open(dir_path.get_basename())
+		if dir_access == null:
+			# Directory doesn't exist, try to create it recursively
+			var create_error := DirAccess.make_dir_recursive_absolute(dir_path)
+			if create_error != OK:
+				push_error("SpreadsheetPlugin: Failed to create directory '%s' - error: %d" % [dir_path, create_error])
+				return false
+	
 	var error := ResourceSaver.save(sheet, path)
 	if error != OK:
 		push_error("SpreadsheetPlugin: Failed to save sheet to %s - error: %d" % [path, error])
@@ -378,9 +411,15 @@ func _exit_tree() -> void:
 	remove_control_from_bottom_panel(sheet_editor_dock)
 	sheet_editor_dock.queue_free()
 
+	# Clean up dialogs
+	if save_dialog:
+		save_dialog.queue_free()
+	if load_dialog:
+		load_dialog.queue_free()
+
 
 func _on_button_pressed() -> void:
-	if current_sheet:
+	if is_instance_valid(current_sheet):
 		make_bottom_panel_item_visible(sheet_editor_dock)
 	else:
-		print("No sheet selected")
+		print("No sheet selected or resource was freed")
