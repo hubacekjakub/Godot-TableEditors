@@ -9,3 +9,4 @@ class_name BaseUnit
 @export var attack_damage: int = 10
 @export var movement_speed: float = 5.0
 @export var description: String = "A basic unit"
+@export var unit_color: Color = Color.WHITE

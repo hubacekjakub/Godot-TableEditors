@@ -1,0 +1,95 @@
+[gd_resource type="Resource" script_class="ClassTableResource" load_steps=2 format=3 uid="uid://d2nd0v6tqoisy"]
+
+[ext_resource type="Script" uid="uid://0cxe8rqi2rrw" path="res://addons/class_table_editor/core/class_table_resource.gd" id="1_p7p3n"]
+
+[resource]
+script = ExtResource("1_p7p3n")
+sheet_name = "BaseUnitTable"
+row_count = 4
+column_count = 6
+cells = {
+"0,0": "Guardian",
+"0,1": "200.0",
+"0,2": "15.0",
+"0,3": "3.0",
+"0,4": "Unbreakable wall of steel and resolve",
+"1,0": "Shadow",
+"1,1": "70.0",
+"1,2": "45.0",
+"1,3": "6.0",
+"1,4": "Deadly shadow that strikes unseen",
+"2,0": "Mystic",
+"2,1": "90.0",
+"2,2": "25.0",
+"2,3": "4.0",
+"2,4": "Mystical force of wisdom and power",
+"3,0": "Ranger",
+"3,1": "110.0",
+"3,2": "20.0",
+"3,3": "5.0",
+"3,4": "Swift arrow that dances through battle"
+}
+column_names = Array[String](["unit_name", "max_health", "attack_damage", "movement_speed", "description", "unit_color"])
+row_names = Array[String](["Row 1", "Row 2", "Row 3"])
+class_file_path = "res://addons/class_table_editor/example/BaseUnit.gd"
+columns_metadata = Array[Dictionary]([{
+"default": null,
+"exported": true,
+"hint": 0,
+"hint_string": "",
+"is_required": false,
+"name": "unit_name",
+"type": 4,
+"type_name": "String",
+"usage": 4102
+}, {
+"default": null,
+"exported": true,
+"hint": 0,
+"hint_string": "",
+"is_required": false,
+"name": "max_health",
+"type": 2,
+"type_name": "int",
+"usage": 4102
+}, {
+"default": null,
+"exported": true,
+"hint": 0,
+"hint_string": "",
+"is_required": false,
+"name": "attack_damage",
+"type": 2,
+"type_name": "int",
+"usage": 4102
+}, {
+"default": null,
+"exported": true,
+"hint": 0,
+"hint_string": "",
+"is_required": false,
+"name": "movement_speed",
+"type": 3,
+"type_name": "float",
+"usage": 4102
+}, {
+"default": null,
+"exported": true,
+"hint": 0,
+"hint_string": "",
+"is_required": false,
+"name": "description",
+"type": 4,
+"type_name": "String",
+"usage": 4102
+}, {
+"default": null,
+"exported": true,
+"hint": 0,
+"hint_string": "",
+"is_required": false,
+"name": "unit_color",
+"type": 20,
+"type_name": "Color",
+"usage": 4102
+}])
