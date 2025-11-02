@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://c8vyay6n4lo5w"]
 
-[ext_resource type="Script" uid="uid://d10sl1vofx53c" path="res://addons/class_table_editor/class_table_dock.gd" id="1_class_table_dock"]
+[ext_resource type="Script" uid="uid://d10sl1vofx53c" path="res://addons/class_table_editor/ui/class_table_dock.gd" id="1_class_table_dock"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_menubar"]
 bg_color = Color(0.2, 0.23, 0.27, 1)
