@@ -18,12 +18,12 @@ func _init(p_dock: Control) -> void:
 
 ## Create a type-specific cell editor for the given position.
 func create_cell_editor(row: int, col: int, sheet: ClassTableResource) -> Control:
-	# Get type info for this column (P2-020)
+	# Get type info for this column
 	var type_info = sheet.get_column_type_info(col)
 	var type_id = type_info.get("type", TYPE_NIL)
 	var type_name = type_info.get("type_name", "Variant")
 
-	# Create type-specific editor (P2-020, P2-023, P2-024, P2-025)
+	# Create type-specific editor
 	var cell_editor = TYPED_CELL_EDITOR_FACTORY.create_editor(type_id, type_name, type_info)
 	cell_editor.set_meta("row", row)
 	cell_editor.set_meta("col", col)
@@ -78,7 +78,7 @@ func _apply_cell_styling(cell_editor: Control, row: int, col: int, type_id: int)
 
 ## Connect appropriate events for the cell editor.
 func _connect_cell_events(cell_editor: Control, row: int, col: int) -> void:
-	# Connect signals based on control type (P2-019, P2-026, P2-027)
+	# Connect signals based on control type
 	if cell_editor is LineEdit:
 		cell_editor.text_changed.connect(_on_typed_cell_changed.bind(row, col, cell_editor))
 		cell_editor.text_submitted.connect(_on_typed_cell_submitted.bind(row, col, cell_editor))

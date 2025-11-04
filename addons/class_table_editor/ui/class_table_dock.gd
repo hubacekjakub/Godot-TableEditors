@@ -137,8 +137,6 @@ func update_ui() -> void:
 	grid_builder.rebuild_grid()
 	_update_recent_sheets_list()
 
-## Convert column index to Excel-style letter (0=A, 1=B, ..., 26=AA, etc.).
-
 func _on_cell_focus_entered(row: int, col: int, cell: Control) -> void:
 	## Track focused cell and select all text for easy editing.
 	# Only select all text for LineEdit controls
@@ -342,7 +340,7 @@ func _on_recent_sheet_selected(index: int) -> void:
 				editor_settings.set_setting("class_table_editor/recent_tables", recent_sheets)
 
 
-## Show the Class Selection dialog for P2-009.
+## Show the Class Selection dialog.
 func _show_class_select_dialog() -> void:
 	# Instantiate new class selection dialog if it doesn't exist
 	if not class_select_dialog:
@@ -380,10 +378,10 @@ func _on_class_table_created(resource_path: String, class_info: Dictionary) -> v
 			push_warning("Editor interface not available - plugin may not be aware of new table")
 
 
-## === NEW: Type-Safe Editing Methods (P2-019 to P2-028) ===
+## === NEW: Type-Safe Editing Methods ===
 
 
-## Handle cell value changes with type validation (P2-019, P2-021, P2-022, P2-026, P2-027).
+## Handle cell value changes with type validation.
 func _on_typed_cell_changed(new_value: Variant, row: int, col: int, editor: Control) -> void:
 	var sheet := _get_sheet()
 	if not sheet:
@@ -394,10 +392,10 @@ func _on_typed_cell_changed(new_value: Variant, row: int, col: int, editor: Cont
 	# Get value from editor
 	var value = TYPED_CELL_EDITOR_FACTORY.get_editor_value(editor)
 
-	# Validate value (P2-019, P2-026)
+	# Validate value
 	var validation = TYPED_CELL_EDITOR_FACTORY.validate_value(type_id, value)
 	if not validation["valid"]:
-		# Show validation error (P2-026)
+		# Show validation error
 		_show_validation_error(editor, validation["error"])
 		return
 
@@ -415,7 +413,7 @@ func _on_typed_cell_submitted(new_value: Variant, row: int, col: int, editor: Co
 	_move_to_cell(row + 1, col)
 
 
-## Show validation error in UI (P2-026)
+## Show validation error in UI
 func _show_validation_error(editor: Control, error_message: String) -> void:
 	## Display validation error for a cell editor.
 	# Add error border styling

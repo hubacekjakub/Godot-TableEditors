@@ -65,7 +65,7 @@ func _build_column_headers(sheet: ClassTableResource) -> void:
 		var col_type_name = type_info.get("type_name", "Variant")
 		var col_name = sheet.get_column_name(col)
 
-		# Display column name with type hint (P2-028)
+		# Display column name with type hint
 		header_edit.text = col_name
 		header_edit.tooltip_text = "Type: %s" % col_type_name
 		header_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -73,10 +73,10 @@ func _build_column_headers(sheet: ClassTableResource) -> void:
 		# Make columns wider to accommodate longer property names
 		var column_width = max(120, col_name.length() * 8)
 		header_edit.custom_minimum_size = Vector2(column_width, 30)
-		header_edit.placeholder_text = "%s (%s)" % [_get_column_letter(col), col_type_name]
+		header_edit.placeholder_text = "%s (%s)" % [sheet.get_column_name(col), col_type_name]
 		header_edit.set_meta("column_index", col)
 
-		# Style column headers like Excel with type-based color coding (P2-019)
+		# Style column headers like Excel with type-based color coding
 		var header_style := StyleBoxFlat.new()
 		header_style.bg_color = _get_type_header_color(type_info.get("type", TYPE_NIL))
 		header_style.border_width_right = 1
@@ -100,21 +100,6 @@ func _build_data_rows(sheet: ClassTableResource) -> void:
 		for col in range(sheet.column_count):
 			var cell_editor = cell_manager.create_cell_editor(row, col, sheet)
 			grid_container.add_child(cell_editor)
-
-
-## Convert column index to Excel-style letter (0=A, 1=B, ..., 26=AA, etc.).
-func _get_column_letter(col_index: int) -> String:
-	var result := ""
-	var index := col_index
-
-	while true:
-		result = char(65 + (index % 26)) + result
-		index = index / 26
-		if index == 0:
-			break
-		index -= 1
-
-	return result
 
 
 ## Return color-coded background for column headers based on type.

@@ -1,7 +1,7 @@
 extends Resource
 class_name TypeSafeTestData
 
-## Example class for demonstrating type-safe editing (P2-019 to P2-028)
+## Example class for demonstrating type-safe editing
 ## Use this class to create a table and test all supported editor types
 
 @export var item_name: String = "Example Item"

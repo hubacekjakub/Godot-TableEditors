@@ -229,12 +229,12 @@ func _on_confirmed() -> void:
 	# Add "name" column as first column
 	table_resource.add_column_with_type("name", "String", "", true)
 
-	# P2-012: Auto-generate table columns from class properties
+	# Auto-generate table columns from class properties
 	if not table_resource.create_columns_from_class(class_file_path):
 		push_error("Failed to create columns from class: " + class_file_path)
 		return
 
-	# P2-017: Create new class table instances with initial rows
+	# Create new class table instances with initial rows
 	table_resource.row_count = 0
 	table_resource.column_count = table_resource.columns_metadata.size()
 

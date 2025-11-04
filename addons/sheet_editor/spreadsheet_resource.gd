@@ -141,12 +141,9 @@ func _get_column_letter(col_index: int) -> String:
 	var result := ""
 	var index := col_index
 
-	while true:
+	while index >= 0:
 		result = char(65 + (index % 26)) + result
-		index = index / 26
-		if index == 0:
-			break
-		index -= 1
+		index = int(index / 26) - 1
 
 	return result
 

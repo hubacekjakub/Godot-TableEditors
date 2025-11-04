@@ -45,7 +45,8 @@ func get_column_name(col: int) -> String:
 		var name := column_names[col]
 		if not name.is_empty():
 			return name
-	return _get_column_letter(col)
+	# Fallback for edge cases (shouldn't happen in class tables)
+	return "Column_%d" % col
 
 
 ## Set a custom display name for a column.
@@ -143,21 +144,6 @@ func add_row(row_name: String = "") -> void:
 func add_column(col_name: String = "") -> void:
 	column_names.append(col_name)
 	column_count += 1
-
-
-## Convert column index to Excel-style letter (0=A, 1=B, ..., 26=AA, etc.).
-func _get_column_letter(col_index: int) -> String:
-	var result := ""
-	var index := col_index
-
-	while true:
-		result = char(65 + (index % 26)) + result
-		index = index / 26
-		if index == 0:
-			break
-		index -= 1
-
-	return result
 
 
 ## CSV Export/Import Functions

@@ -1,9 +1,6 @@
 @tool
 ## ClassSelector - Utility for discovering and selecting GDScript classes (Strict Typing v3)
 ##
-## P2-009: Create "Select Class" dialog for choosing classes
-## P2-010: Detect GDScript classes in the project
-##
 ## This utility provides class discovery and selection functionality for
 ## auto-generating tables from GDScript class definitions.
 

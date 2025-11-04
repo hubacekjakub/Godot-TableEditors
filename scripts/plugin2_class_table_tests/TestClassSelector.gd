@@ -1,9 +1,9 @@
 @tool
-## TestClassSelector - Tests for ClassSelector class discovery (P2-009 to P2-010)
+## TestClassSelector - Tests for ClassSelector class discovery
 ##
 ## Tests the new ClassSelector functionality:
-## - P2-009: Create "Select Class" dialog for choosing classes
-## - P2-010: Detect GDScript classes in the project
+## - Create "Select Class" dialog for choosing classes
+## - Detect GDScript classes in the project
 ##
 ## This test validates that ClassSelector can:
 ## 1. Discover classes in the project
@@ -40,7 +40,7 @@ func run_all() -> void:
 
 
 func test_class_discovery() -> void:
-	print("\n  📍 Test 1: Class Discovery (P2-009, P2-010)")
+	print("\n  📍 Test 1: Class Discovery")
 	_test_count += 1
 
 	var selector := ClassSelector.new()

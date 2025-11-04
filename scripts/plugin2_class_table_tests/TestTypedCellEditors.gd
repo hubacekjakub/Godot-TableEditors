@@ -1,7 +1,7 @@
 @tool
 extends RefCounted
 
-## Unit Tests for Typed Cell Editors (P2-019 to P2-028)
+## Unit Tests for Typed Cell Editors
 ## Tests type-safe editing, validation, and specialized controls
 
 const TypedCellEditorFactory = preload("res://addons/class_table_editor/utils/typed_cell_editor_factory.gd")
@@ -14,7 +14,7 @@ var failed_count: int = 0
 func run_all_tests() -> void:
 	"""Run all typed cell editor tests"""
 	print("\n" + "=".repeat(60))
-	print("Running Typed Cell Editor Tests (P2-019 to P2-028)")
+	print("Running Typed Cell Editor Tests")
 	print("=".repeat(60))
 
 	test_results.clear()
@@ -57,7 +57,7 @@ func run_all_tests() -> void:
 				print("  ❌ %s: %s" % [result["name"], result["message"]])
 
 
-## === Test: Editor Creation (P2-020) ===
+## === Test: Editor Creation ===
 
 func test_bool_editor_creation() -> void:
 	var editor = TypedCellEditorFactory.create_editor(TYPE_BOOL, "bool")
@@ -109,7 +109,7 @@ func test_color_editor_creation() -> void:
 	_assert("Color editor has correct type_id", editor.get_meta("type_id") == TYPE_COLOR)
 
 
-## === Test: Value Handling (P2-021, P2-022, P2-023, P2-024, P2-025) ===
+## === Test: Value Handling ===
 
 func test_bool_value_handling() -> void:
 	var editor = TypedCellEditorFactory.create_editor(TYPE_BOOL, "bool")
@@ -217,7 +217,7 @@ func test_color_value_handling() -> void:
 	_assert("Color editor converts from hex string", value.is_equal_approx(Color.RED))
 
 
-## === Test: Type Validation (P2-019, P2-026, P2-027) ===
+## === Test: Type Validation ===
 
 func test_type_validation() -> void:
 	# Test bool validation
@@ -275,7 +275,7 @@ func test_type_conversion() -> void:
 	_assert("Parse empty Vector3 returns ZERO", vec3.is_equal_approx(Vector3.ZERO))
 
 
-## === Test: Type Hint Display (P2-028) ===
+## === Test: Type Hint Display ===
 
 func test_type_hint_display() -> void:
 	# Test type hint text generation
