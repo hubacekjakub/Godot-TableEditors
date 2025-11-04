@@ -69,7 +69,7 @@ func calculate_total_stats():
 	var total_armor = 0.0
 
 	for item in inventory:
-		total_damage += item.get_damage()  # Using the method from TestItemData
+		total_damage += item.damage
 		total_armor += item.armor
 
 	print("  Total Damage: %d" % total_damage)
