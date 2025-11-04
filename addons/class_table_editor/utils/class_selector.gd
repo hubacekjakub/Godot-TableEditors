@@ -155,6 +155,7 @@ func _extract_parent_class(file_path: String) -> String:
 		return ""
 
 	var content: String = file.get_as_text()
+	file.close()
 
 	# Look for "extends" keyword
 	var lines: PackedStringArray = content.split("\n")

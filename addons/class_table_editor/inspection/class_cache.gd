@@ -47,6 +47,7 @@ func _get_file_mtime(file_path: String) -> int:
 	if file == null:
 		return 0
 
+	file.close()
 	return FileAccess.get_modified_time(file_path)
 
 

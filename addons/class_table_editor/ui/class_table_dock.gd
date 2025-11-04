@@ -360,20 +360,23 @@ func _show_class_select_dialog() -> void:
 
 ## Handle class table creation from class selection dialog.
 func _on_class_table_created(resource_path: String, class_info: Dictionary) -> void:
-	print("Class table created: %s" % resource_path)
-	print("  From class: %s" % class_info.get("class_name", ""))
+	if OS.is_debug_build():
+		print("Class table created: %s" % resource_path)
+		print("  From class: %s" % class_info.get("class_name", ""))
 
 	# Load and display the newly created table
 	var table_resource = load(resource_path) as ClassTableResource
 	if table_resource:
 		set_sheet(table_resource)
-		print("Table loaded and displayed in dock")
+		if OS.is_debug_build():
+			print("Table loaded and displayed in dock")
 
 		# IMPORTANT: Make the plugin aware of this resource by editing it
 		# This will trigger the plugin's _edit() method which sets current_sheet
 		if editor_interface:
 			editor_interface.edit_resource(table_resource)
-			print("Resource registered with editor")
+			if OS.is_debug_build():
+				print("Resource registered with editor")
 		else:
 			push_warning("Editor interface not available - plugin may not be aware of new table")
 
