@@ -31,7 +31,7 @@ signal create_table_requested(table_name: String, file_name: String, rows: int, 
 @onready var recent_sheets_list: ItemList = %RecentSheetsList
 @onready var grid_container: GridContainer = %GridContainer
 
-var class_select_dialog: ConfirmationDialog = null
+var class_select_dialog: ConfirmationDialog = null  # Lazy instantiated in _show_class_select_dialog()
 var editor_interface: EditorInterface = null  # Reference to editor interface
 
 var current_sheet: Resource = null
@@ -80,6 +80,14 @@ func _ready() -> void:
 	grid_builder.cell_manager.typed_cell_submitted.connect(_on_typed_cell_submitted)
 	grid_builder.cell_manager.cell_focus_entered.connect(_on_cell_focus_entered)
 	grid_builder.cell_manager.cell_gui_input.connect(_on_cell_gui_input)
+
+
+func _exit_tree() -> void:
+	"""Clean up resources to prevent memory leaks"""
+	# Clean up dialogs
+	if class_select_dialog and is_instance_valid(class_select_dialog):
+		class_select_dialog.queue_free()
+		class_select_dialog = null
 
 
 func _setup_menus() -> void:

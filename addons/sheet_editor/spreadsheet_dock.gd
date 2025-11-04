@@ -45,6 +45,21 @@ func _ready() -> void:
 	_update_recent_sheets_list()
 
 
+func _exit_tree() -> void:
+	"""Clean up dialogs to prevent memory leaks"""
+	if csv_export_dialog and is_instance_valid(csv_export_dialog):
+		csv_export_dialog.queue_free()
+		csv_export_dialog = null
+	
+	if csv_import_dialog and is_instance_valid(csv_import_dialog):
+		csv_import_dialog.queue_free()
+		csv_import_dialog = null
+	
+	if create_table_dialog and is_instance_valid(create_table_dialog):
+		create_table_dialog.queue_free()
+		create_table_dialog = null
+
+
 func _setup_csv_dialogs() -> void:
 	"""Setup CSV export/import dialogs"""
 	# Create CSV export dialog
