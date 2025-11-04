@@ -1,0 +1,191 @@
+[gd_scene load_steps=5 format=3 uid="uid://ra5i7p7pjcjo"]
+
+[ext_resource type="Script" uid="uid://b6j3crxppkh8j" path="res://addons/class_table_editor/class_selection_dialog.gd" id="1_selection"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_knvl7"]
+bg_color = Color(0.160784, 0.160784, 0.160784, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.254902, 0.321569, 0.388235, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="2"]
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+bg_color = Color(0.12549, 0.12549, 0.12549, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.160784, 0.160784, 0.160784, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="1"]
+bg_color = Color(0.160784, 0.160784, 0.160784, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.4, 0.5, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="ClassSelectionDialog" type="ConfirmationDialog"]
+title = "Create Table from GDScript Class"
+initial_position = 1
+size = Vector2i(495, 649)
+visible = true
+min_size = Vector2i(495, 500)
+ok_button_text = "Create"
+script = ExtResource("1_selection")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+custom_minimum_size = Vector2(450, 380)
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 487.0
+offset_bottom = 600.0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="ScriptLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "📄 Select GDScript Class:"
+
+[node name="ScriptPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ScriptContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScriptPanel"]
+layout_mode = 2
+
+[node name="ClassList" type="ItemList" parent="MarginContainer/VBoxContainer/ScriptPanel/ScriptContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_knvl7")
+item_count = 3
+item_0/text = "InventoryExample (1 properties)"
+item_1/text = "TestItemData (5 properties)"
+item_2/text = "TypeSafeTestData (14 properties)"
+
+[node name="RefreshButton" type="Button" parent="MarginContainer/VBoxContainer/ScriptPanel/ScriptContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "🔄 Refresh"
+
+[node name="ClassInfoPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("2")
+
+[node name="ClassInfoVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ClassInfoPanel"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="ClassNameLabel" type="Label" parent="MarginContainer/VBoxContainer/ClassInfoPanel/ClassInfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "📦 Class: (none selected)"
+
+[node name="PropertiesCountLabel" type="Label" parent="MarginContainer/VBoxContainer/ClassInfoPanel/ClassInfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+text = "📝 Properties: 0"
+
+[node name="PropertiesList" type="ItemList" parent="MarginContainer/VBoxContainer/ClassInfoPanel/ClassInfoVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("1")
+
+[node name="Spacer1" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "📋 Table Name:"
+
+[node name="NameEdit" type="LineEdit" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Enter table name..."
+
+[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="PathLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "💾 Save Path:"
+
+[node name="PathContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PathEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/PathContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "res://resources/"
+placeholder_text = "res://resources/"
+
+[node name="BrowseButton" type="Button" parent="MarginContainer/VBoxContainer/PathContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Browse..."
+
+[node name="Spacer4" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="HelpText" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 12
+text = "You can add or remove rows and columns later.
+The table will be saved as a .tres resource file."
+autowrap_mode = 3
+clip_text = true
+
+[node name="WarningText" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.5, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "⚠️ WARNING: File 'my_table.tres' already exists!"
+autowrap_mode = 3
+clip_text = true

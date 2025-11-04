@@ -1,0 +1,206 @@
+[gd_scene load_steps=9 format=3 uid="uid://cj8yv3xm5qp7w"]
+
+[ext_resource type="Script" uid="uid://bqrmetvjhk77p" path="res://addons/class_table_editor/example/AdvancedDemo.gd" id="1_h3k8v"]
+[ext_resource type="Script" uid="uid://b3r0fm6iltfvb" path="res://addons/class_table_editor/inspector_plugins/table_handle.gd" id="2_r5kc8"]
+[ext_resource type="Resource" uid="uid://d2nd0v6tqoisy" path="res://addons/class_table_editor/example/base_unit_table.tres" id="3_r5kc8"]
+
+[sub_resource type="Resource" id="Resource_r5kc8"]
+script = ExtResource("2_r5kc8")
+table_resource = ExtResource("3_r5kc8")
+row_name = "Guardian"
+
+[sub_resource type="Resource" id="Resource_qg1g0"]
+script = ExtResource("2_r5kc8")
+table_resource = ExtResource("3_r5kc8")
+row_name = "Guardian"
+
+[sub_resource type="Resource" id="Resource_010u3"]
+script = ExtResource("2_r5kc8")
+table_resource = ExtResource("3_r5kc8")
+
+[sub_resource type="Resource" id="Resource_ddmgv"]
+script = ExtResource("2_r5kc8")
+table_resource = ExtResource("3_r5kc8")
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_base"]
+bg_color = Color(0.15, 0.15, 0.2, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.7, 0.7, 0.8, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 16
+shadow_offset = Vector2(4, 6)
+
+[node name="UnitSpawner" type="Node2D"]
+script = ExtResource("1_h3k8v")
+unit_1_handle = SubResource("Resource_r5kc8")
+unit_2_handle = SubResource("Resource_qg1g0")
+unit_3_handle = SubResource("Resource_010u3")
+unit_4_handle = SubResource("Resource_ddmgv")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/CenterContainer"]
+custom_minimum_size = Vector2(800, 530)
+layout_mode = 2
+alignment = 1
+
+[node name="Title" type="Label" parent="CanvasLayer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.95, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
+theme_override_font_sizes/font_size = 28
+text = "⚔️ UNIT SELECTION"
+horizontal_alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="CanvasLayer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+columns = 2
+
+[node name="Panel1" type="Panel" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer"]
+modulate = Color(0.4, 0.6, 1, 0.9)
+custom_minimum_size = Vector2(350, 230)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_base")
+
+[node name="DescriptionLabel" type="Label" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer/Panel1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.98, 0.98, 0.98, 1)
+theme_override_font_sizes/font_size = 16
+text = "Guardian
+
+Unbreakable wall of steel and resolve
+
+HP: 200
+ATK: 15
+SPD: 3.0"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+clip_text = true
+
+[node name="Panel2" type="Panel" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer"]
+modulate = Color(0.4, 0.6, 1, 0.9)
+custom_minimum_size = Vector2(350, 230)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_base")
+
+[node name="DescriptionLabel" type="Label" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer/Panel2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.98, 0.98, 0.98, 1)
+theme_override_font_sizes/font_size = 16
+text = "Guardian
+
+Unbreakable wall of steel and resolve
+
+HP: 200
+ATK: 15
+SPD: 3.0"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+clip_text = true
+
+[node name="Panel3" type="Panel" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer"]
+modulate = Color(0.5, 0.5, 0.5, 0.7)
+custom_minimum_size = Vector2(350, 230)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_base")
+
+[node name="DescriptionLabel" type="Label" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer/Panel3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.98, 0.98, 0.98, 1)
+theme_override_font_sizes/font_size = 16
+text = "Slot 3
+
+[Empty - Select a unit using the TableHandle]"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+clip_text = true
+
+[node name="Panel4" type="Panel" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer"]
+modulate = Color(0.5, 0.5, 0.5, 0.7)
+custom_minimum_size = Vector2(350, 230)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_base")
+
+[node name="DescriptionLabel" type="Label" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer/Panel4"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.98, 0.98, 0.98, 1)
+theme_override_font_sizes/font_size = 16
+text = "Slot 4
+
+[Empty - Select a unit using the TableHandle]"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+clip_text = true
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.08, 0.08, 0.12, 1)
