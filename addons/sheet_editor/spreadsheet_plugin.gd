@@ -54,8 +54,9 @@ func _show_dock() -> void:
 		sheet_editor_dock.set_sheet(current_sheet)
 
 func _hide_dock() -> void:
-	"""Hide the sheet editor dock (currently no-op as dock stays visible)"""
-	pass
+	"""Hide the sheet editor dock when editing non-SpreadsheetResource objects"""
+	if sheet_editor_dock:
+		hide_bottom_panel()
 
 
 func _is_object_sheet_resource(object: Object) -> bool:

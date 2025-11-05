@@ -82,7 +82,7 @@ func _show_dock() -> void:
 ## Hide the dock.
 func _hide_dock() -> void:
 	if class_table_dock:
-		class_table_dock.hide()
+		hide_bottom_panel()
 
 
 ## Add all toolbar buttons used by the plugin.

@@ -52,8 +52,9 @@ func _show_dock() -> void:
 
 
 func _hide_dock() -> void:
-	"""Hide the resource editor dock"""
-	pass
+	"""Hide the resource editor dock when editing non-ResourceCollection objects"""
+	if resource_editor_dock:
+		hide_bottom_panel()
 
 
 func _is_object_resource_collection(object: Object) -> bool:
