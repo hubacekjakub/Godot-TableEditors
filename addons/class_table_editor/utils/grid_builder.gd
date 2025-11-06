@@ -24,8 +24,14 @@ func set_sheet(sheet: ClassTableResource = null) -> void:
 	current_sheet = sheet
 
 
-func rebuild_grid() -> void:
+func rebuild_grid(force: bool = false) -> void:
 	## Rebuild the entire grid based on current sheet data.
+	## If force is false, checks if rebuild is necessary first.
+	
+	# Check if rebuild is actually needed (optimization)
+	if not force and not _needs_rebuild():
+		return
+	
 	for child in grid_container.get_children():
 		child.queue_free()
 
@@ -53,6 +59,41 @@ func rebuild_grid() -> void:
 
 	_build_column_headers(sheet)
 	_build_data_rows(sheet)
+
+
+func _needs_rebuild() -> bool:
+	## Check if grid structure needs to be rebuilt.
+	## Returns true if grid dimensions don't match sheet dimensions.
+	if not current_sheet:
+		return grid_container.get_child_count() > 0
+	
+	var child_count = grid_container.get_child_count()
+	if child_count == 0:
+		return true
+	
+	# Expected children: col_headers + (rows * cells)
+	var expected = current_sheet.column_count + (current_sheet.row_count * current_sheet.column_count)
+	return child_count != expected
+
+
+func update_single_cell(row: int, col: int) -> void:
+	## Update a single cell's display without rebuilding entire grid.
+	## This is an optimization for cell edits that don't change structure.
+	if not current_sheet:
+		return
+	
+	# Calculate cell index: headers + (row * columns) + col
+	var cell_index := current_sheet.column_count + (row * current_sheet.column_count) + col
+	
+	var children := grid_container.get_children()
+	if cell_index >= 0 and cell_index < children.size():
+		var cell := children[cell_index]
+		# Update the cell editor's value from sheet
+		var value = current_sheet.get_cell(row, col)
+		if cell.has_method("set_text"):
+			cell.set_text(str(value))
+		elif cell.has_method("set_value"):
+			cell.set_value(value)
 
 
 ## Create editable column headers with type styling.

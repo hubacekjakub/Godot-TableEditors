@@ -54,11 +54,11 @@ func _exit_tree() -> void:
 	if csv_export_dialog and is_instance_valid(csv_export_dialog):
 		csv_export_dialog.queue_free()
 		csv_export_dialog = null
-	
+
 	if csv_import_dialog and is_instance_valid(csv_import_dialog):
 		csv_import_dialog.queue_free()
 		csv_import_dialog = null
-	
+
 	if create_table_dialog and is_instance_valid(create_table_dialog):
 		create_table_dialog.queue_free()
 		create_table_dialog = null
@@ -115,8 +115,12 @@ func set_sheet(sheet: Resource) -> void:
 	update_ui()
 
 
-func update_ui() -> void:
-	"""Update the UI to reflect the current sheet data"""
+func update_ui(force_rebuild: bool = false) -> void:
+	"""Update the UI to reflect the current sheet data
+	
+	Args:
+		force_rebuild: If true, forces a full grid rebuild. If false, only updates labels.
+	"""
 	if not current_sheet or not current_sheet is SpreadsheetResource:
 		columns_label.text = "Columns: 0"
 		rows_label.text = "Rows: 0"
@@ -127,8 +131,69 @@ func update_ui() -> void:
 	var sheet := current_sheet as SpreadsheetResource
 	columns_label.text = "Columns: %d" % sheet.column_count
 	rows_label.text = "Rows: %d" % sheet.row_count
-	_rebuild_grid.call_deferred()
+	
+	# Only rebuild if forced (structure changed) or grid doesn't match sheet dimensions
+	if force_rebuild or _needs_grid_rebuild(sheet):
+		_rebuild_grid.call_deferred()
+	
 	_update_recent_sheets_list()
+
+
+func _rebuild_grid() -> void:
+	"""Rebuild the entire grid based on current sheet data"""
+	# Clear existing grid
+	for child in grid_container.get_children():
+		child.queue_free()
+
+	if not current_sheet or not current_sheet is SpreadsheetResource:
+		var label := Label.new()
+		label.text = "No sheet loaded"
+		grid_container.add_child(label)
+		return
+
+	var sheet := current_sheet as SpreadsheetResource
+
+	# Set grid columns (add 1 for row headers)
+	grid_container.columns = max(1, sheet.column_count + 1)
+
+
+func _needs_grid_rebuild(sheet: SpreadsheetResource) -> bool:
+	"""Check if grid structure needs to be rebuilt
+	
+	Returns true if:
+	- Grid is empty
+	- Number of grid children doesn't match expected (row/col structure changed)
+	"""
+	var child_count = grid_container.get_child_count()
+	if child_count == 0:
+		return true
+	
+	# Expected children: corner + col_headers + (rows * (row_header + cells))
+	# = 1 + column_count + (row_count * (1 + column_count))
+	var expected = 1 + sheet.column_count + (sheet.row_count * (1 + sheet.column_count))
+	return child_count != expected
+
+
+func _update_single_cell(row: int, col: int, new_value: String) -> void:
+	"""Update a single cell's display without rebuilding the entire grid
+	
+	This is an optimization for cell edits that don't change grid structure.
+	"""
+	if not current_sheet or not current_sheet is SpreadsheetResource:
+		return
+	
+	var sheet := current_sheet as SpreadsheetResource
+	
+	# Calculate cell index in grid layout
+	# Grid: [corner] [col headers...] [row1 header] [row1 cells...] [row2 header] [row2 cells...]
+	var cell_index := (1 + sheet.column_count) + (row * (sheet.column_count + 1)) + 1 + col
+	
+	var children := grid_container.get_children()
+	if cell_index >= 0 and cell_index < children.size():
+		var cell := children[cell_index]
+		if cell is LineEdit and cell.text != new_value:
+			# Update without triggering text_changed signal
+			cell.text = new_value
 
 
 func _rebuild_grid() -> void:
@@ -404,7 +469,7 @@ func _on_csv_import_confirmed(file_path: String) -> void:
 	var sheet := current_sheet as SpreadsheetResource
 	if sheet.import_from_csv(file_path):
 		print("Successfully imported from: " + file_path)
-		update_ui.call_deferred()  # Refresh the UI to show imported data
+		update_ui.call_deferred(true)  # Force rebuild since structure may have changed
 	else:
 		push_error("Failed to import CSV from: " + file_path)
 
@@ -574,10 +639,10 @@ func _load_recent_sheets_from_settings() -> void:
 	"""Load recent sheets list from EditorSettings"""
 	if not editor_settings:
 		return
-	
+
 	if not editor_settings.has_setting(RECENT_SHEETS_SETTING):
 		editor_settings.set_setting(RECENT_SHEETS_SETTING, [])
-	
+
 	var saved_sheets = editor_settings.get_setting(RECENT_SHEETS_SETTING)
 	if saved_sheets is Array:
 		recent_sheets.clear()

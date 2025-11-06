@@ -159,19 +159,20 @@ func set_sheet(sheet: Resource) -> void:
 	update_ui()
 
 
-func update_ui() -> void:
+func update_ui(force_rebuild: bool = false) -> void:
 	## Update the UI to reflect the current sheet data.
+	## If force_rebuild is true, forces a full grid rebuild.
 	var sheet := _get_sheet()
 	if not sheet:
 		columns_label.text = "Columns: 0"
 		rows_label.text = "Rows: 0"
-		grid_builder.rebuild_grid()
+		grid_builder.rebuild_grid(true)  # Always rebuild when no sheet
 		_update_recent_sheets_list()
 		return
 
 	columns_label.text = "Columns: %d" % sheet.column_count
 	rows_label.text = "Rows: %d" % sheet.row_count
-	grid_builder.rebuild_grid()
+	grid_builder.rebuild_grid(force_rebuild)  # Only rebuild if forced or needed
 	_update_recent_sheets_list()
 
 func _on_cell_focus_entered(row: int, col: int, cell: Control) -> void:
@@ -474,8 +475,8 @@ func _on_csv_import_confirmed(file_path: String) -> void:
 	if result:
 		if OS.is_debug_build():
 			print("[ClassTableDock] Imported from CSV: ", file_path)
-		# Refresh UI to show imported data
-		update_ui()
+		# Refresh UI with forced rebuild since structure may have changed
+		update_ui(true)
 		save_requested.emit()  # Auto-save after import
 	else:
 		push_error("Failed to import CSV from: " + file_path)
