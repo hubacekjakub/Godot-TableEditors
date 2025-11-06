@@ -4,6 +4,11 @@ class_name TestClassTableResource
 
 ## Test script for ClassTableResource type management
 
+func run_all_tests() -> void:
+	test_resource()
+	test_type_validation()
+	test_csv_export_import()
+
 
 func test_resource() -> void:
 	print("\n=== Testing ClassTableResource ===\n")
@@ -148,3 +153,101 @@ func test_type_validation() -> void:
 	print("  ✓ Vector2")
 
 	print("\n✅ Type validation test PASSED!\n")
+
+
+func test_csv_export_import() -> void:
+	print("=== Testing CSV Export/Import ===\n")
+
+	var resource = ClassTableResource.new()
+
+	# Setup test data
+	resource.source_class_name = "TestItem"
+	resource.class_file_path = "res://scripts/plugin2_class_table_tests/TestItemData.gd"
+	resource.sheet_name = "Test Items"
+
+	# Add columns with different types
+	resource.add_column_with_type("name", "String", "Default Item", true)
+	resource.add_column_with_type("damage", "int", 10, true)
+	resource.add_column_with_type("speed", "float", 1.5, true)
+	resource.add_column_with_type("is_magic", "bool", false, true)
+
+	# Add rows with data
+	resource.add_row("Sword")
+	resource.add_row("Bow")
+	resource.add_row("Staff")
+
+	# Set cell values
+	resource.set_cell(0, 0, "Iron Sword")
+	resource.set_cell(0, 1, "15")
+	resource.set_cell(0, 2, "2.5")
+	resource.set_cell(0, 3, "false")
+
+	resource.set_cell(1, 0, "Elven Bow")
+	resource.set_cell(1, 1, "8")
+	resource.set_cell(1, 2, "3.0")
+	resource.set_cell(1, 3, "true")
+
+	resource.set_cell(2, 0, "Wizard Staff")
+	resource.set_cell(2, 1, "25")
+	resource.set_cell(2, 2, "1.0")
+	resource.set_cell(2, 3, "true")
+
+	print("Test data setup complete:")
+	print("  Columns: ", resource.column_count)
+	print("  Rows: ", resource.row_count)
+
+	# Test CSV export
+	var export_path = "res://test_export.csv"
+	var export_result = resource.export_to_csv(export_path)
+	print("  Export result: ", export_result)
+	assert(export_result == true, "CSV export should succeed")
+
+	# Verify export file exists and has content
+	var file = FileAccess.open(export_path, FileAccess.READ)
+	assert(file != null, "Export file should exist")
+	var csv_content = file.get_as_text()
+	file.close()
+	print("  Exported CSV content:")
+	print(csv_content)
+
+	# Verify CSV headers contain type information
+	assert(csv_content.contains("name:String"), "CSV should contain typed headers")
+	assert(csv_content.contains("damage:int"), "CSV should contain int type")
+	assert(csv_content.contains("speed:float"), "CSV should contain float type")
+	assert(csv_content.contains("is_magic:bool"), "CSV should contain bool type")
+
+	# Verify no "Row Name" column (new format doesn't include row names)
+	assert(not csv_content.contains("Row Name"), "CSV should not contain Row Name column")
+
+	# Test CSV import into new resource
+	var import_resource = ClassTableResource.new()
+	var import_result = import_resource.import_from_csv(export_path)
+	print("  Import result: ", import_result)
+	assert(import_result == true, "CSV import should succeed")
+
+	# Verify imported data
+	print("  Imported resource:")
+	print("    Columns: ", import_resource.column_count)
+	print("    Rows: ", import_resource.row_count)
+
+	assert(import_resource.column_count == 4, "Imported resource should have 4 columns")
+	assert(import_resource.row_count == 3, "Imported resource should have 3 rows")
+
+	# Verify column metadata was reconstructed
+	var col0 = import_resource.get_column_type_info(0)
+	assert(col0["name"] == "name", "Column 0 name should be 'name'")
+	assert(col0["type_name"] == "String", "Column 0 type should be String")
+
+	var col1 = import_resource.get_column_type_info(1)
+	assert(col1["name"] == "damage", "Column 1 name should be 'damage'")
+	assert(col1["type_name"] == "int", "Column 1 type should be int")
+
+	# Verify cell data
+	assert(import_resource.get_cell(0, 0) == "Iron Sword", "Cell (0,0) should match")
+	assert(import_resource.get_cell(1, 1) == "8", "Cell (1,1) should match")
+	assert(import_resource.get_cell(2, 3) == "true", "Cell (2,3) should match")
+
+	# Clean up test file
+	DirAccess.remove_absolute(export_path)
+
+	print("\n✅ CSV Export/Import test PASSED!\n")
