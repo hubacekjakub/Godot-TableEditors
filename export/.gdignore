@@ -1,0 +1,2 @@
+# This file tells Godot to ignore all files in this directory
+# Used to prevent CSV files from being imported as translation files
