@@ -251,11 +251,11 @@ addons/
   - [ ] `P2-061` Reload and use newly generated class
   - [ ] `P2-062` Add version tracking for regeneration
 
-- [ ] **CSV Export/Import with Types** (P2-063 to P2-074)
-  - [ ] `P2-063` Export table to CSV with type information in header
-  - [ ] `P2-064` Include type hints in CSV (e.g., "name:String", "damage:int")
-  - [ ] `P2-065` Export default values for reference
-  - [ ] `P2-066` Create structured CSV format for type preservation
+- [x] **CSV Export/Import with Types** (P2-063 to P2-074)
+  - [x] `P2-063` Export table to CSV with type information in header
+  - [x] `P2-064` Include type hints in CSV (e.g., "name:String", "damage:int")
+  - [x] `P2-065` Export default values for reference
+  - [x] `P2-066` Create structured CSV format for type preservation
   - [ ] `P2-067` Import CSV and validate against class types
   - [ ] `P2-068` Convert imported values to correct types
   - [ ] `P2-069` Show validation errors during import

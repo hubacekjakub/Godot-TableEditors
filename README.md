@@ -1,206 +1,125 @@
-# Godot Sheet Editor Plugin
+# Godot Sheet Editor - 3 Independent Plugins
 
-A powerful data table editor plugin for Godot 4 that explores **three distinct approaches** to data management within the Godot Editor, designed for academic research and practical game development.
+**Academic research project** exploring three distinct approaches to editor-based data management in Godot 4.4+.
 
-## Three Implementation Approaches
+## Plugins
 
-This plugin demonstrates three different ways to work with structured data in Godot:
+### 1. **Spreadsheet Editor** (`sheet_editor/`) ✅ COMPLETE
+Excel-style data tables with CSV export/import
 
-### 1. **Spreadsheet** - Excel-Style Editor
-A standalone spreadsheet-like editor for creating arbitrary data tables without predefined schemas.
-
-**Use Case**: Item lists, enemy stats, dialogue trees, configuration data
-
-**Features**:
-- Manual column/row creation and editing
-- CSV export/import for external tools
-- Save as Godot resources (.tres files)
+**Features:**
+- Manual column/row creation
+- CSV import/export (compatible with Excel, Google Sheets)
+- Save as `.tres` resources
 - No code required
 
-### 2. **Class Table** - GDScript Class Integration
-Automatically generate and maintain tables based on GDScript class definitions.
+**Use:** Item lists, config data, dialogue trees
 
-**Use Case**: Type-safe data structures mirroring your game classes
+### 2. **Class Table Editor** (`class_table_editor/`) ✅ CORE COMPLETE
+Type-safe tables generated from GDScript classes
 
-**Features**:
-- Parse GDScript classes and extract typed properties
-- Auto-generate table columns from class structure
-- Bidirectional sync: class → table and table → class
-- Type enforcement (int, float, bool, String, Vector2, etc.)
+**Features:**
+- Auto-generate columns from `@export` properties
+- 34+ Godot types supported (primitives, Vector2/3, Color, Resources)
+- **TableHandle system** - persistent row references with reflection-based conversion
+- **CSV with type hints** - `name:String,damage:int,speed:float`
+- Native PropertyInspector API (no regex parsing)
 
-### 3. **Resource Editor** - Multi-Resource Collection Editor
-Edit multiple resource files of the same type in a unified table view.
+**Use:** Type-enforced data mirroring game classes
 
-**Use Case**: Managing collections of similar game objects (enemies, items, levels)
+**Example:**
+```gdscript
+# Game code
+@export var unit_handle: TableHandle
+var unit = unit_handle.to_resource(BaseUnit) as BaseUnit
+print(unit.max_health)  # Full type safety
+```
 
-**Features**:
-- Load multiple .tres files from a folder
-- Display as table: rows = resource files, columns = properties
-- Edit all resources at once in spreadsheet format
-- Save changes back to individual files
-- Bulk operations and filtering
+### 3. **Resource Collection Editor** (`resource_collection_editor/`) ⏳ PLANNED
+Bulk editing of multiple `.tres` files in unified table view
+
+**Use:** Managing collections of similar resources
+
+## Quick Start
+
+1. Copy `addons/` folder to your project
+2. Enable plugins in **Project Settings > Plugins**
+3. Access editors from bottom panel dock
+
+**Plugin 1:** Create tables manually, export to CSV
+**Plugin 2:** Select GDScript class → auto-generate typed table → use TableHandles in game
+
+## CSV Formats
+
+### Plugin 1 - Simple CSV
+```csv
+Name,Health,Speed
+Knight,100,5.5
+Archer,75,6.2
+```
+
+### Plugin 2 - Type-Preserving CSV
+```csv
+name:String,damage:int,speed:float,is_boss:bool
+Knight,100,5.5,false
+Dragon,500,3.8,true
+```
+- Type hints in headers
+- Automatic metadata reconstruction on import
+- CSV injection prevention
+
+## Architecture
+
+**Zero Shared Code:** Each plugin is completely independent
+
+**Cell Storage:** Sparse dictionary `cells["row,col"] = value`
+
+**Plugin 2 Unique:**
+- `PropertyInspector` - Native `Script.get_script_property_list()` API
+- `TableHandle` - Inspector-integrated row references
+- `ResourceConverter` - Reflection-based property mapping
+- `ClassCache` - Mtime-based invalidation
+
+## Development
+
+**Tests:** Open `scenes/TestRunner.tscn` → F5 → Check Output
+
+**VS Code Tasks:**
+- `Ctrl+Shift+B` - Run Godot Editor
+- Run Game, Debug, Remote Debug available
+
+**Standards:**
+- `snake_case` for vars/funcs, `PascalCase` for classes
+- `@tool` directive required in plugins
+- Explicit typing everywhere
+
+**Commits:** `feat: description (P2-XXX)`
 
 ## Project Structure
 
 ```
-addons/sheet_editor/
-├── core/                          # Shared utilities (minimal, optional)
-│   ├── grid_helpers.gd           # Basic grid math/helpers
-│   └── common_types.gd           # Shared enums/constants
-│
-├── spreadsheet/                   # Implementation 1: Excel-style
-│   ├── spreadsheet_plugin.gd     # Plugin entry point
-│   ├── spreadsheet_dock.gd       # Main dock UI
-│   ├── spreadsheet_dock.tscn     # Dock scene
-│   ├── spreadsheet_resource.gd   # Sheet resource class
-│   ├── create_table_dialog.gd    # Create new table dialog
-│   ├── create_table_dialog.tscn  # Dialog scene
-│   ├── csv_export_dialog.gd      # CSV export
-│   └── csv_import_dialog.gd      # CSV import
-│
-├── class_table/                   # Implementation 2: Class integration
-│   ├── class_table_plugin.gd     # Plugin entry point
-│   ├── class_table_dock.gd       # Main dock UI
-│   ├── class_table_resource.gd   # Typed sheet resource
-│   ├── class_parser.gd           # Parse GDScript files
-│   └── ... (to be implemented)
-│
-├── resource_editor/               # Implementation 3: Resource collections
-│   ├── resource_editor_plugin.gd # Plugin entry point
-│   ├── resource_editor_dock.gd   # Main dock UI
-│   └── ... (to be implemented)
-│
-├── plugin.cfg                     # Main plugin configuration
-└── sheet_editor_plugin.gd         # Main plugin entry (mode switcher)
+addons/
+├── sheet_editor/              # Plugin 1: Spreadsheet ✅
+├── class_table_editor/        # Plugin 2: Class Table ✅
+└── resource_collection_editor/# Plugin 3: Resource Editor ⏳
+scripts/                        # Tests
+scenes/TestRunner.tscn         # Test runner
+docs/                          # Documentation
 ```
 
-**Current Status**: All files are currently in the root `addons/sheet_editor/` folder. They will be moved to `spreadsheet/` folder once Implementation 1 is complete.
+**Status:**
+- Plugin 1: ✅ Complete (P1-001 to P1-026)
+- Plugin 2: ✅ Core Complete (P2-001 to P2-066)
+- Plugin 3: ⏳ Planned (P3-001 to P3-026)
 
-Each implementation is **independent** and can be used, modified, or removed separately while sharing common core functionality.
-
-## Current Status
-
-- 🚧 **Implementation 1 (Spreadsheet)**: Core functionality complete, finishing CSV export/import and refactoring
-  - ✅ Grid editing, columns/rows management
-  - ✅ Resource persistence (Sheet.gd)
-  - ⏳ CSV export/import (in progress)
-  - ⏳ Move to `spreadsheet/` folder structure
-- ⏳ **Implementation 2 (Class Table)**: Planned (will duplicate and adapt Implementation 1)
-- ⏳ **Implementation 3 (Resource Editor)**: Planned (will duplicate and adapt Implementation 1)
-
-See [PLAN.md](PLAN.md) for detailed development roadmap and task tracking.
-
-## Installation & Usage
-
-1. Copy the `addons/sheet_editor` folder into your Godot project
-2. Enable the plugin in **Project Settings > Plugins**
-3. Access the Sheet Editor from the bottom panel dock
-4. Choose your preferred implementation approach
-5. Create and save your data tables as resources
-6. Load and use the resources in your game scripts
-
-## Academic Purpose
-
-This project serves as a comparative study of different data management patterns in game engines, demonstrating:
-- Manual data entry vs. code-driven schemas
-- Single-table editing vs. bulk resource management
-- Trade-offs between flexibility and type safety
-
-Each implementation can be studied independently or compared side-by-side.
-
-## Development
-
-### VS Code Tasks
-
-This project includes convenient VS Code tasks:
-
-- **🎨 Open Godot Editor** - `Ctrl+Shift+B` (default build task)
-- **▶️ Run Game** - Quick test the game
-- **🐛 Debug Godot Editor** - Editor with debug visualizations
-- **🔍 Run Game with Remote Debug** - Game with remote debugging
-
-### Running Tests
-
-**Method 1: Play from Scene**
-```
-1. Open Godot Editor
-2. Open: scenes/TestRunner.tscn
-3. Press F5 (Play)
-4. Check Output tab for test results
-```
-
-**Method 2: Command Line**
-```bash
-python verify_tests.py
-```
-
-### Code Standards
-
-**GDScript Conventions:**
-- Use `snake_case` for variables and functions
-- Use `PascalCase` for classes
-- Use `SCREAMING_SNAKE_CASE` for constants
-- Always use explicit type hints
-- Prefix private methods with underscore (`_method`)
-- Use `@tool` directive in all editor plugin scripts
-- Add documentation comments for all public methods
-
-**File Organization:**
-```
-addons/my_plugin/
-├── plugin.cfg                      # Plugin configuration
-├── my_plugin.gd                    # Main EditorPlugin
-├── my_dock.gd                      # UI dock implementation
-├── my_dock.tscn                    # Dock scene
-├── my_resource.gd                  # Data resource class
-└── my_utility.gd                   # Helper utilities
-```
-
-### Contributing
-
-1. **Create a feature branch**:
-   ```bash
-   git checkout -b feature/P2-XXX-description
-   ```
-
-2. **Write tests first** (TDD approach)
-
-3. **Follow code standards** (see above)
-
-4. **Commit with task reference**:
-   ```bash
-   git commit -m "feat: description (P2-XXX)"
-   ```
-
-### Project Structure
-
-```
-Godot-SheetEditor/
-├── addons/
-│   ├── sheet_editor/              # Plugin 1: Spreadsheet
-│   ├── class_table_editor/        # Plugin 2: Class Table
-│   └── resource_collection_editor/# Plugin 3: Resource Editor (planned)
-├── scripts/                        # Test files
-├── scenes/                         # Test runner scenes
-├── resources/                      # Example tables
-├── docs/                           # Detailed documentation
-├── PLAN.md                         # Development roadmap
-└── README.md                       # This file
-```
-
-### Current Status
-
-- 🚧 **Plugin 1 (Spreadsheet)**: Core complete
-- ✅ **Plugin 2 (Class Table)**: Core complete, UI refactored
-- ⏳ **Plugin 3 (Resource Editor)**: Planned
-
-See [PLAN.md](PLAN.md) for detailed roadmap and task tracking.
+See [PLAN.md](PLAN.md) for task tracking.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-You are free to use, modify, and distribute this template in your own projects.
+MIT License - Free to use, modify, and distribute.
 
----
+## Links
 
-**💡 Pro Tip:** Star this repo if it helps your workflow! Questions? Open an issue or check the [live demo](https://hubacekjakub.itch.io/godot-quick-start) to see everything working.
+- [PLAN.md](PLAN.md) - Development roadmap
+- [Plugin 2 README](addons/class_table_editor/README.md) - Class Table usage guide
+- [Example Walkthrough](addons/class_table_editor/example/README.md) - Working example
