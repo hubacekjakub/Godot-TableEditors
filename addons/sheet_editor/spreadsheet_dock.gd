@@ -117,7 +117,7 @@ func set_sheet(sheet: Resource) -> void:
 
 func update_ui(force_rebuild: bool = false) -> void:
 	"""Update the UI to reflect the current sheet data
-	
+
 	Args:
 		force_rebuild: If true, forces a full grid rebuild. If false, only updates labels.
 	"""
@@ -131,11 +131,11 @@ func update_ui(force_rebuild: bool = false) -> void:
 	var sheet := current_sheet as SpreadsheetResource
 	columns_label.text = "Columns: %d" % sheet.column_count
 	rows_label.text = "Rows: %d" % sheet.row_count
-	
+
 	# Only rebuild if forced (structure changed) or grid doesn't match sheet dimensions
 	if force_rebuild or _needs_grid_rebuild(sheet):
 		_rebuild_grid.call_deferred()
-	
+
 	_update_recent_sheets_list()
 
 
@@ -159,7 +159,7 @@ func _rebuild_grid() -> void:
 
 func _needs_grid_rebuild(sheet: SpreadsheetResource) -> bool:
 	"""Check if grid structure needs to be rebuilt
-	
+
 	Returns true if:
 	- Grid is empty
 	- Number of grid children doesn't match expected (row/col structure changed)
@@ -167,7 +167,7 @@ func _needs_grid_rebuild(sheet: SpreadsheetResource) -> bool:
 	var child_count = grid_container.get_child_count()
 	if child_count == 0:
 		return true
-	
+
 	# Expected children: corner + col_headers + (rows * (row_header + cells))
 	# = 1 + column_count + (row_count * (1 + column_count))
 	var expected = 1 + sheet.column_count + (sheet.row_count * (1 + sheet.column_count))
@@ -176,18 +176,18 @@ func _needs_grid_rebuild(sheet: SpreadsheetResource) -> bool:
 
 func _update_single_cell(row: int, col: int, new_value: String) -> void:
 	"""Update a single cell's display without rebuilding the entire grid
-	
+
 	This is an optimization for cell edits that don't change grid structure.
 	"""
 	if not current_sheet or not current_sheet is SpreadsheetResource:
 		return
-	
+
 	var sheet := current_sheet as SpreadsheetResource
-	
+
 	# Calculate cell index in grid layout
 	# Grid: [corner] [col headers...] [row1 header] [row1 cells...] [row2 header] [row2 cells...]
 	var cell_index := (1 + sheet.column_count) + (row * (sheet.column_count + 1)) + 1 + col
-	
+
 	var children := grid_container.get_children()
 	if cell_index >= 0 and cell_index < children.size():
 		var cell := children[cell_index]

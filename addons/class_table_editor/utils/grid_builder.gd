@@ -27,11 +27,11 @@ func set_sheet(sheet: ClassTableResource = null) -> void:
 func rebuild_grid(force: bool = false) -> void:
 	## Rebuild the entire grid based on current sheet data.
 	## If force is false, checks if rebuild is necessary first.
-	
+
 	# Check if rebuild is actually needed (optimization)
 	if not force and not _needs_rebuild():
 		return
-	
+
 	for child in grid_container.get_children():
 		child.queue_free()
 
@@ -66,11 +66,11 @@ func _needs_rebuild() -> bool:
 	## Returns true if grid dimensions don't match sheet dimensions.
 	if not current_sheet:
 		return grid_container.get_child_count() > 0
-	
+
 	var child_count = grid_container.get_child_count()
 	if child_count == 0:
 		return true
-	
+
 	# Expected children: col_headers + (rows * cells)
 	var expected = current_sheet.column_count + (current_sheet.row_count * current_sheet.column_count)
 	return child_count != expected
@@ -81,10 +81,10 @@ func update_single_cell(row: int, col: int) -> void:
 	## This is an optimization for cell edits that don't change structure.
 	if not current_sheet:
 		return
-	
+
 	# Calculate cell index: headers + (row * columns) + col
 	var cell_index := current_sheet.column_count + (row * current_sheet.column_count) + col
-	
+
 	var children := grid_container.get_children()
 	if cell_index >= 0 and cell_index < children.size():
 		var cell := children[cell_index]
