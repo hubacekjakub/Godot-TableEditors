@@ -7,6 +7,8 @@ const CLASS_SELECTION_SCENE := preload("res://addons/class_table_editor/ui/class
 const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/utils/typed_cell_editor_factory.gd")
 const GRID_BUILDER := preload("res://addons/class_table_editor/utils/grid_builder.gd")
 const CELL_MANAGER := preload("res://addons/class_table_editor/editors/cell_manager.gd")
+const CSV_EXPORT_DIALOG_SCENE := preload("res://addons/class_table_editor/ui/csv_export_dialog.gd")
+const CSV_IMPORT_DIALOG_SCENE := preload("res://addons/class_table_editor/ui/csv_import_dialog.gd")
 
 signal column_added
 signal row_added
@@ -32,6 +34,8 @@ signal create_table_requested(table_name: String, file_name: String, rows: int, 
 @onready var grid_container: GridContainer = %GridContainer
 
 var class_select_dialog: ConfirmationDialog = null  # Lazy instantiated in _show_class_select_dialog()
+var csv_export_dialog: FileDialog = null  # Lazy instantiated for CSV export
+var csv_import_dialog: FileDialog = null  # Lazy instantiated for CSV import
 var editor_interface: EditorInterface = null  # Reference to editor interface
 
 var current_sheet: Resource = null
@@ -64,6 +68,7 @@ func _ready() -> void:
 			recent_sheets = recent_sheets.slice(-MAX_RECENT_SHEETS)
 
 	_setup_menus()
+	_setup_csv_dialogs()
 	_connect_signals()
 	_update_recent_sheets_list()
 
@@ -89,6 +94,14 @@ func _exit_tree() -> void:
 		class_select_dialog.queue_free()
 		class_select_dialog = null
 
+	if csv_export_dialog and is_instance_valid(csv_export_dialog):
+		csv_export_dialog.queue_free()
+		csv_export_dialog = null
+
+	if csv_import_dialog and is_instance_valid(csv_import_dialog):
+		csv_import_dialog.queue_free()
+		csv_import_dialog = null
+
 
 func _setup_menus() -> void:
 	# Setup File menu
@@ -97,6 +110,9 @@ func _setup_menus() -> void:
 	file_popup.add_item("New", 0)
 	file_popup.add_item("Load", 1)
 	file_popup.add_item("Save", 2)
+	file_popup.add_separator()
+	file_popup.add_item("Export to CSV", 4)
+	file_popup.add_item("Import from CSV", 5)
 	file_popup.add_separator()
 	file_popup.add_item("Close", 3)
 	file_popup.id_pressed.connect(_on_file_menu_pressed)
@@ -108,6 +124,19 @@ func _setup_menus() -> void:
 	edit_popup.add_separator()
 	edit_popup.add_item("Clear All", 1)
 	edit_popup.id_pressed.connect(_on_edit_menu_pressed)
+
+
+func _setup_csv_dialogs() -> void:
+	"""Setup CSV import/export dialogs"""
+	# Create export dialog
+	csv_export_dialog = CSV_EXPORT_DIALOG_SCENE.new()
+	csv_export_dialog.export_confirmed.connect(_on_csv_export_confirmed)
+	add_child(csv_export_dialog)
+
+	# Create import dialog
+	csv_import_dialog = CSV_IMPORT_DIALOG_SCENE.new()
+	csv_import_dialog.import_confirmed.connect(_on_csv_import_confirmed)
+	add_child(csv_import_dialog)
 
 
 func _connect_signals() -> void:
@@ -213,6 +242,10 @@ func _on_file_menu_pressed(id: int) -> void:
 			save_requested.emit()
 		3:  # Close
 			close_requested.emit()
+		4:  # Export to CSV
+			_export_to_csv()
+		5:  # Import from CSV
+			_import_from_csv()
 
 
 func _on_edit_menu_pressed(id: int) -> void:
@@ -389,6 +422,65 @@ func _on_class_table_created(resource_path: String, class_info: Dictionary) -> v
 			push_warning("Editor interface not available - plugin may not be aware of new table")
 
 
+## === CSV Export/Import Methods ===
+
+
+func _export_to_csv() -> void:
+	"""Show CSV export dialog"""
+	var sheet := _get_sheet()
+	if not sheet:
+		push_warning("No class table loaded for export")
+		return
+
+	# Set default filename based on current sheet
+	if current_sheet and current_sheet.resource_path:
+		var base_name = current_sheet.resource_path.get_file().get_basename()
+		csv_export_dialog.current_file = base_name + ".csv"
+
+	csv_export_dialog.show_dialog()
+
+
+func _on_csv_export_confirmed(file_path: String) -> void:
+	"""Handle CSV export after file path is selected"""
+	var sheet := _get_sheet()
+	if not sheet:
+		return
+
+	var result = sheet.export_to_csv(file_path)
+	if result:
+		if OS.is_debug_build():
+			print("[ClassTableDock] Exported to CSV: ", file_path)
+	else:
+		push_error("Failed to export CSV to: " + file_path)
+
+
+func _import_from_csv() -> void:
+	"""Show CSV import dialog"""
+	var sheet := _get_sheet()
+	if not sheet:
+		push_warning("No class table loaded for import")
+		return
+
+	csv_import_dialog.show_dialog()
+
+
+func _on_csv_import_confirmed(file_path: String) -> void:
+	"""Handle CSV import after file path is selected"""
+	var sheet := _get_sheet()
+	if not sheet:
+		return
+
+	var result = sheet.import_from_csv(file_path)
+	if result:
+		if OS.is_debug_build():
+			print("[ClassTableDock] Imported from CSV: ", file_path)
+		# Refresh UI to show imported data
+		update_ui()
+		save_requested.emit()  # Auto-save after import
+	else:
+		push_error("Failed to import CSV from: " + file_path)
+
+
 ## === NEW: Type-Safe Editing Methods ===
 
 
@@ -448,7 +540,7 @@ func _show_validation_error(editor: Control, error_message: String) -> void:
 func _clear_validation_error(editor: Control) -> void:
 	if editor is LineEdit:
 		# Restore normal styling
-		var row = editor.get_meta("row", 0)
+		var row = int(editor.get_meta("row", 0))
 		var cell_style := StyleBoxFlat.new()
 		if row % 2 == 0:
 			cell_style.bg_color = Color(0.24, 0.24, 0.24, 1)

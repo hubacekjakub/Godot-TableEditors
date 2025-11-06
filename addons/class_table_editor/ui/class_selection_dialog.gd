@@ -240,7 +240,7 @@ func _on_confirmed() -> void:
 
 	# Add 3 default rows
 	for i in range(3):
-		table_resource.add_row("Row " + str(i + 1))
+		table_resource.add_row(str(i + 1))
 
 	# Save the resource
 	var error: int = ResourceSaver.save(table_resource, full_path)

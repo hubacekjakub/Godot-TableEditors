@@ -148,22 +148,28 @@ func add_column(col_name: String = "") -> void:
 
 ## CSV Export/Import Functions
 
-## Export sheet data to CSV file (comma-separated with header row including row names).
+## Export sheet data to CSV file (comma-separated with header row including type hints).
 func export_to_csv(file_path: String) -> bool:
 	var file := FileAccess.open(file_path, FileAccess.WRITE)
 	if file == null:
 		push_error("Failed to open file for writing: " + file_path)
 		return false
 
-	# Write header row (row name column + column names)
-	var header_row: PackedStringArray = ["Row Name"]
+	# Write header row with type hints (no row names for class tables)
+	var header_row: PackedStringArray = []
 	for col in range(column_count):
-		header_row.append(_escape_csv_value(get_column_name(col)))
+		var col_name = get_column_name(col)
+		var type_info = get_column_type_info(col)
+		var type_name = type_info.get("type_name", "")
+		var header_text = col_name
+		if not type_name.is_empty():
+			header_text += ":" + type_name
+		header_row.append(_escape_csv_value(header_text))
 	file.store_line(",".join(header_row))
 
-	# Write data rows with row names
+	# Write data rows (no row names)
 	for row in range(row_count):
-		var data_row: PackedStringArray = [_escape_csv_value(get_row_name(row))]
+		var data_row: PackedStringArray = []
 		for col in range(column_count):
 			var value := get_cell(row, col)
 			data_row.append(_escape_csv_value(value))
@@ -175,7 +181,7 @@ func export_to_csv(file_path: String) -> bool:
 	return true
 
 
-## Import CSV file into sheet (supports row names in first column).
+## Import CSV file into sheet (supports type hints in headers).
 func import_from_csv(file_path: String) -> bool:
 	var file := FileAccess.open(file_path, FileAccess.READ)
 	if file == null:
@@ -186,11 +192,10 @@ func import_from_csv(file_path: String) -> bool:
 	clear_all_cells()
 	column_names.clear()
 	row_names.clear()
+	columns_metadata.clear()
 
 	var line_number := 0
 	var is_first_line := true
-	var has_row_names := false
-	var header_values: PackedStringArray = []
 
 	while not file.eof_reached():
 		var line := file.get_line().strip_edges()
@@ -200,43 +205,23 @@ func import_from_csv(file_path: String) -> bool:
 		var values := _parse_csv_line(line)
 
 		if is_first_line:
-			# First line is header
-			header_values = values
+			# First line is header with type hints
+			_parse_typed_header_line(values)
 			is_first_line = false
-
-			# Check if first column is "Row Name" (case insensitive)
-			if values.size() > 0 and values[0].to_lower() == "row name":
-				has_row_names = true
-				# Skip the "Row Name" column for actual column names
-				column_count = values.size() - 1
-				for i in range(1, values.size()):
-					set_column_name(i - 1, values[i])
-			else:
-				# No row names column, treat as regular data columns
-				has_row_names = false
-				column_count = values.size()
-				for i in range(values.size()):
-					set_column_name(i, values[i])
 		else:
 			# Data rows
 			var row_index := line_number - 1
-			row_count = row_index + 1
+			row_count = max(row_count, row_index + 1)
 
-			if has_row_names and values.size() > 0:
-				# First value is row name, rest are data
-				set_row_name(row_index, values[0])
-				for col in range(min(values.size() - 1, column_count)):
-					set_cell(row_index, col, values[col + 1])
-			else:
-				# No row names, all values are data
-				for col in range(min(values.size(), column_count)):
-					set_cell(row_index, col, values[col])
+			# Set data for each column
+			for col in range(min(values.size(), column_count)):
+				set_cell(row_index, col, values[col])
 
 		line_number += 1
 
 	file.close()
 	if OS.is_debug_build():
-		print("Sheet imported from CSV: " + file_path + " (" + str(row_count) + " rows, " + str(column_count) + " columns, row names: " + str(has_row_names) + ")")
+		print("Sheet imported from CSV: " + file_path + " (" + str(row_count) + " rows, " + str(column_count) + " columns)")
 	return true
 
 
@@ -283,6 +268,66 @@ func _parse_csv_line(line: String) -> PackedStringArray:
 	values.append(current_value)
 
 	return values
+
+
+## Parse header line with type hints like "name:String,damage:int"
+func _parse_typed_header_line(header_values: PackedStringArray) -> void:
+	column_count = header_values.size()
+
+	for i in range(header_values.size()):
+		var header_text = header_values[i]
+		var parsed = _parse_typed_column_header(header_text)
+		_add_column_metadata_from_header(parsed, i)
+
+
+## Parse a column header like "name:String" into name and type
+func _parse_typed_column_header(header_text: String) -> Dictionary:
+	var colon_pos = header_text.find(":")
+	if colon_pos == -1:
+		# No type hint, just column name
+		return {
+			"name": header_text,
+			"type_name": "String",  # Default to String
+			"has_type_hint": false
+		}
+
+	var name_part = header_text.substr(0, colon_pos)
+	var type_part = header_text.substr(colon_pos + 1)
+
+	return {
+		"name": name_part,
+		"type_name": type_part,
+		"has_type_hint": true
+	}
+
+
+## Add column metadata from parsed header
+func _add_column_metadata_from_header(parsed_header: Dictionary, col_index: int) -> void:
+	var col_name = parsed_header["name"]
+	var type_name = parsed_header["type_name"]
+
+	# Set column name
+	set_column_name(col_index, col_name)
+
+	# Create metadata entry
+	var type_id = _type_name_to_id(type_name)
+	var column_meta = {
+		"name": col_name,
+		"type": type_id,
+		"type_name": type_name,
+		"default": null,
+		"exported": true,
+		"usage": PROPERTY_USAGE_SCRIPT_VARIABLE,
+		"hint": 0,
+		"hint_string": "",
+		"is_required": false,
+	}
+
+	# Ensure columns_metadata array is large enough
+	while columns_metadata.size() <= col_index:
+		columns_metadata.append({})
+
+	columns_metadata[col_index] = column_meta
 
 
 ## === NEW: Type-Based Methods using PropertyInspector native API ===
