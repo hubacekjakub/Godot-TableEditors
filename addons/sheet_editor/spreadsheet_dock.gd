@@ -35,10 +35,14 @@ var csv_import_dialog: FileDialog = null
 
 var current_sheet: Resource = null
 var recent_sheets: Array[String] = []  # Store recent sheet paths
+var editor_settings: EditorSettings = null
 const MAX_RECENT_SHEETS = 10
+const RECENT_SHEETS_SETTING = "sheet_editor/recent_sheets"
 
 
 func _ready() -> void:
+	editor_settings = EditorInterface.get_editor_settings()
+	_load_recent_sheets_from_settings()
 	_setup_menus()
 	_setup_csv_dialogs()
 	_connect_signals()
@@ -513,6 +517,7 @@ func add_to_recent_sheets(path: String) -> void:
 	if recent_sheets.size() > MAX_RECENT_SHEETS:
 		recent_sheets.pop_front()  # Remove oldest
 
+	_save_recent_sheets_to_settings()
 	_update_recent_sheets_list()
 
 
@@ -563,3 +568,25 @@ func _on_create_table_confirmed(table_name: String, file_name: String, num_rows:
 	"""Handle Create Table dialog confirmation"""
 	# Emit signal with parameters for the plugin to handle
 	create_table_requested.emit(table_name, file_name, num_rows, num_columns, save_path)
+
+
+func _load_recent_sheets_from_settings() -> void:
+	"""Load recent sheets list from EditorSettings"""
+	if not editor_settings:
+		return
+	
+	if not editor_settings.has_setting(RECENT_SHEETS_SETTING):
+		editor_settings.set_setting(RECENT_SHEETS_SETTING, [])
+	
+	var saved_sheets = editor_settings.get_setting(RECENT_SHEETS_SETTING)
+	if saved_sheets is Array:
+		recent_sheets.clear()
+		for path in saved_sheets:
+			if path is String:
+				recent_sheets.append(path)
+
+
+func _save_recent_sheets_to_settings() -> void:
+	"""Save recent sheets list to EditorSettings"""
+	if editor_settings:
+		editor_settings.set_setting(RECENT_SHEETS_SETTING, recent_sheets)
