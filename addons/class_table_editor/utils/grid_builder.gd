@@ -9,6 +9,11 @@ class_name GridBuilder
 
 const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/utils/typed_cell_editor_factory.gd")
 
+# UI Size Constants
+const MIN_COLUMN_WIDTH: int = 120  # Minimum column width
+const COLUMN_HEADER_HEIGHT: int = 30  # Height for column headers
+const CHAR_WIDTH_ESTIMATE: int = 8  # Approximate pixels per character for column sizing
+
 var grid_container: GridContainer
 var current_sheet: ClassTableResource
 var cell_manager: CellManager
@@ -112,8 +117,8 @@ func _build_column_headers(sheet: ClassTableResource) -> void:
 		header_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 		# Make columns wider to accommodate longer property names
-		var column_width = max(120, col_name.length() * 8)
-		header_edit.custom_minimum_size = Vector2(column_width, 30)
+		var column_width = max(MIN_COLUMN_WIDTH, col_name.length() * CHAR_WIDTH_ESTIMATE)
+		header_edit.custom_minimum_size = Vector2(column_width, COLUMN_HEADER_HEIGHT)
 		header_edit.placeholder_text = "%s (%s)" % [sheet.get_column_name(col), col_type_name]
 		header_edit.set_meta("column_index", col)
 

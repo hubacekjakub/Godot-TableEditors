@@ -10,6 +10,10 @@ const CELL_MANAGER := preload("res://addons/class_table_editor/editors/cell_mana
 const CSV_EXPORT_DIALOG_SCENE := preload("res://addons/class_table_editor/ui/csv_export_dialog.gd")
 const CSV_IMPORT_DIALOG_SCENE := preload("res://addons/class_table_editor/ui/csv_import_dialog.gd")
 
+# Recent Items Configuration
+const MAX_RECENT_SHEETS: int = 10  # Same as Godot's recent scenes limit
+const RECENT_SHEETS_SETTING: String = "class_table_editor/recent_tables"
+
 signal column_added
 signal row_added
 signal column_deleted(col: int)
@@ -40,7 +44,6 @@ var editor_interface: EditorInterface = null  # Reference to editor interface
 
 var current_sheet: Resource = null
 var recent_sheets: Array[String] = []  # Store recent sheet paths
-const MAX_RECENT_SHEETS := 10
 
 var editor_settings: EditorSettings
 

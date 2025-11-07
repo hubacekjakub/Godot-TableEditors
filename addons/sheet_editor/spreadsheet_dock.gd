@@ -5,6 +5,16 @@ extends VBoxContainer
 
 const CREATE_TABLE_SCENE := preload("res://addons/sheet_editor/create_table_dialog.tscn")
 
+# UI Size Constants
+const DEFAULT_CELL_WIDTH: int = 100  # Fits ~12 chars at default font
+const DEFAULT_CELL_HEIGHT: int = 30  # Standard line height
+const ROW_HEADER_WIDTH: int = 40  # Width for row number column
+const COLUMN_HEADER_HEIGHT: int = 30  # Height for column header row
+
+# Recent Items Configuration
+const MAX_RECENT_SHEETS: int = 10  # Same as Godot's recent scenes limit
+const RECENT_SHEETS_SETTING: String = "sheet_editor/recent_sheets"
+
 signal column_added
 signal row_added
 signal column_deleted(col: int)
@@ -36,8 +46,6 @@ var csv_import_dialog: FileDialog = null
 var current_sheet: Resource = null
 var recent_sheets: Array[String] = []  # Store recent sheet paths
 var editor_settings: EditorSettings = null
-const MAX_RECENT_SHEETS = 10
-const RECENT_SHEETS_SETTING = "sheet_editor/recent_sheets"
 
 
 func _ready() -> void:
@@ -227,7 +235,7 @@ func _rebuild_grid() -> void:
 	# Create header row - first cell is empty (top-left corner)
 	var corner_label := Label.new()
 	corner_label.text = ""
-	corner_label.custom_minimum_size = Vector2(40, 30)
+	corner_label.custom_minimum_size = Vector2(ROW_HEADER_WIDTH, COLUMN_HEADER_HEIGHT)
 	corner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	corner_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 
@@ -246,7 +254,7 @@ func _rebuild_grid() -> void:
 		var header_edit := LineEdit.new()
 		header_edit.text = sheet.get_column_name(col)
 		header_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		header_edit.custom_minimum_size = Vector2(100, 30)
+		header_edit.custom_minimum_size = Vector2(DEFAULT_CELL_WIDTH, COLUMN_HEADER_HEIGHT)
 		header_edit.placeholder_text = _get_column_letter(col)
 		header_edit.set_meta("column_index", col)
 
@@ -271,7 +279,7 @@ func _rebuild_grid() -> void:
 		var row_edit := LineEdit.new()
 		row_edit.text = sheet.get_row_name(row)
 		row_edit.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		row_edit.custom_minimum_size = Vector2(40, 30)
+		row_edit.custom_minimum_size = Vector2(ROW_HEADER_WIDTH, DEFAULT_CELL_HEIGHT)
 		row_edit.placeholder_text = str(row + 1)
 		row_edit.set_meta("row_index", row)
 
@@ -294,7 +302,7 @@ func _rebuild_grid() -> void:
 		for col in range(sheet.column_count):
 			var line_edit := LineEdit.new()
 			line_edit.text = sheet.get_cell(row, col)
-			line_edit.custom_minimum_size = Vector2(100, 30)
+			line_edit.custom_minimum_size = Vector2(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT)
 			line_edit.placeholder_text = "..."
 
 			# Style data cells with subtle alternating row colors

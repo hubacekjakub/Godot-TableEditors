@@ -5,6 +5,15 @@ class_name TypedCellEditorFactory
 ## Factory for creating type-specific cell editors
 ## Creates LineEdit, SpinBox, CheckBox, ColorPicker, etc. based on column type
 
+# UI Size Constants
+const DEFAULT_CELL_WIDTH: int = 100  # Standard cell width
+const DEFAULT_CELL_HEIGHT: int = 30  # Standard cell height
+const VECTOR2_CELL_WIDTH: int = 150  # Width for Vector2 cells (2 components)
+const VECTOR3_CELL_WIDTH: int = 220  # Width for Vector3 cells (3 components)
+const VECTOR_COMPONENT_WIDTH: int = 60  # Width for individual X/Y/Z inputs in Vector2
+const VECTOR3_COMPONENT_WIDTH: int = 50  # Width for individual X/Y/Z inputs in Vector3
+const VECTOR_LABEL_WIDTH: int = 15  # Width for X:/Y:/Z: labels
+
 ## Create editor for a specific type
 static func create_editor(type_id: int, type_name: String, metadata: Dictionary = {}) -> Control:
 	match type_id:
@@ -29,7 +38,7 @@ static func create_editor(type_id: int, type_name: String, metadata: Dictionary 
 ## Create CheckBox for boolean values
 static func _create_bool_editor(metadata: Dictionary) -> CheckBox:
 	var checkbox = CheckBox.new()
-	checkbox.custom_minimum_size = Vector2(100, 30)
+	checkbox.custom_minimum_size = Vector2(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT)
 	checkbox.set_meta("type_id", TYPE_BOOL)
 	checkbox.set_meta("type_name", "bool")
 	checkbox.alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -39,7 +48,7 @@ static func _create_bool_editor(metadata: Dictionary) -> CheckBox:
 ## Create SpinBox for integer values
 static func _create_int_editor(metadata: Dictionary) -> SpinBox:
 	var spinbox = SpinBox.new()
-	spinbox.custom_minimum_size = Vector2(100, 30)
+	spinbox.custom_minimum_size = Vector2(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT)
 	spinbox.set_meta("type_id", TYPE_INT)
 	spinbox.set_meta("type_name", "int")
 	spinbox.step = 1
@@ -54,7 +63,7 @@ static func _create_int_editor(metadata: Dictionary) -> SpinBox:
 ## Create SpinBox for float values
 static func _create_float_editor(metadata: Dictionary) -> SpinBox:
 	var spinbox = SpinBox.new()
-	spinbox.custom_minimum_size = Vector2(100, 30)
+	spinbox.custom_minimum_size = Vector2(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT)
 	spinbox.set_meta("type_id", TYPE_FLOAT)
 	spinbox.set_meta("type_name", "float")
 	spinbox.step = 0.01
@@ -69,7 +78,7 @@ static func _create_float_editor(metadata: Dictionary) -> SpinBox:
 ## Create LineEdit for string values
 static func _create_string_editor(metadata: Dictionary) -> LineEdit:
 	var line_edit = LineEdit.new()
-	line_edit.custom_minimum_size = Vector2(100, 30)
+	line_edit.custom_minimum_size = Vector2(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT)
 	line_edit.set_meta("type_id", TYPE_STRING)
 	line_edit.set_meta("type_name", "String")
 	line_edit.placeholder_text = metadata.get("placeholder", "...")
@@ -79,13 +88,13 @@ static func _create_string_editor(metadata: Dictionary) -> LineEdit:
 ## Create specialized editor for Vector2
 static func _create_vector2_editor(metadata: Dictionary) -> HBoxContainer:
 	var container = HBoxContainer.new()
-	container.custom_minimum_size = Vector2(150, 30)
+	container.custom_minimum_size = Vector2(VECTOR2_CELL_WIDTH, DEFAULT_CELL_HEIGHT)
 	container.set_meta("type_id", TYPE_VECTOR2)
 	container.set_meta("type_name", "Vector2")
 
 	var label_x = Label.new()
 	label_x.text = "X:"
-	label_x.custom_minimum_size = Vector2(15, 0)
+	label_x.custom_minimum_size = Vector2(VECTOR_LABEL_WIDTH, 0)
 	container.add_child(label_x)
 
 	var spinbox_x = SpinBox.new()
@@ -93,12 +102,12 @@ static func _create_vector2_editor(metadata: Dictionary) -> HBoxContainer:
 	spinbox_x.step = 0.1
 	spinbox_x.allow_greater = true
 	spinbox_x.allow_lesser = true
-	spinbox_x.custom_minimum_size = Vector2(60, 30)
+	spinbox_x.custom_minimum_size = Vector2(VECTOR_COMPONENT_WIDTH, DEFAULT_CELL_HEIGHT)
 	container.add_child(spinbox_x)
 
 	var label_y = Label.new()
 	label_y.text = "Y:"
-	label_y.custom_minimum_size = Vector2(15, 0)
+	label_y.custom_minimum_size = Vector2(VECTOR_LABEL_WIDTH, 0)
 	container.add_child(label_y)
 
 	var spinbox_y = SpinBox.new()
@@ -106,7 +115,7 @@ static func _create_vector2_editor(metadata: Dictionary) -> HBoxContainer:
 	spinbox_y.step = 0.1
 	spinbox_y.allow_greater = true
 	spinbox_y.allow_lesser = true
-	spinbox_y.custom_minimum_size = Vector2(60, 30)
+	spinbox_y.custom_minimum_size = Vector2(VECTOR_COMPONENT_WIDTH, DEFAULT_CELL_HEIGHT)
 	container.add_child(spinbox_y)
 
 	return container
@@ -115,13 +124,13 @@ static func _create_vector2_editor(metadata: Dictionary) -> HBoxContainer:
 ## Create specialized editor for Vector3
 static func _create_vector3_editor(metadata: Dictionary) -> HBoxContainer:
 	var container = HBoxContainer.new()
-	container.custom_minimum_size = Vector2(220, 30)
+	container.custom_minimum_size = Vector2(VECTOR3_CELL_WIDTH, DEFAULT_CELL_HEIGHT)
 	container.set_meta("type_id", TYPE_VECTOR3)
 	container.set_meta("type_name", "Vector3")
 
 	var label_x = Label.new()
 	label_x.text = "X:"
-	label_x.custom_minimum_size = Vector2(15, 0)
+	label_x.custom_minimum_size = Vector2(VECTOR_LABEL_WIDTH, 0)
 	container.add_child(label_x)
 
 	var spinbox_x = SpinBox.new()
@@ -129,12 +138,12 @@ static func _create_vector3_editor(metadata: Dictionary) -> HBoxContainer:
 	spinbox_x.step = 0.1
 	spinbox_x.allow_greater = true
 	spinbox_x.allow_lesser = true
-	spinbox_x.custom_minimum_size = Vector2(50, 30)
+	spinbox_x.custom_minimum_size = Vector2(VECTOR3_COMPONENT_WIDTH, DEFAULT_CELL_HEIGHT)
 	container.add_child(spinbox_x)
 
 	var label_y = Label.new()
 	label_y.text = "Y:"
-	label_y.custom_minimum_size = Vector2(15, 0)
+	label_y.custom_minimum_size = Vector2(VECTOR_LABEL_WIDTH, 0)
 	container.add_child(label_y)
 
 	var spinbox_y = SpinBox.new()
@@ -142,12 +151,12 @@ static func _create_vector3_editor(metadata: Dictionary) -> HBoxContainer:
 	spinbox_y.step = 0.1
 	spinbox_y.allow_greater = true
 	spinbox_y.allow_lesser = true
-	spinbox_y.custom_minimum_size = Vector2(50, 30)
+	spinbox_y.custom_minimum_size = Vector2(VECTOR3_COMPONENT_WIDTH, DEFAULT_CELL_HEIGHT)
 	container.add_child(spinbox_y)
 
 	var label_z = Label.new()
 	label_z.text = "Z:"
-	label_z.custom_minimum_size = Vector2(15, 0)
+	label_z.custom_minimum_size = Vector2(VECTOR_LABEL_WIDTH, 0)
 	container.add_child(label_z)
 
 	var spinbox_z = SpinBox.new()
@@ -155,7 +164,7 @@ static func _create_vector3_editor(metadata: Dictionary) -> HBoxContainer:
 	spinbox_z.step = 0.1
 	spinbox_z.allow_greater = true
 	spinbox_z.allow_lesser = true
-	spinbox_z.custom_minimum_size = Vector2(50, 30)
+	spinbox_z.custom_minimum_size = Vector2(VECTOR3_COMPONENT_WIDTH, DEFAULT_CELL_HEIGHT)
 	container.add_child(spinbox_z)
 
 	return container
@@ -164,7 +173,7 @@ static func _create_vector3_editor(metadata: Dictionary) -> HBoxContainer:
 ## Create ColorPickerButton for Color values
 static func _create_color_editor(metadata: Dictionary) -> ColorPickerButton:
 	var color_picker = ColorPickerButton.new()
-	color_picker.custom_minimum_size = Vector2(100, 30)
+	color_picker.custom_minimum_size = Vector2(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT)
 	color_picker.set_meta("type_id", TYPE_COLOR)
 	color_picker.set_meta("type_name", "Color")
 	color_picker.edit_alpha = true
@@ -174,7 +183,7 @@ static func _create_color_editor(metadata: Dictionary) -> ColorPickerButton:
 ## Create default LineEdit editor for unsupported types
 static func _create_default_editor(metadata: Dictionary) -> LineEdit:
 	var line_edit = LineEdit.new()
-	line_edit.custom_minimum_size = Vector2(100, 30)
+	line_edit.custom_minimum_size = Vector2(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT)
 	line_edit.set_meta("type_id", TYPE_NIL)
 	line_edit.set_meta("type_name", "Variant")
 	line_edit.placeholder_text = "..."
