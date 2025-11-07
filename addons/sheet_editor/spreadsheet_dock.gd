@@ -147,25 +147,21 @@ func update_ui(force_rebuild: bool = false) -> void:
 	_update_recent_sheets_list()
 
 
-func _rebuild_grid() -> void:
-	"""Rebuild the entire grid based on current sheet data"""
-	# Clear existing grid
-	for child in grid_container.get_children():
-		child.queue_free()
-
-	if not current_sheet or not current_sheet is SpreadsheetResource:
-		var label := Label.new()
-		label.text = "No sheet loaded"
-		grid_container.add_child(label)
-		return
-
-	var sheet := current_sheet as SpreadsheetResource
-
-	# Set grid columns (add 1 for row headers)
-	grid_container.columns = max(1, sheet.column_count + 1)
-
-
 func _needs_grid_rebuild(sheet: SpreadsheetResource) -> bool:
+	"""Check if grid structure needs to be rebuilt
+
+	Returns true if:
+	- Grid is empty
+	- Number of grid children doesn't match expected (row/col structure changed)
+	"""
+	var child_count = grid_container.get_child_count()
+	if child_count == 0:
+		return true
+
+	# Expected children: corner + col_headers + (rows * (row_header + cells))
+	# = 1 + column_count + (row_count * (1 + column_count))
+	var expected = 1 + sheet.column_count + (sheet.row_count * (1 + sheet.column_count))
+	return child_count != expected
 	"""Check if grid structure needs to be rebuilt
 
 	Returns true if:
