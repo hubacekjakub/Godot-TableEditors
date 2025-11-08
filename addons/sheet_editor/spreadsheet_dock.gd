@@ -162,20 +162,6 @@ func _needs_grid_rebuild(sheet: SpreadsheetResource) -> bool:
 	# = 1 + column_count + (row_count * (1 + column_count))
 	var expected = 1 + sheet.column_count + (sheet.row_count * (1 + sheet.column_count))
 	return child_count != expected
-	"""Check if grid structure needs to be rebuilt
-
-	Returns true if:
-	- Grid is empty
-	- Number of grid children doesn't match expected (row/col structure changed)
-	"""
-	var child_count = grid_container.get_child_count()
-	if child_count == 0:
-		return true
-
-	# Expected children: corner + col_headers + (rows * (row_header + cells))
-	# = 1 + column_count + (row_count * (1 + column_count))
-	var expected = 1 + sheet.column_count + (sheet.row_count * (1 + sheet.column_count))
-	return child_count != expected
 
 
 func _update_single_cell(row: int, col: int, new_value: String) -> void:
