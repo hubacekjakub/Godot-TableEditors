@@ -172,7 +172,6 @@ func _check_file_collision() -> bool:
 
 	# Check if file exists
 	if FileAccess.file_exists(full_path):
-		warning_text.text = "⚠️ WARNING: File '%s' already exists!" % file_name
 		warning_text.visible = true
 		return true
 	else:
