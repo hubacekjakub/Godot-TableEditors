@@ -16,7 +16,7 @@ class_name ClassTableResource
 ## NEW: Type metadata for class-based tables (uses PropertyInspector native types)
 @export var source_class_name: String = ""  # Class this table represents (fully-qualified name)
 @export var class_file_path: String = ""  # Path to the source .gd file
-@export var columns_metadata: Array[Dictionary] = []  # Enhanced type info from PropertyInspector: {name, type, type_name, usage, exported, default, hint, hint_string}
+@export var columns_metadata: Array[Dictionary] = []  # Minimal schema info: {name, type, hint}
 
 
 ## Get the value of a cell at the specified position.
@@ -159,8 +159,7 @@ func export_to_csv(file_path: String) -> bool:
 	var header_row: PackedStringArray = []
 	for col in range(column_count):
 		var col_name = get_column_name(col)
-		var type_info = get_column_type_info(col)
-		var type_name = type_info.get("type_name", "")
+		var type_name = get_column_type_name(col)
 		var header_text = col_name
 		if not type_name.is_empty():
 			header_text += ":" + type_name
@@ -314,13 +313,7 @@ func _add_column_metadata_from_header(parsed_header: Dictionary, col_index: int)
 	var column_meta = {
 		"name": col_name,
 		"type": type_id,
-		"type_name": type_name,
-		"default": null,
-		"exported": true,
-		"usage": PROPERTY_USAGE_SCRIPT_VARIABLE,
-		"hint": 0,
-		"hint_string": "",
-		"is_required": false,
+		"hint": "",
 	}
 
 	# Ensure columns_metadata array is large enough
@@ -357,26 +350,17 @@ func create_columns_from_class(script_path: String) -> bool:
 
 
 ## Add a column from PropertyInspector metadata dictionary
-## Metadata format: {name, type (int), type_name (String), usage, exported, default, hint, hint_string}
+## Metadata format from Godot: {name, type, type_name, usage, exported, default, hint, hint_string}
 func add_column_from_property_metadata(prop_meta: Dictionary) -> void:
 	var col_name = prop_meta.get("name", "unknown")
 	var col_type_id = prop_meta.get("type", TYPE_NIL)
-	var col_type_name = prop_meta.get("type_name", "Variant")
-	var default_value = prop_meta.get("default", null)
-	var usage_flags = prop_meta.get("usage", 0)
-	var is_exported = prop_meta.get("exported", false)
+	var hint_text = _extract_hint_text(prop_meta)
 
-	# Create enhanced metadata entry
+	# Store minimal metadata footprint
 	var column_meta = {
 		"name": col_name,
 		"type": col_type_id,  # Godot type ID (TYPE_INT, TYPE_STRING, etc.)
-		"type_name": col_type_name,  # Human-readable type name
-		"default": default_value,
-		"exported": is_exported,
-		"usage": usage_flags,
-		"hint": prop_meta.get("hint", 0),
-		"hint_string": prop_meta.get("hint_string", ""),
-		"is_required": false,
+		"hint": hint_text,
 	}
 
 	columns_metadata.append(column_meta)
@@ -385,20 +369,14 @@ func add_column_from_property_metadata(prop_meta: Dictionary) -> void:
 
 
 ## Add a column with type information (legacy method, uses PropertyInspector internally)
-func add_column_with_type(col_name: String, col_type: String, default_value: Variant = null, is_exported: bool = false) -> void:
+func add_column_with_type(col_name: String, col_type: String, _default_value: Variant = null, _is_exported: bool = false, column_hint: String = "") -> void:
 	# Convert type name to Godot type ID
 	var type_id = _type_name_to_id(col_type)
 
 	var column_meta = {
 		"name": col_name,
 		"type": type_id,
-		"type_name": col_type,
-		"default": default_value,
-		"exported": is_exported,
-		"usage": PROPERTY_USAGE_SCRIPT_VARIABLE if is_exported else 0,
-		"hint": 0,
-		"hint_string": "",
-		"is_required": false,
+		"hint": column_hint,
 	}
 	columns_metadata.append(column_meta)
 	set_column_name(column_count, col_name)
@@ -424,8 +402,8 @@ func get_column_type_info(col: int) -> Dictionary:
 
 ## Get type name for a column (human-readable)
 func get_column_type_name(col: int) -> String:
-	var type_info = get_column_type_info(col)
-	return type_info.get("type_name", "Unknown")
+	var type_id = get_column_type_id(col)
+	return _type_id_to_name(type_id)
 
 
 ## Get Godot type ID for a column
@@ -492,6 +470,20 @@ func _type_name_to_id(type_name: String) -> int:
 		"Dictionary": return TYPE_DICTIONARY
 		"Object": return TYPE_OBJECT
 		_: return TYPE_NIL
+
+
+func _type_id_to_name(type_id: int) -> String:
+	var name = type_string(type_id)
+	return name if not name.is_empty() else "Variant"
+
+
+func _extract_hint_text(prop_meta: Dictionary) -> String:
+	var hint_string = prop_meta.get("hint_string", "")
+	if hint_string is String and not hint_string.is_empty():
+		return hint_string
+	if prop_meta.has("hint"):
+		return str(prop_meta.get("hint"))
+	return ""
 
 
 ## Check if a property type is supported for table storage

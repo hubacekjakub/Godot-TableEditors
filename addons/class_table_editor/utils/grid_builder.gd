@@ -108,7 +108,7 @@ func _build_column_headers(sheet: ClassTableResource) -> void:
 
 		# Get type info for this column
 		var type_info = sheet.get_column_type_info(col)
-		var col_type_name = type_info.get("type_name", "Variant")
+		var col_type_name = sheet.get_column_type_name(col)
 		var col_name = sheet.get_column_name(col)
 
 		# Display column name with type hint

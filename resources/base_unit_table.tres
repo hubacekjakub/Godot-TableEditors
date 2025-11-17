@@ -22,53 +22,23 @@ row_names = Array[String](["Knight", "Archer", "Mage", "Scout"])
 source_class_name = "BaseUnit"
 class_file_path = "res://addons/class_table_editor/example/BaseUnit.gd"
 columns_metadata = Array[Dictionary]([{
-"default": "Unnamed Unit",
-"exported": true,
-"hint": 0,
-"hint_string": "",
-"is_required": false,
+"hint": "",
 "name": "unit_name",
-"type": 4,
-"type_name": "String",
-"usage": 4102
+"type": 4
 }, {
-"default": 100,
-"exported": true,
-"hint": 0,
-"hint_string": "",
-"is_required": false,
+"hint": "",
 "name": "max_health",
-"type": 2,
-"type_name": "int",
-"usage": 4102
+"type": 2
 }, {
-"default": 10,
-"exported": true,
-"hint": 0,
-"hint_string": "",
-"is_required": false,
+"hint": "",
 "name": "attack_damage",
-"type": 2,
-"type_name": "int",
-"usage": 4102
+"type": 2
 }, {
-"default": 5.0,
-"exported": true,
-"hint": 0,
-"hint_string": "",
-"is_required": false,
+"hint": "",
 "name": "movement_speed",
-"type": 3,
-"type_name": "float",
-"usage": 4102
+"type": 3
 }, {
-"default": "A basic unit",
-"exported": true,
-"hint": 0,
-"hint_string": "",
-"is_required": false,
+"hint": "",
 "name": "description",
-"type": 4,
-"type_name": "String",
-"usage": 4102
+"type": 4
 }])

@@ -21,7 +21,7 @@ func create_cell_editor(row: int, col: int, sheet: ClassTableResource) -> Contro
 	# Get type info for this column
 	var type_info = sheet.get_column_type_info(col)
 	var type_id = type_info.get("type", TYPE_NIL)
-	var type_name = type_info.get("type_name", "Variant")
+	var type_name = sheet.get_column_type_name(col)
 
 	# Create type-specific editor
 	var cell_editor = TYPED_CELL_EDITOR_FACTORY.create_editor(type_id, type_name, type_info)

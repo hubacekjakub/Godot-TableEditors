@@ -38,15 +38,16 @@ func test_resource() -> void:
 	# Test 3: Verify column type metadata
 	print("\nTest 3: Verifying column type metadata...")
 	var col0 = resource.get_column_type_info(0)
-	print("  Column 0: ", col0["name"], " (type: ", col0["type_name"], ", default: ", col0["default"], ")")
+	var col0_type_name = resource.get_column_type_name(0)
+	print("  Column 0: ", col0["name"], " (type: ", col0_type_name, ")")
 	assert(col0["name"] == "item_name", "Column 0 name mismatch")
-	assert(col0["type_name"] == "String", "Column 0 type mismatch")
-	assert(col0["exported"] == true, "Column 0 should be exported")
+	assert(col0_type_name == "String", "Column 0 type mismatch")
 
 	var col1 = resource.get_column_type_info(1)
-	print("  Column 1: ", col1["name"], " (type: ", col1["type_name"], ", default: ", col1["default"], ")")
-	assert(col1["type_name"] == "int", "Column 1 type should be int")
-	assert(col1["default"] == 10, "Column 1 default should be 10")
+	var col1_type_name = resource.get_column_type_name(1)
+	print("  Column 1: ", col1["name"], " (type: ", col1_type_name, ")")
+	assert(col1["name"] == "damage", "Column 1 name mismatch")
+	assert(col1_type_name == "int", "Column 1 type should be int")
 
 	# Test 4: Add rows and set cells
 	print("\nTest 4: Adding rows with data...")
@@ -236,11 +237,11 @@ func test_csv_export_import() -> void:
 	# Verify column metadata was reconstructed
 	var col0 = import_resource.get_column_type_info(0)
 	assert(col0["name"] == "name", "Column 0 name should be 'name'")
-	assert(col0["type_name"] == "String", "Column 0 type should be String")
+	assert(import_resource.get_column_type_name(0) == "String", "Column 0 type should be String")
 
 	var col1 = import_resource.get_column_type_info(1)
 	assert(col1["name"] == "damage", "Column 1 name should be 'damage'")
-	assert(col1["type_name"] == "int", "Column 1 type should be int")
+	assert(import_resource.get_column_type_name(1) == "int", "Column 1 type should be int")
 
 	# Verify cell data
 	assert(import_resource.get_cell(0, 0) == "Iron Sword", "Cell (0,0) should match")
