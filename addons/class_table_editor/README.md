@@ -2,7 +2,7 @@
 
 A **Godot 4.4+ Editor Plugin** for creating and editing type-safe data tables. Define a GDScript resource class, auto-generate a spreadsheet-like editor, and use TableHandles to reference rows in your game code.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Create a Data Class
 ```gdscript
@@ -35,7 +35,7 @@ func _ready():
     print(unit_data.max_health)
 ```
 
-## 📚 Features
+## Features
 
 ✅ **Type Safety** - Properties validated at edit time
 ✅ **Designer Workflow** - Non-programmers can edit data
@@ -44,7 +44,7 @@ func _ready():
 ✅ **Inspector Integration** - Easy property assignment
 ✅ **Version Control** - Text-based .tres files
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 Your Resource Class (@export properties)
@@ -56,7 +56,7 @@ TableHandle (Row reference)
 Game Code (Type-safe data access)
 ```
 
-## 📁 Folder Structure
+## Folder Structure
 
 ```
 addons/class_table_editor/
@@ -91,7 +91,7 @@ addons/class_table_editor/
     └── README.md               # Example documentation
 ```
 
-## 🎯 Core Concepts
+## Core Concepts
 
 ### ClassTable Resource
 A `.tres` file containing:
@@ -118,7 +118,7 @@ A persistent reference to a row:
 | Vector2 | Vector2(10, 20) |
 | Vector3 | Vector3(0, 1, 0) |
 
-## 📖 How to Use
+## How to Use
 
 ### Step 1: Define Your Resource
 ```gdscript
@@ -150,7 +150,7 @@ func display_item(handle: TableHandle) -> void:
     print("%s: $%d" % [item.item_name, item.price])
 ```
 
-## 🎮 Complete Example
+## Complete Example
 
 See the `example/` folder for a full working implementation:
 - **BaseUnit.gd** - Resource class
@@ -165,7 +165,7 @@ See the `example/` folder for a full working implementation:
 3. Press F6 to run
 4. See 4 colored units with stats
 
-## ✨ Key Benefits
+## Key Benefits
 
 1. **Type Safety** - Invalid values caught at edit time
 2. **Designer Friendly** - Non-programmers edit data spreadsheet-style
@@ -174,7 +174,7 @@ See the `example/` folder for a full working implementation:
 5. **Git Friendly** - Text-based .tres resources
 6. **Performance** - Efficient data loading at runtime
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 **Table not showing properties?**
 - Ensure class has `@export` decorators
@@ -191,12 +191,12 @@ See the `example/` folder for a full working implementation:
 - Check .tres file format is valid
 - Verify `to_resource()` has correct class type
 
-## 🔗 Related Resources
+## Related Resources
 
 - **Godot Docs**: [Resources](https://docs.godotengine.org/en/stable/tutorials/io/saving_games.html), [@export](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_exports.html)
 - **Example Docs**: See `example/README.md` for detailed walkthrough
 
-## 📝 Best Practices
+## Best Practices
 
 1. Use descriptive property names
 2. Provide sensible default values
@@ -205,7 +205,7 @@ See the `example/` folder for a full working implementation:
 5. Version control .tres files (they're text-based)
 6. Test with `example/ExampleTest.tscn`
 
-## 🎓 Learning Path
+## Learning Path
 
 1. Read this README
 2. Check the example (run UnitSpawner.tscn)
