@@ -43,8 +43,8 @@ func load_starting_inventory():
 			push_warning("Skipping invalid TableHandle")
 			continue
 
-		# Use to_resource() for one-liner conversion
-		var item = handle.to_resource(TestItemData)
+		# Use get_data() for one-liner conversion
+		var item = handle.get_data(TestItemData)
 		if item:
 			inventory.append(item)
 			print("  ✅ Loaded: %s (Damage: %d, Armor: %.1f)" % [item.item_name, item.damage, item.armor])
@@ -97,7 +97,7 @@ func get_rare_items() -> Array[TestItemData]:
 
 
 ## Example: Load entire item database from a table
-## Demonstrates batch loading with to_resource() method
+## Demonstrates batch loading with get_data() method
 static func load_item_database(table_path: String) -> Dictionary:
 	var database = {}
 
@@ -115,8 +115,8 @@ static func load_item_database(table_path: String) -> Dictionary:
 		handle.table_resource = table
 		handle.row_name = item_name
 
-		# Use to_resource() for one-liner conversion
-		var item = handle.to_resource(TestItemData)
+		# Use get_data() for one-liner conversion
+		var item = handle.get_data(TestItemData)
 		if item:
 			database[item_name] = item
 
@@ -134,7 +134,7 @@ func spawn_item(item_name: String, database: Dictionary) -> TestItemData:
 	var template = database[item_name] as TestItemData
 
 	# For runtime instances, duplicate properties manually
-	# (to_resource() is for loading from table, not cloning)
+	# (get_data() is for loading from table, not cloning)
 	var new_item = TestItemData.new()
 	new_item.item_name = template.item_name
 	new_item.damage = template.damage

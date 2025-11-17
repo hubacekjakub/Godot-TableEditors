@@ -2,154 +2,99 @@
 extends RefCounted
 class_name ResourceConverter
 
-## Generic Reflection-Based Resource Converter
-## Automatically maps TableHandle row data to Resource properties using reflection.
-## Works with any Resource class without modification.
+## Reflection-based converter for mapping TableHandle rows to typed instances.
+## Works with RefCounted or Resource classes.
 ##
-## Recommended Usage (via TableHandle):
-##   var item = handle.to_resource(TestItemData)
-##   # Properties automatically mapped from table columns
-##
-## Direct Usage (less common):
-##   var item = ResourceConverter.create_from_handle(handle, TestItemData)
-##
-## Requirements:
-##   - Table column names must match Resource property names exactly
-##   - Resource properties should use @export for proper reflection
-##   - TableHandle must be valid with existing row
+## Usage:
+##   var item = handle.get_data(TestItemData)
 
 
-## Creates a Resource instance from a TableHandle using reflection.
-## Automatically maps table columns to Resource properties by matching names.
-##
-## @param handle: TableHandle - The table handle containing row data
-## @param resource_class: Script or String - The Resource class to instantiate
-## @return Resource - Newly created and populated Resource, or null on error
-static func create_from_handle(handle: TableHandle, resource_class) -> Resource:
-	# Validate handle
+## Creates and populates a data instance from a TableHandle.
+## Automatically maps table columns to class properties by matching names.
+static func create_from_handle(handle: TableHandle, data_class) -> Variant:
 	if not handle:
 		push_error("ResourceConverter: TableHandle is null")
 		return null
 
 	if not handle.is_valid():
-		push_error("ResourceConverter: TableHandle is invalid (missing table or row)")
+		push_error("ResourceConverter: TableHandle is invalid")
 		return null
 
-	# Validate resource class
-	if not resource_class:
-		push_error("ResourceConverter: No resource class provided")
+	if not data_class:
+		push_error("ResourceConverter: No data class provided")
 		return null
 
-	# Create instance
-	var resource: Resource = _instantiate_resource(resource_class)
-	if not resource:
+	var instance = _instantiate_class(data_class)
+	if not instance:
 		return null
 
-	# Get row data from table
 	var row_data = handle.get_row_data()
 	if row_data.is_empty():
-		push_warning("ResourceConverter: No data found in table row '%s'" % handle.row_name)
-		return resource  # Return empty resource (graceful degradation)
+		push_warning("ResourceConverter: No data in row '%s'" % handle.row_name)
+		return instance
 
-	# Get all properties from the resource
-	var property_list = resource.get_property_list()
 	var mapped_count = 0
-
-	# Auto-map matching properties
-	for prop_info in property_list:
+	for prop_info in instance.get_property_list():
 		var prop_name: String = prop_info["name"]
 		var prop_type: int = prop_info["type"]
 		var prop_usage: int = prop_info["usage"]
 
-		# Skip internal properties (starts with underscore)
 		if prop_name.begins_with("_"):
 			continue
 
-		# Skip internal engine properties
 		if prop_usage & PROPERTY_USAGE_INTERNAL:
 			continue
 
-		# Only process storable properties (user-defined @export vars)
 		if not (prop_usage & PROPERTY_USAGE_STORAGE):
 			continue
 
-		# If table has this column
 		if prop_name in row_data:
 			var value = row_data[prop_name]
 
-			# Type check before assignment
 			if _is_type_compatible(value, prop_type):
-				resource.set(prop_name, value)
+				instance.set(prop_name, value)
 				mapped_count += 1
 			else:
-				push_warning("ResourceConverter: Type mismatch for property '%s' (expected %s, got %s)" %
+				push_warning("ResourceConverter: Type mismatch for '%s' (expected %s, got %s)" %
 					[prop_name, type_string(prop_type), type_string(typeof(value))])
 
 	if mapped_count == 0:
-		push_warning("ResourceConverter: No properties were mapped. Check column names match property names.")
-	else:
-		if OS.is_debug_build():
-			print("ResourceConverter: Successfully mapped %d properties from table" % mapped_count)
+		push_warning("ResourceConverter: No properties mapped. Check column names match property names.")
+	elif OS.is_debug_build():
+		print("ResourceConverter: Mapped %d properties" % mapped_count)
 
-	return resource
+	return instance
 
 
-## Instantiates a Resource from a Script or class name string.
-## Handles both direct Script references and ClassDB string lookups.
-##
-## @param resource_class: Script or String - The class to instantiate
-## @return Resource - New instance, or null on failure
-static func _instantiate_resource(resource_class) -> Resource:
-	var resource: Resource = null
+static func _instantiate_class(data_class) -> Variant:
+	if data_class is Script:
+		return data_class.new()
 
-	# Try Script-based instantiation
-	if resource_class is Script:
-		resource = resource_class.new()
-
-	# Try ClassDB string-based instantiation
-	elif resource_class is String:
-		if ClassDB.class_exists(resource_class):
-			resource = ClassDB.instantiate(resource_class)
-		else:
-			push_error("ResourceConverter: Class '%s' not found in ClassDB" % resource_class)
-			return null
-
-	# Try as class name if it has .new() method
-	elif resource_class.has_method("new"):
-		resource = resource_class.new()
-
-	else:
-		push_error("ResourceConverter: Unable to instantiate resource from type: %s" % str(resource_class))
+	if data_class is String:
+		if ClassDB.class_exists(data_class):
+			return ClassDB.instantiate(data_class)
+		push_error("ResourceConverter: Class '%s' not found in ClassDB" % data_class)
 		return null
 
-	# Validate result is actually a Resource
-	if not resource is Resource:
-		push_error("ResourceConverter: Instantiated object is not a Resource: %s" % str(resource))
-		return null
+	if data_class.has_method("new"):
+		return data_class.new()
 
-	return resource
+	push_error("ResourceConverter: Unable to instantiate class from type: %s" % str(data_class))
+	return null
 
 
-## Checks if a value's type is compatible with the expected property type.
-## Allows exact matches and numeric coercion (int <-> float).
-##
-## @param value: Variant - The value to check
-## @param expected_type: int - The TYPE_* constant for expected type
-## @return bool - True if compatible, false otherwise
 static func _is_type_compatible(value: Variant, expected_type: int) -> bool:
-	# Null is compatible with any type
 	if value == null:
 		return true
 
 	var value_type = typeof(value)
 
-	# Exact type match
 	if value_type == expected_type:
 		return true
 
-	# Allow numeric coercion between int and float
+	# Allow numeric coercion
 	if expected_type in [TYPE_INT, TYPE_FLOAT] and value_type in [TYPE_INT, TYPE_FLOAT]:
 		return true
 
-	# Not compatible
 	return false
+

@@ -31,7 +31,7 @@ Type-safe tables generated from GDScript classes
 ```gdscript
 # Game code
 @export var unit_handle: TableHandle
-var unit = unit_handle.to_resource(BaseUnit) as BaseUnit
+var unit = unit_handle.get_data(BaseUnit) as BaseUnit
 print(unit.max_health)  # Full type safety
 ```
 

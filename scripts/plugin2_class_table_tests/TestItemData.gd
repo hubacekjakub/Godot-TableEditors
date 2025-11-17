@@ -1,8 +1,10 @@
-extends Resource
+extends RefCounted
 class_name TestItemData
 
 ## Test class for parser verification
 ## This class demonstrates property types and @export decorators
+##
+## Note: Extends RefCounted instead of Resource for better performance
 
 @export var item_name: String = "Sword"
 @export var damage: int = 10

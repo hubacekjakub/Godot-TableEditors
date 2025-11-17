@@ -1,5 +1,4 @@
-@tool
-extends Resource
+extends RefCounted
 class_name BaseUnit
 ## Base unit data class for the example
 ## Demonstrates type-safe properties for the class table editor

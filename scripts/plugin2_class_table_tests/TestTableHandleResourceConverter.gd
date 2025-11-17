@@ -2,8 +2,8 @@
 extends Node
 class_name TestTableHandleResourceConverter
 
-## Test script for TableHandle.to_resource() and ResourceConverter functionality
-## Tests the new convenient API for converting table rows to typed Resources
+## Test script for TableHandle.get_data() and ResourceConverter functionality
+## Tests the convenient API for converting table rows to typed data instances
 
 
 func run_all_tests() -> void:
@@ -54,9 +54,9 @@ func test_table_handle_validity() -> void:
 	print("  ✅ Validity checks passed")
 
 
-## Test 2: Convert single item using to_resource()
+## Test 2: Convert single item using get_data()
 func test_to_resource_single_item() -> void:
-	print("\nTest 2: Convert single item using to_resource()...")
+	print("\nTest 2: Convert single item using get_data()...")
 
 	# Create test table with item data
 	var table = ClassTableResource.new()
@@ -79,8 +79,8 @@ func test_to_resource_single_item() -> void:
 	handle.table_resource = table
 	handle.row_name = "Iron Sword"
 
-	# Use the new to_resource() method
-	var item = handle.to_resource(TestItemData)
+	# Use the get_data() method
+	var item = handle.get_data(TestItemData)
 
 	# Verify conversion
 	assert(item != null, "Should create resource instance")
@@ -127,7 +127,7 @@ func test_to_resource_batch_loading() -> void:
 	table.set_cell(2, 2, "0")
 	table.set_cell(2, 3, "true")
 
-	# Batch load using to_resource()
+	# Batch load using get_data()
 	var items: Array[TestItemData] = []
 	for row in range(table.row_count):
 		# Get the value from the first column (item_name) as the row identifier
@@ -136,7 +136,7 @@ func test_to_resource_batch_loading() -> void:
 		handle.table_resource = table
 		handle.row_name = row_identifier
 
-		var item = handle.to_resource(TestItemData)
+		var item = handle.get_data(TestItemData)
 		if item:
 			items.append(item)
 
@@ -213,7 +213,7 @@ func test_type_conversion() -> void:
 	handle.table_resource = table
 	handle.row_name = "Test Item"
 
-	var item = handle.to_resource(TestItemData)
+	var item = handle.get_data(TestItemData)
 
 	assert(item != null, "Item should be created")
 	assert(item.item_name is String, "item_name should be String")
@@ -260,7 +260,7 @@ func test_error_handling() -> void:
 	assert(not handle_invalid_row.is_valid(), "Handle with invalid row should be invalid")
 	print("  ✓ TableHandle with invalid row: invalid")
 
-	# Test Case 3: Valid handle - ensure to_resource() handles null class gracefully
+	# Test Case 3: Valid handle - ensure get_data() handles null class gracefully
 	var valid_table = ClassTableResource.new()
 	valid_table.sheet_name = "Test"
 	valid_table.add_column_with_type("item_name", "String", "", true)
@@ -279,16 +279,16 @@ func test_error_handling() -> void:
 	assert(row_data.has("item_name"), "Row data should have item_name column")
 	print("  ✓ Valid handle returns row data")
 
-	# Test Case 5: Verify to_resource() works on valid handle
-	var converted_item = valid_handle.to_resource(TestItemData)
-	assert(converted_item != null, "to_resource() should work on valid handle")
+	# Test Case 5: Verify get_data() works on valid handle
+	var converted_item = valid_handle.get_data(TestItemData)
+	assert(converted_item != null, "get_data() should work on valid handle")
 	assert(converted_item is TestItemData, "Should create TestItemData instance")
 	assert(converted_item.item_name == "Test Item", "Item name should match")
-	print("  ✓ Valid handle.to_resource() works correctly")
+	print("  ✓ Valid handle.get_data() works correctly")
 
 	print("  ✅ Error handling via validity checks verified")
 	print("    - Invalid table: ✓")
 	print("    - Invalid row: ✓")
 	print("    - Valid handle: ✓")
 	print("    - Row data retrieval: ✓")
-	print("    - to_resource() conversion: ✓")
+	print("    - get_data() conversion: ✓")

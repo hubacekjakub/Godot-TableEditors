@@ -98,18 +98,18 @@ func is_valid() -> bool:
 	return table_resource != null and get_row_index() >= 0
 
 
-## Convert this table row to a Resource instance using reflection.
-## Automatically maps table columns to Resource properties by matching names.
+## Convert this table row to a typed data instance using reflection.
+## Automatically maps table columns to class properties by matching names.
 ## This is a convenience wrapper around ResourceConverter.create_from_handle().
 ##
 ## Usage:
-##   var item = handle.to_resource(TestItemData)
+##   var item = handle.get_data(TestItemData)  # TestItemData extends RefCounted
 ##   print(item.item_name, item.price)
 ##
-## @param resource_class: Script or String - The Resource class to instantiate
-## @return Resource - Newly created and populated Resource, or null on error
-func to_resource(resource_class) -> Resource:
-	return ResourceConverter.create_from_handle(self, resource_class)
+## @param data_class: Script or String - The class to instantiate (RefCounted or Resource)
+## @return Variant - Newly created and populated instance, or null on error
+func get_data(data_class) -> Variant:
+	return ResourceConverter.create_from_handle(self, data_class)
 
 
 ## Parse string value to typed variant based on type ID

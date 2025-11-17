@@ -1,4 +1,4 @@
-extends Resource
+extends RefCounted
 class_name TypeSafeTestData
 
 ## Example class for demonstrating type-safe editing
