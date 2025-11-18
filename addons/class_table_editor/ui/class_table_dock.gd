@@ -405,23 +405,20 @@ func _show_class_select_dialog() -> void:
 
 ## Handle class table creation from class selection dialog.
 func _on_class_table_created(resource_path: String, class_info: Dictionary) -> void:
-	if OS.is_debug_build():
-		print("Class table created: %s" % resource_path)
-		print("  From class: %s" % class_info.get("class_name", ""))
+	_debug_log("Class table created: %s" % resource_path)
+	_debug_log("  From class: %s" % class_info.get("class_name", ""))
 
 	# Load and display the newly created table
 	var table_resource = load(resource_path) as ClassTableResource
 	if table_resource:
 		set_sheet(table_resource)
-		if OS.is_debug_build():
-			print("Table loaded and displayed in dock")
+		_debug_log("Table loaded and displayed in dock")
 
 		# IMPORTANT: Make the plugin aware of this resource by editing it
 		# This will trigger the plugin's _edit() method which sets current_sheet
 		if editor_interface:
 			editor_interface.edit_resource(table_resource)
-			if OS.is_debug_build():
-				print("Resource registered with editor")
+			_debug_log("Resource registered with editor")
 		else:
 			push_warning("Editor interface not available - plugin may not be aware of new table")
 
@@ -452,8 +449,7 @@ func _on_csv_export_confirmed(file_path: String) -> void:
 
 	var result = sheet.export_to_csv(file_path)
 	if result:
-		if OS.is_debug_build():
-			print("[ClassTableDock] Exported to CSV: ", file_path)
+		_debug_log("[ClassTableDock] Exported to CSV: " + file_path)
 	else:
 		push_error("Failed to export CSV to: " + file_path)
 
@@ -476,8 +472,7 @@ func _on_csv_import_confirmed(file_path: String) -> void:
 
 	var result = sheet.import_from_csv(file_path)
 	if result:
-		if OS.is_debug_build():
-			print("[ClassTableDock] Imported from CSV: ", file_path)
+		_debug_log("[ClassTableDock] Imported from CSV: " + file_path)
 		# Refresh UI with forced rebuild since structure may have changed
 		update_ui(true)
 		save_requested.emit()  # Auto-save after import
@@ -581,4 +576,9 @@ func _value_to_string(value: Variant, type_id: int) -> String:
 		_:
 			return str(value)
 
+
+## Helper: debug-only logging
+func _debug_log(message: String) -> void:
+	if OS.is_debug_build():
+		print(message)
 

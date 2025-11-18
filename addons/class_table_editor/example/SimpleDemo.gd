@@ -25,7 +25,7 @@ func _update_display() -> void:
 		return
 
 	# Convert handle to BaseUnit resource
-	var unit_data = unit.to_resource(BaseUnit) as BaseUnit
+	var unit_data = unit.get_data(BaseUnit) as BaseUnit
 
 	if unit_data == null:
 		properties_label.text = "[Invalid unit data]"

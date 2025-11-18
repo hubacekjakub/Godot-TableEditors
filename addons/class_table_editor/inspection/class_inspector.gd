@@ -11,7 +11,7 @@ extends RefCounted
 func inspect_class(file_path: String) -> Dictionary:
 	var script = load(file_path)
 	if script == null:
-		push_error("Failed to load script: ", file_path)
+		push_error("Failed to load script: " + file_path)
 		return {}
 
 	var class_name_str = script.resource_name
@@ -32,7 +32,7 @@ func inspect_class(file_path: String) -> Dictionary:
 func inspect_class_metadata(file_path: String) -> Dictionary:
 	var script = load(file_path)
 	if script == null:
-		push_error("Failed to load script: ", file_path)
+		push_error("Failed to load script: " + file_path)
 		return {}
 
 	var class_name_str = script.resource_name
@@ -99,14 +99,15 @@ static func print_class_report(file_path: String) -> void:
 	var inspector = ClassInspector.new()
 	var metadata = inspector.inspect_class_metadata(file_path)
 
-	print("\n=== Class Inspection Report ===")
-	print("Class: %s" % metadata.get("class_name", "Unknown"))
-	print("File: %s" % metadata.get("file_path", "Unknown"))
-	print("\nProperties:")
+	if OS.is_debug_build():
+		print("\n=== Class Inspection Report ===")
+		print("Class: %s" % metadata.get("class_name", "Unknown"))
+		print("File: %s" % metadata.get("file_path", "Unknown"))
+		print("\nProperties:")
 
-	for prop in metadata.get("properties", []):
-		print("  - %s: %s" % [prop.get("name", "?"), prop.get("type_name", "?")])
-		if prop.has("default"):
-			print("    Default: %s" % prop.get("default"))
-	print("=".repeat(30))
+		for prop in metadata.get("properties", []):
+			print("  - %s: %s" % [prop.get("name", "?"), prop.get("type_name", "?")])
+			if prop.has("default"):
+				print("    Default: %s" % prop.get("default"))
+		print("=".repeat(30))
 

@@ -90,7 +90,8 @@ static func get_property_metadata(script_path: String) -> Array[Dictionary]:
 
 ## Print property report directly to console (for debugging)
 static func print_properties(script_path: String) -> void:
-	print(inspect_script(script_path))
+	if OS.is_debug_build():
+		print(inspect_script(script_path))
 
 ## Check if a property is exported and should be included
 ## Checks for both PROPERTY_USAGE_SCRIPT_VARIABLE and PROPERTY_USAGE_EDITOR flags

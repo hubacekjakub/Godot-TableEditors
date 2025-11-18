@@ -59,7 +59,7 @@ func update_panel(slot_number: int, handle: TableHandle, panel: Panel, label: La
 			panel.modulate = Color(0.5, 0.5, 0.5, 0.7)
 		return
 
-	var unit_data = handle.to_resource(BaseUnit) as BaseUnit
+	var unit_data = handle.get_data(BaseUnit) as BaseUnit
 	if unit_data == null:
 		label.text = "Slot %d\n\n[Invalid unit data]" % slot_number
 		if panel:

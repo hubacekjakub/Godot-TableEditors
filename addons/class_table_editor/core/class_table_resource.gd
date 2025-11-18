@@ -368,7 +368,8 @@ func add_column_from_property_metadata(prop_meta: Dictionary) -> void:
 	column_count += 1
 
 
-## Add a column with type information (legacy method, uses PropertyInspector internally)
+## Add a column with type information
+## Compatibility wrapper kept for tests/examples - prefer create_columns_from_class
 func add_column_with_type(col_name: String, col_type: String, _default_value: Variant = null, _is_exported: bool = false, column_hint: String = "") -> void:
 	# Convert type name to Godot type ID
 	var type_id = _type_name_to_id(col_type)
@@ -383,7 +384,7 @@ func add_column_with_type(col_name: String, col_type: String, _default_value: Va
 	column_count += 1
 
 
-## Add a column from a PropertyInfo dictionary (legacy method from old ClassParser)
+## Add a column from a PropertyInfo dictionary (compatibility method kept for tests/examples)
 func add_column_from_property(prop: Dictionary) -> void:
 	var col_name = prop.get("name", "")
 	var col_type = prop.get("type", "Variant")

@@ -247,9 +247,9 @@ func _on_confirmed() -> void:
 		push_error("Failed to save table resource: " + full_path)
 		return
 
-	print("Created table from class: %s" % cls_name)
-	print("  - Columns: %d" % table_resource.column_count)
-	print("  - Saved to: %s" % full_path)
+	_debug_log("Created table from class: %s" % cls_name)
+	_debug_log("  - Columns: %d" % table_resource.column_count)
+	_debug_log("  - Saved to: %s" % full_path)
 
 	# Emit signals
 	class_selected.emit(selected_class_info)
@@ -268,6 +268,12 @@ func reset_to_defaults() -> void:
 	path_edit.text = "res://resources/"
 	warning_text.visible = false
 	_validate_inputs()
+
+
+## Debug logging helper
+func _debug_log(message: String) -> void:
+	if OS.is_debug_build():
+		print(message)
 
 
 ## Clean up when dialog is exiting the tree.
