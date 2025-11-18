@@ -19,7 +19,7 @@
 ### Plugin 2: Type-Safe Patterns
 
 **PropertyInspector:** Uses `Script.get_script_property_list()` - NO regex
-**TableHandle:** `handle.to_resource(MyClass)` - Reflection-based conversion
+**TableHandle:** `handle.get_data(MyClass)` - Reflection-based conversion
 **ClassCache:** Mtime-based invalidation for performance
 **Types:** 34+ Godot types (primitives, Vector2/3, Color, Resources)
 
@@ -39,7 +39,7 @@
 ## Plugin 2 Details
 
 **Why Native API?** Accurate, fast, type-safe (vs regex). Limitation: file-based only
-**ResourceConverter:** Auto-maps properties via reflection (`handle.to_resource(Class)`)
+**ResourceConverter:** Auto-maps properties via reflection (`handle.get_data(Class)`)
 **Type Metadata:** `columns_metadata[col]` stores {name, type, type_name, default, hint}
 
 ## Common Issues
@@ -52,7 +52,7 @@
 ## Usage
 
 **P1:** `sheet.get_cell(row, col)` - Manual access
-**P2:** `handle.to_resource(Class)` - Type-safe conversion
+**P2:** `handle.get_data(Class)` - Type-safe conversion
 
 ## Reference
 
