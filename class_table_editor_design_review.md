@@ -1,19 +1,19 @@
 # Class Table Editor - Design Review & Proposals
 
-**Date:** November 10, 2025
-**Status:** Discussion Phase - No Code Changes Yet
+**Date:** November 10, 2025 (updated: November 18, 2025)
+**Status:** Discussion + Implementation — some proposals implemented in code (see Changelog)
 **Purpose:** Critical analysis of current architecture and proposed improvements
 
 ---
 
 ## Quick Summary of Proposed Changes
 
-- **P1 – Use `RefCounted` instead of `Resource`** for row data classes (examples) to better match usage and reduce overhead.
-- **P2 – Keep auto-discovery, add filters + optional registration** instead of going fully manual.
+- **P1 – Use `RefCounted` instead of `Resource`** for row data classes (examples) to better match usage and reduce overhead. ✅ IMPLEMENTED
+- **P2 – Keep auto-discovery, add filters + optional registration** instead of going fully manual. ⚠️ PARTIAL (filtering helpers added; registration remains a proposal)
 - **P3 – Do not enforce a name column**, but warn when an identifier-like property is missing.
-- **P4 – Rename `TableHandle.to_resource()` to `build()`** (with a deprecation alias) for clearer semantics.
+-- **P4 – Rename `TableHandle.get_data()` to `build()`** (with a deprecation alias) for clearer semantics.
 - **P5 – Improve TableHandle inspector** with search + dialog-based selection; consider de-emphasizing TableHandle as an exported property.
-- **P9 – Add optional per-row UIDs** for stable references; default ON for new tables, usually hidden from the grid.
+- **P9 – Add optional per-row UIDs** for stable references; default ON for new tables, usually hidden from the grid. ⏳ PLANNED
 
 Below sections give short justifications rather than exhaustive arguments.
 
@@ -21,13 +21,19 @@ Below sections give short justifications rather than exhaustive arguments.
 
 ## Proposal 1: Resource vs RefCounted/Object Base Class
 
-### Current State
-`BaseUnit` and other user classes extend `Resource`:
+### Current State (updated)
+`BaseUnit` and other example row classes now extend `RefCounted` instead of `Resource`.
+This is a small API shift for example/DTO classes — `ClassTableResource` remains a `Resource`.
 ```gdscript
 @tool
-extends Resource
+extends RefCounted
 class_name BaseUnit
 ```
+
+### Changelog (since Nov 10, 2025)
+- P1 implemented: Example row classes (e.g., `BaseUnit`, `TestItemData`) now extend `RefCounted`. See `addons/class_table_editor/example/BaseUnit.gd` and `scripts/plugin2_class_table_tests/TestItemData.gd`.
+- `ResourceConverter` updated and is RefCounted-friendly; tests exercise `get_data()` conversions (`scripts/plugin2_class_table_tests/TestTableHandleResourceConverter.gd`).
+- `ClassSelector` includes additional filtering helpers (`get_non_resource_classes`, `get_classes_inheriting_from`) to support hybrid discovery patterns.
 
 ### Proposal
 Use `RefCounted` or `Object` as parent class instead of `Resource`.
@@ -35,6 +41,8 @@ Use `RefCounted` or `Object` as parent class instead of `Resource`.
 **Why:** Row classes are used as transient DTOs converted from table rows; they are not assets.
 
 **Conclusion:** Use `RefCounted` (or `Object` if needed) for example/row classes; `ClassTableResource` itself remains a `Resource`.
+
+**Status in code:** Implemented for example classes and tests. `ResourceConverter` already supports RefCounted instances for conversion.
 
 **Notes:**
 - Exported properties work fine on `RefCounted` in Godot 4.
@@ -80,6 +88,8 @@ static func register_class(script: GDScript, category: String = "Game Data"):
 - Keeps zero-config experience for small projects.
 - Gives control and structure for large projects.
 - No breaking changes; mostly UI/UX work in the selector dialog.
+
+**Status in code:** `ClassSelector` has been extended with helpful filters (e.g., `get_non_resource_classes`, `get_classes_inheriting_from`) to enable the hybrid approach. Manual class registration is still a proposa.
 
 ---
 
@@ -129,7 +139,7 @@ func _validate_class_for_table(script: GDScript) -> Dictionary:
 ### Current State
 ```gdscript
 var handle: TableHandle = table_resource.create_handle()
-var unit: BaseUnit = handle.to_resource(BaseUnit)
+var unit: BaseUnit = handle.get_data(BaseUnit)
 ```
 
 ### Proposal
@@ -138,8 +148,8 @@ Rename `to_resource()` to better-sounding method name.
 **Why:** `to_resource()` is vague and becomes wrong once row classes use `RefCounted`.
 
 **Conclusion:**
-- Introduce `build(MyClass)` as the primary API: `var unit: BaseUnit = handle.build(BaseUnit)`.
-- Keep `to_resource()` as a deprecated alias for one version, with a warning.
+- Introduce `build(MyClass)` as a clearer API in the future, but do not break existing users.
+- Current code uses `get_data()` as the conversion API — rename to `build()` is a proposal and would require a deprecation path. Tests and README still reference `get_data()`.
 
 ---
 
@@ -225,11 +235,21 @@ func _init():
 
 ### Improvement Proposals
 
-#### Option A: Compact Single-Line Mode
+#### Option A: Compact Single-Line Mode ✅ IMPLEMENTED
 **Concept:** Use horizontal layout with smart truncation
 ```gdscript
 [Table: base_unit_table.tres ▼] → [Row: "Warrior" ▼] [👁️]
 ```
+
+**Status:** Implemented November 18, 2025
+
+**Implementation Details:**
+- Replaced `VBoxContainer` with `HBoxContainer` for horizontal layout
+- Removed separate "Table:" and "Row:" labels
+- Added arrow separator (`→`) between table picker and row selector
+- Added preview button with eye emoji (`👁`) that opens a popup
+- Preview popup shows all row data in a formatted key-value grid
+- Popup includes scroll container for tables with many columns
 
 **Pros:**
 - Saves vertical space (1 line vs 4)
@@ -432,14 +452,14 @@ func _update_preview():
 # Old pattern (requires inspector):
 @export var unit_handle: TableHandle
 func _ready():
-    var unit = unit_handle.to_resource(BaseUnit)
+    var unit = unit_handle.get_data(BaseUnit)
 
 # New pattern (direct reference):
 @export var unit_table: ClassTableResource
 @export var unit_name: String = "Warrior"
 func _ready():
     var handle = unit_table.get_row_by_name(unit_name)
-    var unit = handle.build(BaseUnit)
+    var unit = handle.build(BaseUnit)  # NOTE: `build()` is a proposed rename; current code uses `get_data()`
 ```
 
 **This suggests:**
@@ -459,7 +479,7 @@ func _ready():
 func _ready():
     # Get data via table API
     var unit_data = unit_table.get_row_by_name(unit_row)
-    var unit = unit_data.build(BaseUnit)
+    var unit = unit_data.build(BaseUnit)  # NOTE: `build()` is a proposed rename; current code uses `get_data()`
 ```
 
 **This means:**
@@ -480,11 +500,11 @@ func _ready():
 | Proposal | Recommendation | Confidence | Breaking Change? |
 |----------|---------------|------------|------------------|
 | 1. RefCounted base | ✅ **Support** - Do it | 🔥🔥🔥🔥🔥 High | Minor (examples only) |
-| 2. Manual registration | 🔀 **Hybrid** - Add filtering, keep auto | 🔥🔥🔥🔥 High | No |
+| 2. Manual registration | 🔀 **Hybrid** - Add filtering, keep auto (filter helpers implemented) | 🔥🔥🔥🔥 High | No |
 | 3. Mandatory name | ⚠️ **Soft** - Warn, don't enforce | 🔥🔥🔥 Medium | No |
-| 4. Rename method | ✅ **build()** - Clear and concise | 🔥🔥🔥🔥 High | Yes (add deprecation) |
-| 5. Inspector UX | 🔀 **Phase 1: Search**, **Consider: Remove TableHandle export** | 🔥🔥🔥🔥 High | Potentially major |
-| 9. Row UID column | ✅ **Implement as optional**, default ON | 🔥🔥🔥🔥 High | No (additive) |
+| 4. Rename method | ⚠️ **Proposed** - Keep `get_data()` for now; plan `build()` with deprecation | 🔥🔥🔥 High | Yes (add deprecation) |
+| 5. Inspector UX | ✅ **Option A Implemented** - Compact single-line mode with preview | 🔥🔥🔥🔥 High | No (visual only) |
+| 9. Row UID column | ⏳ **Planned** - Add optional immutable UIDs per row for stable references | 🔥🔥🔥 High | No (additive) |
 
 **Key Insight:** Proposal 9 (UID) actually STRENGTHENS Proposal 3's argument against mandatory name column. If UIDs handle stability, names can be fully flexible.
 

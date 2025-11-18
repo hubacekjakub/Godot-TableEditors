@@ -30,7 +30,7 @@ class_name MyUnit
 @export var unit_handle: TableHandle
 
 func _ready():
-    var unit_data = unit_handle.to_resource(MyUnit) as MyUnit
+    var unit_data = unit_handle.get_data(MyUnit) as MyUnit
     print(unit_data.unit_name)  # Access properties
     print(unit_data.max_health)
 ```
@@ -103,7 +103,7 @@ A `.tres` file containing:
 ### TableHandle
 A persistent reference to a row:
 - Stores table path + row ID
-- Type-safe data access via `to_resource()`
+- Type-safe data access via `get_data()`
 - Works even if table is reordered
 - Inspector-integrated for easy assignment
 
@@ -141,12 +141,12 @@ class_name Item
 ### Step 3: Use TableHandles
 1. In your scene, add an @export TableHandle property
 2. In Inspector, assign handle to table row
-3. In code: `var item = handle.to_resource(Item) as Item`
+3. In code: `var item = handle.get_data(Item) as Item`
 
 ### Step 4: Access Data
 ```gdscript
 func display_item(handle: TableHandle) -> void:
-    var item = handle.to_resource(Item) as Item
+    var item = handle.get_data(Item) as Item
     print("%s: $%d" % [item.item_name, item.price])
 ```
 
@@ -189,7 +189,7 @@ See the `example/` folder for a full working implementation:
 **Data not loading?**
 - Save table with Class Table Editor (not manual save)
 - Check .tres file format is valid
-- Verify `to_resource()` has correct class type
+- Verify `get_data()` has correct class type
 
 ## Related Resources
 

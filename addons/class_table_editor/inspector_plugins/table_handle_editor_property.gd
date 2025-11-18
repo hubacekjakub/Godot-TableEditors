@@ -12,31 +12,41 @@ var updating: bool = false
 
 
 func _init():
-	# Create vertical container for controls
+	# Create vertical container for two-line layout
 	container = VBoxContainer.new()
 	container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	add_child(container)
 
-	# Create table resource picker
-	var table_label = Label.new()
-	table_label.text = "Table:"
-	container.add_child(table_label)
+	# First row: Labels
+	var labels = HBoxContainer.new()
+	container.add_child(labels)
 
+	var table_label = Label.new()
+	table_label.text = "Table"
+	table_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	labels.add_child(table_label)
+
+	var row_label = Label.new()
+	row_label.text = "Row"
+	row_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	labels.add_child(row_label)
+
+	# Second row: Controls
+	var controls = HBoxContainer.new()
+	container.add_child(controls)
+
+	# Table resource picker
 	table_picker = EditorResourcePicker.new()
 	table_picker.base_type = "ClassTableResource"
 	table_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	table_picker.resource_changed.connect(_on_table_changed)
-	container.add_child(table_picker)
+	controls.add_child(table_picker)
 
-	# Create row selector
-	var row_label = Label.new()
-	row_label.text = "Row:"
-	container.add_child(row_label)
-
+	# Row selector dropdown
 	row_selector = OptionButton.new()
 	row_selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row_selector.item_selected.connect(_on_row_selected)
-	container.add_child(row_selector)
+	controls.add_child(row_selector)
 
 	# Make the property take up full width
 	set_bottom_editor(container)
