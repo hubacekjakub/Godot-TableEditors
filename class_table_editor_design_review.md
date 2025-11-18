@@ -7,16 +7,16 @@
 
 ## High‑Level Summary of Remaining Proposals
 
-- **P1 – Class discovery & registration (hybrid)**  
+- **P1 – Class discovery & registration (hybrid)**
   Keep auto‑discovery for small projects, but add filters and an optional “registered classes only” mode. Some filter helpers exist already; the registration UX is still unimplemented.
 
-- **P2 – Identifier / name column guidance (soft)**  
+- **P2 – Identifier / name column guidance (soft)**
   Do **not** enforce a mandatory `name` column. Instead, add validation and helper APIs for common identifier patterns.
 
-- **P3–P6 – Advanced table features (conceptual)**  
+- **P3–P6 – Advanced table features (conceptual)**
   Type validation on load, bulk row edits, column reordering, and export templates. These remain design ideas and have not been implemented.
 
-- **P7 – Immutable row UIDs (planned)**  
+- **P7 – Immutable row UIDs (planned)**
   Per‑row stable UID column (optional, default ON for new tables) to decouple row identity from the visible name or index.
 
 Use this document as the working list for **future work** on the Class Table Editor.
