@@ -354,7 +354,10 @@ func _build_save_path(save_path: String, file_name: String) -> String:
 	var full_path := save_path
 	if not full_path.begins_with("res://"):
 		full_path = "res://" + full_path
-	return full_path.path_join(file_name)
+	full_path = full_path.path_join(file_name)
+	if not full_path.ends_with(".tres"):
+		full_path += ".tres"
+	return full_path
 
 
 func _save_sheet_resource(sheet: SpreadsheetResource, path: String) -> bool:
