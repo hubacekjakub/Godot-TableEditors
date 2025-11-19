@@ -8,8 +8,15 @@ const TableHandleEditorProperty = preload("res://addons/class_table_editor/inspe
 
 
 func _can_handle(object: Object) -> bool:
-	# We handle all objects that might have TableHandle properties
-	return true
+	var script = object.get_script()
+	if not script:
+		return false
+	
+	for prop in script.get_script_property_list():
+		if prop.type == TYPE_OBJECT and "TableHandle" in prop.hint_string:
+			return true
+	
+	return false
 
 
 func _parse_property(object: Object, type: Variant.Type, name: String, hint_type: PropertyHint, hint_string: String, usage_flags: int, wide: bool) -> bool:
