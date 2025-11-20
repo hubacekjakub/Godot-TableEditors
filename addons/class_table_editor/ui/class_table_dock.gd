@@ -320,6 +320,9 @@ func _show_row_context_menu(row: int, position: Vector2) -> void:
 			row_deleted.emit(row)
 		popup.queue_free()
 	)
+	popup.popup_hide.connect(func():
+		popup.queue_free()
+	)
 	add_child(popup)
 	popup.popup(Rect2i(position, Vector2i(150, 50)))
 
