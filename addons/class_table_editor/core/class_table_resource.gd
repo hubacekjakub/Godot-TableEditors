@@ -346,6 +346,10 @@ func create_columns_from_class(script_path: String) -> bool:
 	if not script:
 		push_error("Failed to load script: %s" % script_path)
 		return false
+	
+	if not (script is Script):
+		push_error("Loaded resource is not a Script: %s" % script_path)
+		return false
 
 	source_class_name = script.resource_name if script.resource_name else script_path.get_file().trim_suffix(".gd")
 	class_file_path = script_path
