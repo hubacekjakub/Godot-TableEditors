@@ -104,12 +104,21 @@ func is_valid() -> bool:
 ##
 ## Usage:
 ##   var item = handle.get_data(TestItemData)  # TestItemData extends RefCounted
-##   print(item.item_name, item.price)
+##   if item:
+##       print(item.item_name, item.price)
+##   else:
+##       push_error("Failed to create data instance")
 ##
 ## @param data_class: Script or String - The class to instantiate (RefCounted or Resource)
-## @return Variant - Newly created and populated instance, or null on error
+## @return Variant - Newly created and populated instance, or null if:
+##   - TableHandle is null or invalid
+##   - data_class is null or cannot be instantiated
+##   - Script loading fails (for Script types)
 func get_data(data_class) -> Variant:
-	return ResourceConverter.create_from_handle(self, data_class)
+	var result = ResourceConverter.create_from_handle(self, data_class)
+	if not result:
+		push_warning("TableHandle.get_data() failed for row '%s' with class %s" % [row_name, str(data_class)])
+	return result
 
 
 ## Parse string value to typed variant based on type ID
