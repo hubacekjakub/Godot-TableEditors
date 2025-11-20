@@ -9,7 +9,14 @@ var _cache: Dictionary = {}  # {file_path: {inspected_data, file_mtime}}
 
 
 ## Get inspected class data, using cache if file hasn't changed
+## Uses file modification time (mtime) for efficient cache validation - avoids re-parsing
+## unchanged GDScript files while detecting all file modifications reliably
 func get_parsed_class(file_path: String) -> Dictionary:
+	# Check if file exists before getting mtime to prevent race conditions
+	if not FileAccess.file_exists(file_path):
+		push_error("Class file does not exist: %s" % file_path)
+		return {}
+
 	var current_mtime = _get_file_mtime(file_path)
 
 	# Check if we have it cached and it's still valid
