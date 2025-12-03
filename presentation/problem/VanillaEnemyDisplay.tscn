@@ -1,0 +1,52 @@
+[gd_scene load_steps=3 format=3 uid="uid://bmuihmbg8uk3m"]
+
+[ext_resource type="Script" path="res://presentation/problem/VanillaEnemyDisplay.gd" id="1_display"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
+bg_color = Color(0.15, 0.15, 0.2, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.7, 0.7, 0.8, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 16
+shadow_offset = Vector2(4, 6)
+
+[node name="EnemyDisplay" type="Panel"]
+modulate = Color(0.5, 0.5, 0.5, 0.7)
+custom_minimum_size = Vector2(350, 200)
+anchors_preset = 0
+offset_right = 350.0
+offset_bottom = 200.0
+theme_override_styles/panel = SubResource("StyleBox_panel")
+script = ExtResource("1_display")
+
+[node name="DescriptionLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.98, 0.98, 0.98, 1)
+theme_override_font_sizes/font_size = 16
+text = "[Empty]
+
+Drag an EnemyData .tres file here"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+clip_text = true

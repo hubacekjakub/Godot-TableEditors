@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://c1enemydisplay"]
+[gd_scene load_steps=3 format=3 uid="uid://cv472mkalwn1u"]
 
-[ext_resource type="Script" path="res://presentation/problem/EnemyDisplay.gd" id="1_display"]
+[ext_resource type="Script" path="res://presentation/solution/TableEnemyDisplay.gd" id="1_display"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
 bg_color = Color(0.15, 0.15, 0.2, 1)
@@ -45,7 +45,7 @@ theme_override_colors/font_color = Color(0.98, 0.98, 0.98, 1)
 theme_override_font_sizes/font_size = 16
 text = "[Empty]
 
-Drag an EnemyData .tres file here"
+Select a unit from the TableHandle dropdown"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2

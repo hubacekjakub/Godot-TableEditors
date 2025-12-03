@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://crkpn4x8wlvhm"]
 
-[ext_resource type="PackedScene" uid="uid://bmuihmbg8uk3m" path="res://presentation/problem/EnemyDisplay.tscn" id="1_display"]
+[ext_resource type="PackedScene" uid="uid://bmuihmbg8uk3m" path="res://presentation/problem/VanillaEnemyDisplay.tscn" id="1_display"]
 [ext_resource type="Resource" path="res://presentation/problem/enemies/shadow.tres" id="3_shadow"]
 [ext_resource type="Resource" path="res://presentation/problem/enemies/mystic.tres" id="4_mystic"]
 [ext_resource type="Resource" path="res://presentation/problem/enemies/ranger.tres" id="5_ranger"]
