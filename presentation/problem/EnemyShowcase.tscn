@@ -1,0 +1,78 @@
+[gd_scene load_steps=5 format=3 uid="uid://crkpn4x8wlvhm"]
+
+[ext_resource type="PackedScene" uid="uid://bmuihmbg8uk3m" path="res://presentation/problem/EnemyDisplay.tscn" id="1_display"]
+[ext_resource type="Resource" path="res://presentation/problem/enemies/shadow.tres" id="3_shadow"]
+[ext_resource type="Resource" path="res://presentation/problem/enemies/mystic.tres" id="4_mystic"]
+[ext_resource type="Resource" path="res://presentation/problem/enemies/ranger.tres" id="5_ranger"]
+
+[node name="EnemyShowcase" type="Node2D"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/CenterContainer"]
+custom_minimum_size = Vector2(800, 530)
+layout_mode = 2
+alignment = 1
+
+[node name="Title" type="Label" parent="CanvasLayer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.95, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
+theme_override_font_sizes/font_size = 28
+text = "👹 ENEMY SHOWCASE - The Vanilla Approach"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CanvasLayer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "Each enemy is a separate .tres file - Try comparing stats across 4 Inspector windows!"
+horizontal_alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="CanvasLayer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+columns = 2
+
+[node name="Enemy1" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer" instance=ExtResource("1_display")]
+modulate = Color(0.894, 0.992, 0.416, 0.9)
+layout_mode = 2
+enemy_data = ExtResource("4_mystic")
+
+[node name="Enemy2" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer" instance=ExtResource("1_display")]
+modulate = Color(0.973, 0.376, 0.459, 0.9)
+layout_mode = 2
+enemy_data = ExtResource("3_shadow")
+
+[node name="Enemy3" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer" instance=ExtResource("1_display")]
+modulate = Color(0.894, 0.992, 0.416, 0.9)
+layout_mode = 2
+enemy_data = ExtResource("4_mystic")
+
+[node name="Enemy4" parent="CanvasLayer/CenterContainer/VBoxContainer/GridContainer" instance=ExtResource("1_display")]
+modulate = Color(0.412, 0.992, 0.604, 0.9)
+layout_mode = 2
+enemy_data = ExtResource("5_ranger")
+
+[node name="Background" type="ColorRect" parent="."]
+z_index = -1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.08, 0.08, 0.12, 1)
