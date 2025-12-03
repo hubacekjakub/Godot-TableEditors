@@ -68,80 +68,243 @@ Game development isn't just about the runtime experience; it's about the develop
 
 ---
 
-### Part 2: The "How" - Extending the Editor (≈25–30 Minutes)
+### Part 2: The "How" - Tools Across All Engines (≈25–30 Minutes)
 
+#### 5. The Tool Ecosystem: Unreal, Unity & Godot (12-15 mins)
 
-#### 5. Context: Industry Standards (Unreal & Unity) (5 mins)
-*   **Unreal Engine:**
-    *   **Editor Utility Widgets:** Build tools visually using UMG (Blueprints). No C++ needed for UI.
-    *   **Blutilities:** Scripted actions on assets.
-*   **Unity:**
-    *   **Editor Scripting:** `EditorWindow` and `CustomEditor` (C#).
-    *   **UI Toolkit:** Modern, web-like styling for tools.
-*   **The Point:** The concepts are identical; only the syntax changes. We use Godot today because it's the fastest to demonstrate live.
+*   **The Universal Truth:** Every major engine has extensibility. The concepts are identical; only the syntax changes.
+*   **Format:** Categorize by *what problem the tool solves*, show examples from all three engines.
 
-#### 6. The Anatomy of a Godot Plugin (8–10 mins)
-*   **What is a Plugin?** It's just a script with a `plugin.cfg`.
-*   **The `EditorPlugin` Class:** The entry point.
-*   **Lifecycle:**
-    *   `_enter_tree()`: Setup (add UI, register types).
-    *   `_exit_tree()`: Cleanup (remove UI, unregister types). **Crucial for stability!**
-*   **The `@tool` Annotation:** Running code in the editor.
-*   **Folder Structure:** `res://addons/my_plugin/`.
-*   **Key API Pointers:** `EditorInterface`, `EditorInterface.get_selection()`.
+---
 
-#### 7. Live Demo: Extending the Editor (15 mins)
-*   *Goal: Show how easy it is to start, with minimal code.*
-*   **Example A: The "Panic Button" (Toolbar)**
-    *   Add a simple button to the top container (`CONTAINER_TOOLBAR`).
-    *   Make it print "Don't Panic" to the output.
-    *   Highlight: Two functions (`_enter_tree`, `_exit_tree`) and you changed the editor.
-*   **Example B: The Custom Dock**
-    *   Create a simple `.tscn` with a Label and a Button.
-    *   Add it to the side or bottom panel (`add_control_to_dock` / `add_control_to_bottom_panel`).
-    *   Highlight: Any in-game UI skill transfers directly to plugin UI.
-*   **Bonus (If Time / Pre-recorded): Inspector Plugin**
-    *   Briefly show a prepared scene where an integer property has a custom editor (e.g., with a "Reset" button) without live-coding it.
-    *   Message: You can go very deep, but you don't have to for tools to be useful.
+**Category 1: Content Creation & Level Design**
+
+| Purpose | Unreal | Unity | Godot |
+|---------|--------|-------|-------|
+| **Level Blockout** | *UE4 Voxel Plugin* | *ProBuilder* (now built-in) | *Cyclops Level Builder* |
+| **Cinematic Camera** | *CineCameraRig Crane* | *Cinemachine* (now built-in) | *Phantom Camera* |
+| **Terrain & World** | *Voxel Plugin* by Phyronnaz | *Gaia* by Procedural Worlds | *Terrain3D* by TokisanGames |
+| **Procedural Generation** | *Dungeon Architect* | *Dungeon Architect* | *Scatter* by HungryProton |
+
+*Key Insight:* All engines let you build worlds faster. The question is: *"Does your project need a custom tool, or an existing one?"*
+
+---
+
+**Category 2: Data & Content Management**
+
+| Purpose | Unreal | Unity | Godot |
+|---------|--------|-------|-------|
+| **Data Tables** | *Easy DataTable* by Jianyang | *Odin Inspector* by Sirenix | *Your Class Table Editor* |
+| **Dialogue & Narrative** | *Dialogue Plugin* by Code Sprites | *Yarn Spinner* by Secret Lab | *Dialogic* by Copypasta |
+| **Localization** | *Localization Manager* | *I2 Localization* by Inter Illusion | *(external: POEditor, Weblate)* |
+| **Database** | *SQLite3UE4* by Justnwhatever | *SQLite4Unity3D* by Roberto Huertas | *Godot SQLite* by 2shady4u |
+
+*Key Insight:* Unreal has native Data Tables - that's exactly what we're building for Godot!
+
+---
+
+**Category 3: Visual Scripting & Logic**
+
+| Purpose | Unreal | Unity | Godot |
+|---------|--------|-------|---------|
+| **Visual Scripting** | *LogicDriver Pro* by Recursoft | *Bolt* by Ludiq (now Unity) | *Orchestrator* by Vahera |
+| **State Machines** | *SUDS Pro* by Elhoussine | *Playmaker* by Hutong Games | *LimboAI* by Serhii Snitsaruk |
+| **Behavior Trees** | *BTSM Pro* by Syntechx | *NodeCanvas* by Paradox Notion | *Beehave* by bitbrain |
+
+*Key Insight:* Visual tools democratize development. Designers can tweak logic without touching code.
+
+---
+
+**Category 4: Audio & Middleware**
+
+| Purpose | Unreal | Unity | Godot |
+|---------|--------|-------|---------|
+| **Audio Middleware** | *FMOD for UE* by Firelight | *FMOD for Unity* by Firelight | *FMOD GDExtension* by alessandrofama |
+| **Adaptive Music** | *Audio Synesthesia* | *Master Audio* by Dark Tonic | *Resonate* by Cloaked Games |
+| **Sound Design** | *MetaSounds* (native) | *Audio Toolkit* by ClockStone | - |
+
+*Key Insight:* Some tools live *outside* the engine entirely. FMOD/Wwise have their own editors - integration plugins just bridge the gap.
+
+---
+
+**Category 5: Workflow & Productivity**
+
+| Purpose | Unreal | Unity | Godot |
+|---------|--------|-------|---------|
+| **Task Tracking** | *UE4 Task Manager* | *TODO Highlighter* by Thomas F | *Todo Manager* by OrigamiDev |
+| **Asset Management** | *Project Cleaner* by Starter | *Asset Hunter PRO* by HeurekaGames | *Godot File Editor* by fenix-hub |
+| **Quick Actions** | *Blutility* scripts | *Editor Console Pro* by FlyingWorm | *Command Palette* by IvanSkoworoda |
+| **Build Automation** | *BuildGraph* (native) | *Super Build Pipeline* by Unity | *(external: GitHub Actions)* |
+
+*Key Insight:* Not every tool needs to be inside the engine. External tools (Git, CI/CD, spreadsheets) are also part of your pipeline.
+
+---
+
+**Category 6: Debugging & Profiling**
+
+| Purpose | Unreal | Unity | Godot |
+|---------|--------|-------|---------|
+| **Console/Cheats** | *UE4 Console Cheats* | *Quantum Console* by QFSW | *Panku Console* by Feo Wu |
+| **Runtime Inspector** | *ImGui for UE* by Segkan | *Runtime Inspector* by Süleyman | *ImGui-Godot* by pkdawson |
+| **Visual Debugging** | *Debug Toolkit* by JimboA | *Debug Drawing Extension* by Akien | *Debug Draw 3D* by DmitriySalnikov |
+
+---
+
+**The Point:**
+*   Tools exist in every engine - you're not reinventing the wheel
+*   The *skill* of building tools transfers across engines
+*   Godot's advantage: The editor IS a Godot game. Same UI code, same nodes, zero context switch.
+
+---
+
+#### 6. Types of Editor Extensions (5-8 mins)
+
+*Goal: Show the "menu" of what's possible in Godot before live-coding.*
+
+| Type | What It Does | When To Use |
+|------|--------------|-------------|
+| **Toolbar Buttons** | One-click actions | Quick automation ("Reimport All", "Reset Scene") |
+| **Docks & Panels** | Persistent UI alongside your work | Ongoing workflows (Sheet Editor, Scene Tree) |
+| **Bottom Panels** | Tab next to Output/Debugger | Tools that need more horizontal space |
+| **Inspector Plugins** | Customize property editing | Better UX for specific types (sliders, previews) |
+| **Main Screen Plugins** | Replace the entire viewport | Complex editors (Tilemap, Dialogic, your Data Table) |
+| **Gizmos** | 3D/2D handles in viewport | Spatial editing (Path3D, collision shapes) |
+| **Importers** | Handle external file formats | Custom assets (your CSV import) |
+
+*Transition:* "Let's build the simplest one - a toolbar button - and see how fast we can extend the editor."
+
+---
+
+#### 7. Live Demo: Your First Plugin (10-12 mins)
+
+*   *Goal: Show how easy it is to start. Build something in under 5 minutes.*
+*   **What We Build:** A "Bazinga!" button that we'll move around the ENTIRE editor.
+*   **The Message:** *"Every corner of Godot can be extended. Let me show you WHERE."*
+*   **Code Reference:** See `Presentation_GodotPlugins_TheSecretWeapon_Code.md`
+*   **Plugin Location:** `addons/bazinga/` (pre-built, just enable it)
+
+---
+
+**Demo Flow:**
+1.  Open Project Settings → Plugins → Enable "Bazinga!"
+2.  Button appears in toolbar → Click it → "Bazinga!" prints to Output
+3.  Open `addons/bazinga/plugin.gd` in the editor
+4.  **The magic:** Uncomment different `add_control_to_*` lines to move the button
+5.  Each time, disable/enable plugin to show the new location
+6.  Show 2-3 locations: Toolbar → Right Dock → Bottom Panel
+
+---
+
+**Demo Script (what to say):**
+1. *"This plugin already exists - I just need to enable it."*
+2. Enable → Click → "Bazinga!" in Output
+3. *"But here's the real magic - watch what happens when I change ONE line of code..."*
+4. Uncomment `DOCK_SLOT_RIGHT_UL` → Disable/Enable → Button near Inspector
+5. Uncomment `add_control_to_bottom_panel` → Button becomes a new tab!
+6. *"Every. Single. Part. Of this editor can be extended."*
+7. *"And this is just a button. Imagine what you could build."*
+
+*Transition:* "Now let me show you what happens when you take this to its logical conclusion..."
 
 ### Part 3: The "What" - Case Study (≈30–35 Minutes)
 
-#### 8. The Problem: Managing Game Data (5 mins)
+#### 8. The Problem: Vanilla Godot Workflow (7-10 mins)
+
 *   **The Missing Feature:** Godot has no native "Data Table" (like Unreal).
 *   **The Godot Way:** We use `Resource` files. One resource = One enemy type.
-*   **The Scaling Issue:**
-    *   10 Enemies = 10 Files. Not bad.
-    *   100 Enemies = 100 Files. Chaos.
-*   **The Friction:**
-    *   Hard to get a complete overview.
-    *   Balancing requires opening/closing dozens of Inspector windows.
-    *   Designers struggle to compare values (e.g., "Is the Boss stronger than the Minion?").
-*   **The Goal:** Visualize all enemies in one table. Less chaos, better readability, designer-friendly.
-*   **Visual Comparison:**
-    *   *Showcase:* A folder full of `.tres` files (The "Before").
-    *   *Showcase:* The same data in a clean grid (The "After").
 
-#### 9. The "Simple" Approach: Sheet Editor (10 mins)
-*   **The Concept:** A generic spreadsheet inside Godot.
-*   **The Name:** "Sheet Editor" (Yes, say it out loud carefully).
-*   **Features:**
-    *   Flexible, arbitrary tables.
-    *   CSV imports/exports.
-    *   Great for prototypes and quick data entry.
-*   **The Limitation:**
-    *   It's just strings. No type safety.
-    *   "Is '10' a number or a string?" -> Runtime errors.
-*   **Transition:** "We need something safer for production."
+**Live Demo: The Pain**
+1.  **Create the Data Class:**
+    *   Show `EnemyData.gd` with `@export` vars (`hp`, `damage`, `speed`, `name`)
+2.  **Create Resources Manually:**
+    *   Right-click → New Resource → Select script → Save as `goblin.tres`
+    *   Repeat for `skeleton.tres`, `boss.tres`
+    *   *Emphasize the tedium* - each requires 4-5 clicks
+3.  **Edit Values:**
+    *   Double-click `goblin.tres` → Inspector opens → Change HP → Save
+    *   Now open `skeleton.tres` to compare... *"Wait, what was Goblin's HP again?"*
+4.  **The Balancing Nightmare:**
+    *   "I need to see all enemies side-by-side"
+    *   *Show:* Opening 3+ Inspector windows, arranging them awkwardly
+5.  **The Bulk Edit Problem:**
+    *   "All enemies need +10 HP for harder difficulty"
+    *   *Show:* Opening each file one by one... or editing `.tres` as text (error-prone)
 
-#### 10. The Solution: Class Table Editor (15 mins)
+**Pain Points to Verbalize:**
+*   "No overview - I can't see the forest for the trees"
+*   "No comparison - Is the Boss actually stronger than the Minion?"
+*   "No bulk operations - 100 enemies = 100 manual edits"
+
+**The Scaling Issue:**
+*   10 Enemies = 10 Files. Manageable.
+*   100 Enemies = 100 Files. Chaos.
+*   1000 Items in an RPG? *Good luck.*
+
+---
+
+#### 9. The "Simple" Approach: Sheet Editor (8-10 mins)
+
+*   **The Concept:** A generic spreadsheet inside Godot. The first step toward sanity.
+*   **The Name:** "Sheet Editor" (Yes, say it out loud carefully. 😅)
+
+**Live Demo: The Improvement**
+1.  **Create a Sheet:** One click, name it, done.
+2.  **Add Columns & Rows:** Define structure on the fly.
+3.  **Enter Data:** Type directly into cells - all visible at once!
+4.  **CSV Export/Import:** Works with Excel, Google Sheets, external tools.
+
+**Features:**
+*   Flexible, arbitrary tables
+*   CSV imports/exports for external collaboration
+*   Great for prototypes and quick data entry
+
+**The Limitation:**
+*   It's just strings. No type safety.
+*   "Is `10` a number or a string?" → Runtime errors.
+*   No connection to your GDScript classes.
+
+**Transition:** *"This is better, but we're still converting strings to types manually. We need the editor to understand our code."*
+
+---
+
+#### 10. The Solution: Class Table Editor (12-15 mins)
+
 *   **The Concept:** A spreadsheet-like editor *inside* Godot that understands GDScript types.
-*   **Walkthrough:**
-    1.  **The Data Class:** Show a simple `EnemyData` class with `@export` variables.
-    2.  **The Reflection:** Explain how `Script.get_script_property_list()` allows the tool to "read" the code.
-    3.  **The UI:** Show the `Class Table Editor` dock.
-    4.  **The Workflow:** Create a table -> Add rows -> Edit values (type-safe!).
-    5.  **The Usage:** Show how `TableHandle` connects the data to the game at runtime.
-    6.  **Workflow Impact:** How this changed your balancing process (designers edit data directly, fewer runtime crashes from bad data).
+*   **The Key Insight:** Use `Script.get_script_property_list()` to read your class definition automatically.
+
+**Live Demo: The Solution**
+1.  **Same Data Class** - `EnemyData.gd` (unchanged from vanilla demo!)
+2.  **Create a Class Table:**
+    *   One click → Select class from dropdown → Columns auto-generated
+3.  **Add Rows:**
+    *   Click "Add Row" → Type values directly in cells
+    *   *Show:* All enemies visible at once, proper type editors (spinbox for int, checkbox for bool, color picker for Color)
+4.  **Compare & Balance:**
+    *   Sort by HP column → "Ah, the Goblin is tankier than the Skeleton - that's a bug!"
+    *   Fix it in 2 seconds, see the change immediately
+5.  **Type Safety in Action:**
+    *   Try typing `"ten"` in an integer field → Editor prevents it
+    *   *"The error happens here, not at 2 AM when your build breaks."*
+6.  **Runtime Usage:**
+    *   Show `TableHandle.get_data(EnemyData)` - type-safe array returned
+    *   No parsing, no casting, no runtime errors from bad data
+
+**Workflow Impact:**
+*   Designers edit data directly without touching code
+*   Fewer runtime crashes from bad data
+*   Balancing sessions that used to take hours now take minutes
+
+**Visual Comparison Slide:**
+
+| Task | Vanilla | With Class Table |
+|------|---------|------------------|
+| Create 10 enemies | ~50 clicks, 10 files | 10 rows, 1 file |
+| Compare HP values | Open 10 Inspectors | One glance |
+| Increase all HP by 10 | Edit 10 files manually | Select column, offset |
+| Find the strongest | Mental math | Sort by column |
+| Type safety | None (runtime errors) | Full (editor validation) |
+
+**Closing Line:** *"The Godot Inspector is great for one resource. But game design isn't about one enemy - it's about the relationship between all of them. That's what we're solving."*
 
 ---
 
