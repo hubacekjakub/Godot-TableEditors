@@ -11,11 +11,11 @@ func _can_handle(object: Object) -> bool:
 	var script = object.get_script()
 	if not script:
 		return false
-	
+
 	for prop in script.get_script_property_list():
 		if prop.type == TYPE_OBJECT and "TableHandle" in prop.hint_string:
 			return true
-	
+
 	return false
 
 
