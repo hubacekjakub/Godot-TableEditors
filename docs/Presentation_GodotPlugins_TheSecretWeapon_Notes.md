@@ -1,7 +1,7 @@
 # Presentation Proposal: Godot Plugins - The Editor's Secret Weapon
 
 **Speaker:** Jakub Hubáček
-**Duration:** 90 Minutes
+**Duration:** 90 Minutes (75 min content + 15 min Q&A)
 **Theme:** The importance of in-editor tools and practical implementation.
 
 ---
@@ -25,9 +25,9 @@ Game development isn't just about the runtime experience; it's about the develop
 
 ## Detailed Outline
 
-### Part 1: Why Tools (≈25–30 Minutes)
+### Part 1: Why Tools (≈20–25 Minutes)
 
-#### 1. Opening: Why Tools, Why Now? (5 Minutes)
+#### 1. Opening: Why Tools, Why Now? (4 Minutes)
 
 *   **The Hook (The Pain):** Establishing empathy through shared horror stories.
     *   **Questions for the Audience:**
@@ -39,147 +39,146 @@ Game development isn't just about the runtime experience; it's about the develop
     *   **Force Multipliers:** A single developer improves the daily work of dozens. Fewer delays, fewer errors, and smoother collaboration make tools essential for shipping complex games.
     *   **Bridge Tech & Creativity:** Turning messy real-world problems into clean, reliable workflows. Their innovation shapes how the entire studio makes games.
 *   **The Promise:** You don't need a dedicated team. Godot makes this accessible to everyone.
+*   **The Solo Opportunity:** Creating a game solo is hard—only a few succeed. But what about creating a tool? That's something you *can* do solo. There are even developers making a living selling paid tools and plugins.
+*   **The Career Path:** Tool engineering is a real, in-demand specialization.
+    *   *[TODO: Research open job postings for "Tools Engineer", "Tools Programmer", "Pipeline TD" at major studios]*
+    *   *Examples to find: Ubisoft, EA, Naughty Dog, Insomniac, CD Projekt, etc.*
+    *   *Key point: These roles exist at every major studio—it's not a niche.*
 *   **Thesis:** Every serious project (even solo) benefits from a few well-chosen tools.
 
-#### 2. The "I'll Just Do It Manually" Trap (10–12 mins)
+#### 2. The "I'll Just Do It Manually" Trap (8–10 mins)
 *   **The Myth:** "Writing a tool takes 5 hours, doing it manually takes 5 minutes."
 *   **The Reality:** You do the manual task 100 times. You make mistakes 10 times. You hate your life 100% of the time.
 *   **Simple ROI Formula:**
     *   `Tool_Time < Manual_Time * N + Cost_of_Bugs`
+*   **The Counterpoint:** On the other hand, you *can* make a tool for anything—but does it make sense to create a tool for it? Not every task justifies the investment.
+
+*   **👥 AUDIENCE MOMENT – Quick Poll (hands up):**
+    *   *"How many of you have a task in your current project that you do more than 10 times?"*
+    *   *"More than 50 times?"*
+    *   *"Keep your hand up if you hate doing it."*
+    *   *"That's your first tool candidate."*
+
 *   **The Value:**
     *   **Consistency:** Tools don't make typos.
     *   **Scalability:** Handling 10 items vs 1000 items.
     *   **Democratization:** Allowing designers/artists to tweak values without touching code.
 
-#### 3. Tool Design Principles (10–12 mins)
-*   **Editor-first UX:** The tool lives where people work (always-visible dock, no hidden scenes).
-*   **Type Safety Over Clever Parsing:** Use Godot's native APIs (`Script.get_script_property_list()`) instead of regex on text files.
-*   **Text-based Assets:** Prefer `.tres` and CSV so Git diffs stay readable.
-*   **Fail in Editor, Not at Runtime:** Validate and yell at designers early.
+#### 3. Tool Design Principles (8–10 mins)
+*These principles apply across all engines—Godot, Unity, Unreal, and beyond.*
+
+*   **Editor-first UX:** The tool lives where people work.
+    *   *Godot:* Always-visible docks, no hidden scenes.
+    *   *Unity:* Custom Editor Windows, Inspector drawers.
+    *   *Unreal:* Editor Utility Widgets, Detail Customizations.
+*   **Type Safety Over Clever Parsing:** Use the engine's native reflection APIs instead of regex on text files.
+    *   *Godot:* `Script.get_script_property_list()`
+    *   *Unity:* `SerializedProperty`, `TypeCache`
+    *   *Unreal:* `UClass` reflection, `TFieldIterator`
+*   **Text-based Assets:** Prefer formats that Git can diff.
+    *   *Godot:* `.tres` (text resources), CSV
+    *   *Unity:* Force Text Serialization for `.asset` and `.prefab`
+    *   *Unreal:* JSON Data Tables, text-based config files
+*   **Fail in Editor, Not at Runtime:** Validate early—yell at designers before the build breaks.
+    *   All engines support editor-time validation. Use it.
 *   **Small, Focused Tools:** Each tool solves one concrete pain point really well.
-
-#### 4. Plugin Power Showcase (5–8 mins)
-*   *Goal: Show what is possible to inspire the audience, without deep-diving.*
-*   **Categories of Plugins:**
-    *   **Content Creation:** *Phantom Camera* (Cinematic shots), *Cyclops Level Builder* (Blockout).
-    *   **Workflow Enhancers:** *Orchestrator* (Visual Scripting), *Todo Manager* (Task tracking).
-    *   **Data Management:** *Dialogic* (Narrative), *Godot SQLite* (Database).
-*   **Format:** One slide per category, max 1–2 plugins each, screenshots over text.
+    *   Resist feature creep. A tool that does one thing perfectly beats a tool that does ten things poorly.
 
 ---
 
-### Part 2: The "How" - Tools Across All Engines (≈25–30 Minutes)
+### Part 2: The "How" - Tools Across All Engines (≈10–15 Minutes)
 
-#### 5. The Tool Ecosystem: Unreal, Unity & Godot (12-15 mins)
+*Goal for Part 2: Establish that editor customization is a universal skill across all game engines. This isn't just a Godot thing—it's an industry-wide practice. High school students exploring game dev should know this skill transfers everywhere.*
 
-*   **The Universal Truth:** Every major engine has extensibility. The concepts are identical; only the syntax changes.
-*   **Format:** Categorize by *what problem the tool solves*, show examples from all three engines.
+#### 4. Tools You Already Know (2-3 mins)
 
----
+*Goal: Build on familiar ground—everyone has used plugins, even if they didn't think of them that way.*
 
-**Category 1: Content Creation & Level Design**
+*   **👥 AUDIENCE MOMENT – Quick Question:**
+    *   *"Quick show of hands: Who here uses Unity? Unreal? Godot? Something else?"*
+    *   *(Acknowledge the mix)* *"Perfect—what I'm about to show you applies to ALL of you."*
 
-| Purpose | Unreal | Unity | Godot |
-|---------|--------|-------|-------|
-| **Level Blockout** | *UE4 Voxel Plugin* | *ProBuilder* (now built-in) | *Cyclops Level Builder* |
-| **Cinematic Camera** | *CineCameraRig Crane* | *Cinemachine* (now built-in) | *Phantom Camera* |
-| **Terrain & World** | *Voxel Plugin* by Phyronnaz | *Gaia* by Procedural Worlds | *Terrain3D* by TokisanGames |
-| **Procedural Generation** | *Dungeon Architect* | *Dungeon Architect* | *Scatter* by HungryProton |
-
-*Key Insight:* All engines let you build worlds faster. The question is: *"Does your project need a custom tool, or an existing one?"*
-
----
-
-**Category 2: Data & Content Management**
-
-| Purpose | Unreal | Unity | Godot |
-|---------|--------|-------|-------|
-| **Data Tables** | *Easy DataTable* by Jianyang | *Odin Inspector* by Sirenix | *Your Class Table Editor* |
-| **Dialogue & Narrative** | *Dialogue Plugin* by Code Sprites | *Yarn Spinner* by Secret Lab | *Dialogic* by Copypasta |
-| **Localization** | *Localization Manager* | *I2 Localization* by Inter Illusion | *(external: POEditor, Weblate)* |
-| **Database** | *SQLite3UE4* by Justnwhatever | *SQLite4Unity3D* by Roberto Huertas | *Godot SQLite* by 2shady4u |
-
-*Key Insight:* Unreal has native Data Tables - that's exactly what we're building for Godot!
+*   **The Revelation:** You've been using plugins all along. Let's name a few:
+    *   **FMOD** – Audio middleware everyone knows. It's a plugin!
+    *   **Steamworks** – Steam integration (achievements, leaderboards, matchmaking). Plugin.
+    *   **Blueprints** – Unreal's visual scripting. Yes, it's a plugin you can disable.
+    *   **Bolt / Visual Scripting** – Unity's visual scripting (now built-in). Started as a plugin.
+    *   **Cinemachine** – Unity's camera system. Was a plugin, now built-in.
+*   **The Point:** The line between "engine feature" and "plugin" is blurry. Many core features started as plugins. *You're not building something alien—you're building what engines are made of.*
 
 ---
 
-**Category 3: Visual Scripting & Logic**
+#### 4.5. The Building Blocks: Extension APIs (2-3 mins)
 
-| Purpose | Unreal | Unity | Godot |
-|---------|--------|-------|---------|
-| **Visual Scripting** | *LogicDriver Pro* by Recursoft | *Bolt* by Ludiq (now Unity) | *Orchestrator* by Vahera |
-| **State Machines** | *SUDS Pro* by Elhoussine | *Playmaker* by Hutong Games | *LimboAI* by Serhii Snitsaruk |
-| **Behavior Trees** | *BTSM Pro* by Syntechx | *NodeCanvas* by Paradox Notion | *Beehave* by bitbrain |
+*Goal: Show that every engine has the same concepts—just different syntax.*
 
-*Key Insight:* Visual tools democratize development. Designers can tweak logic without touching code.
+| Engine | Core Extension Classes |
+|--------|------------------------|
+| **Unreal** | `Editor Utility Widget`, `Details Panel Customization`, `Blutility` |
+| **Unity** | `EditorWindow`, `CustomEditor`, `GraphView` |
+| **Godot** | `EditorPlugin`, `EditorInspectorPlugin`, `EditorProperty` |
 
----
+*Key Insight:* The concepts map 1:1 across engines:
+*   **Custom Inspector** → Unreal: Details Customization | Unity: CustomEditor | Godot: EditorInspectorPlugin
+*   **Standalone Window** → Unreal: Editor Utility Widget | Unity: EditorWindow | Godot: EditorPlugin + dock
+*   **Property Editor** → Unreal: FPropertyEditorModule | Unity: PropertyDrawer | Godot: EditorProperty
+*   **Import Pipeline** → Unreal: Asset Actions | Unity: AssetPostprocessor | Godot: EditorImportPlugin
 
-**Category 4: Audio & Middleware**
-
-| Purpose | Unreal | Unity | Godot |
-|---------|--------|-------|---------|
-| **Audio Middleware** | *FMOD for UE* by Firelight | *FMOD for Unity* by Firelight | *FMOD GDExtension* by alessandrofama |
-| **Adaptive Music** | *Audio Synesthesia* | *Master Audio* by Dark Tonic | *Resonate* by Cloaked Games |
-| **Sound Design** | *MetaSounds* (native) | *Audio Toolkit* by ClockStone | - |
-
-*Key Insight:* Some tools live *outside* the engine entirely. FMOD/Wwise have their own editors - integration plugins just bridge the gap.
+*The syntax changes, the concepts don't.*
 
 ---
 
-**Category 5: Workflow & Productivity**
+#### 5. The Tool Ecosystem: Quick Showcase (3-4 mins)
 
-| Purpose | Unreal | Unity | Godot |
-|---------|--------|-------|---------|
-| **Task Tracking** | *UE4 Task Manager* | *TODO Highlighter* by Thomas F | *Todo Manager* by OrigamiDev |
-| **Asset Management** | *Project Cleaner* by Starter | *Asset Hunter PRO* by HeurekaGames | *Godot File Editor* by fenix-hub |
-| **Quick Actions** | *Blutility* scripts | *Editor Console Pro* by FlyingWorm | *Command Palette* by IvanSkoworoda |
-| **Build Automation** | *BuildGraph* (native) | *Super Build Pipeline* by Unity | *(external: GitHub Actions)* |
+*Goal: A rapid-fire visual tour. Screenshots speak louder than words. Show 1 slide per category, 30 seconds each.*
 
-*Key Insight:* Not every tool needs to be inside the engine. External tools (Git, CI/CD, spreadsheets) are also part of your pipeline.
+| Category | Unreal | Unity | Godot |
+|----------|--------|-------|-------|
+| **World Building** | Voxel Plugin | Cinemachine | Terrain3D |
+| **Data Management** | Dialogue Plugin | Odin Inspector | Loom |
+| **Visual Scripting** | Blueprints | Bolt/Visual Scripting | Orchestrator |
+| **Audio** | FMOD for UE | FMOD for Unity | FMOD GDExtension |
+| **Debug Consoles** | — | Quantum Console | Panku Console |
 
----
-
-**Category 6: Debugging & Profiling**
-
-| Purpose | Unreal | Unity | Godot |
-|---------|--------|-------|---------|
-| **Console/Cheats** | *UE4 Console Cheats* | *Quantum Console* by QFSW | *Panku Console* by Feo Wu |
-| **Runtime Inspector** | *ImGui for UE* by Segkan | *Runtime Inspector* by Süleyman | *ImGui-Godot* by pkdawson |
-| **Visual Debugging** | *Debug Toolkit* by JimboA | *Debug Drawing Extension* by Akien | *Debug Draw 3D* by DmitriySalnikov |
+**The Takeaway (one slide):**
+*   Tools exist in every engine—you're not reinventing the wheel
+*   The *skill* of building tools transfers to any engine you use later
+*   Godot's unique advantage: The editor IS a Godot game. Same UI code, same nodes, zero context switch.
 
 ---
 
-**The Point:**
-*   Tools exist in every engine - you're not reinventing the wheel
-*   The *skill* of building tools transfers across engines
-*   Godot's advantage: The editor IS a Godot game. Same UI code, same nodes, zero context switch.
+#### 6. The Tool Spectrum: From Buttons to Ecosystems (3-4 mins)
 
----
+*Goal: Show that tools exist on a spectrum—pick the right size for your problem.*
 
-#### 6. Types of Editor Extensions (5-8 mins)
+| Size | Examples |
+|------|----------|
+| **🔘 One-Button** | "Reimport All", "Format Code" |
+| **📋 Panels & Docks** | Sheet Editor, Asset Browser |
+| **🖥️ Full-Screen Editors** | Dialogic, Orchestrator |
+| **🔍 Runtime Tools** | Panku Console, profilers |
+| **🌐 External Tools** | FMOD, Spine |
 
-*Goal: Show the "menu" of what's possible in Godot before live-coding.*
+*Key Insight:* The best tool is the smallest one that solves the problem. Don't overbuild.
 
-| Type | What It Does | When To Use |
-|------|--------------|-------------|
-| **Toolbar Buttons** | One-click actions | Quick automation ("Reimport All", "Reset Scene") |
-| **Docks & Panels** | Persistent UI alongside your work | Ongoing workflows (Sheet Editor, Scene Tree) |
-| **Bottom Panels** | Tab next to Output/Debugger | Tools that need more horizontal space |
-| **Inspector Plugins** | Customize property editing | Better UX for specific types (sliders, previews) |
-| **Main Screen Plugins** | Replace the entire viewport | Complex editors (Tilemap, Dialogic, your Data Table) |
-| **Gizmos** | 3D/2D handles in viewport | Spatial editing (Path3D, collision shapes) |
-| **Importers** | Handle external file formats | Custom assets (your CSV import) |
-
-*Transition:* "Let's build the simplest one - a toolbar button - and see how fast we can extend the editor."
+*Transition:* "Let's build the simplest one—a toolbar button—and see how fast we can extend the editor."
 
 ---
 
 #### 7. Live Demo: Your First Plugin (10-12 mins)
 
 *   *Goal: Show how easy it is to start. Build something in under 5 minutes.*
+
+*   **👥 AUDIENCE MOMENT – Prediction Game:**
+    *   *"Before I show you—how many lines of code do you think it takes to add a button to Godot's toolbar?"*
+    *   *"Shout it out! 100? 50? 20?"*
+    *   *(After guesses)* *"Let's find out..."*
+
 *   **What We Build:** A "Bazinga!" button that we'll move around the ENTIRE editor.
-*   **The Message:** *"Every corner of Godot can be extended. Let me show you WHERE."*
+*   **The Message:** *"Every corner of Godot can be extended. Let me show you WHERE."
+*   **Two Amazing Facts About Godot:**
+    1.  **The Godot Editor is made in Godot.** Same `Control` nodes, same `Container` layouts, same signals. If you can build a UI in your game, you can build a plugin.
+    2.  **Every piece of the editor can be replaced by a plugin.** This is both a superpower and a responsibility—you can break things if you're not careful, but you can also fix or improve *anything*.
 *   **Code Reference:** See `Presentation_GodotPlugins_TheSecretWeapon_Code.md`
 *   **Plugin Location:** `addons/bazinga/` (pre-built, just enable it)
 
@@ -201,14 +200,15 @@ Game development isn't just about the runtime experience; it's about the develop
 3. *"But here's the real magic - watch what happens when I change ONE line of code..."*
 4. Uncomment `DOCK_SLOT_RIGHT_UL` → Disable/Enable → Button near Inspector
 5. Uncomment `add_control_to_bottom_panel` → Button becomes a new tab!
-6. *"Every. Single. Part. Of this editor can be extended."*
-7. *"And this is just a button. Imagine what you could build."*
+6. *"Every. Single. Part. Of this editor can be extended—or replaced entirely."*
+7. *"The Godot Editor is made in Godot. That's why this works. And that's amazing."*
+8. *"This is just a button. Imagine what you could build."*
 
 *Transition:* "Now let me show you what happens when you take this to its logical conclusion..."
 
-### Part 3: The "What" - Case Study (≈30–35 Minutes)
+### Part 3: The "What" - Case Study (≈25–30 Minutes)
 
-#### 8. The Problem: Vanilla Godot Workflow (7-10 mins)
+#### 8. The Problem: Vanilla Godot Workflow (6-8 mins)
 
 *   **The Missing Feature:** Godot has no native "Data Table" (like Unreal).
 *   **The Godot Way:** We use `Resource` files. One resource = One enemy type.
@@ -240,9 +240,14 @@ Game development isn't just about the runtime experience; it's about the develop
 *   100 Enemies = 100 Files. Chaos.
 *   1000 Items in an RPG? *Good luck.*
 
+*   **👥 AUDIENCE MOMENT – Reality Check:**
+    *   *"Raise your hand if this looks familiar—you've got data scattered across dozens of files and no easy way to see it all."*
+    *   *"Keep it up if you've ever made a mistake because you couldn't compare two things side by side."*
+    *   *"Yeah. That's the problem we're solving."*
+
 ---
 
-#### 9. The "Simple" Approach: Sheet Editor (8-10 mins)
+#### 9. The "Simple" Approach: Sheet Editor (6-8 mins)
 
 *   **The Concept:** A generic spreadsheet inside Godot. The first step toward sanity.
 *   **The Name:** "Sheet Editor" (Yes, say it out loud carefully. 😅)
@@ -267,7 +272,7 @@ Game development isn't just about the runtime experience; it's about the develop
 
 ---
 
-#### 10. The Solution: Class Table Editor (12-15 mins)
+#### 10. The Solution: Class Table Editor (10-12 mins)
 
 *   **The Concept:** A spreadsheet-like editor *inside* Godot that understands GDScript types.
 *   **The Key Insight:** Use `Script.get_script_property_list()` to read your class definition automatically.
@@ -282,6 +287,11 @@ Game development isn't just about the runtime experience; it's about the develop
 4.  **Compare & Balance:**
     *   Sort by HP column → "Ah, the Goblin is tankier than the Skeleton - that's a bug!"
     *   Fix it in 2 seconds, see the change immediately
+
+    *   **👥 AUDIENCE MOMENT – Spot the Bug:**
+        *   *(Show the sorted table)* *"Can anyone spot a balancing problem here?"*
+        *   *(Let someone call it out)* *"Exactly! That took you 2 seconds. In the old workflow, you might never notice."*
+
 5.  **Type Safety in Action:**
     *   Try typing `"ten"` in an integer field → Editor prevents it
     *   *"The error happens here, not at 2 AM when your build breaks."*
@@ -305,6 +315,38 @@ Game development isn't just about the runtime experience; it's about the develop
 | Type safety | None (runtime errors) | Full (editor validation) |
 
 **Closing Line:** *"The Godot Inspector is great for one resource. But game design isn't about one enemy - it's about the relationship between all of them. That's what we're solving."*
+
+---
+
+### Part 4: Closing (≈5 Minutes)
+
+#### 11. Wrap-Up & Call to Action (5 mins)
+
+**Three Takeaways:**
+1.  **Tools pay for themselves.** The time you invest in building a tool comes back multiplied. Even a simple button can save hours.
+2.  **The Godot Editor is made in Godot.** You already know how to build plugins—same nodes, same signals, same UI code.
+3.  **Start small, solve real pain.** Don't build a framework. Build the smallest thing that removes friction from your daily workflow.
+
+**The Industry Reality:**
+*   What I see in the industry? People get *used* to being annoyed by a process. They do the same tedious thing every day and have no idea there's a better way. It becomes invisible pain.
+*   But we're developers, right? We *create* stuff. We can spot that weakness and add one small button to make the job easier.
+*   What happens in companies is they build a **toolkit**—a collection of small tools they reuse from project to project. Every new game starts faster because they've already solved yesterday's problems.
+
+**Your Path Forward:**
+*   **Start noticing.** When something annoys you, write it down. That's a tool waiting to be built.
+*   **Start small.** One button. One automation. See how it feels.
+*   **Start collecting.** Over time, you'll have your own toolkit—and that's a superpower.
+
+**Resources:**
+*   **This Presentation's Code:** `github.com/hubacekjakub/Godot-SheetEditor` (Sheet Editor, Class Table Editor, and the Bazinga demo)
+*   **Godot Docs – EditorPlugin:** `docs.godotengine.org/en/stable/classes/class_editorplugin.html`
+*   **Godot Asset Library:** Browse existing plugins for inspiration
+*   **🤫 Secret Tip:** Look into asset stores for plugins. There's a ton of amazing stuff for $10 (without sale) that can save your team hundreds of dollars in development time. And once you buy them—you can expand on them, pick functionality from them, or just learn from their code.
+
+**Final Slide:**
+*   *"Every corner of Godot can be extended. Now you know how. Go build something."*
+*   Contact info / social handles
+*   *"Questions?"*
 
 ---
 
@@ -386,7 +428,5 @@ func _parse_property(object, type, name, hint_type, hint_string, usage_flags, wi
 
 ## Speaker Bio
 
-## Speaker Bio
-
-**Jakub Hubáček** is a developer at **Flying Rat Studio** with a passion for pipeline optimization. He specializes in creating "Force Multiplier" tools that bridge the gap between technical constraints and creative workflows, helping teams save time and focus on what matters—making great games.
+**Jakub Hubáček** is a developer at **Flying Rat Studio**
 
