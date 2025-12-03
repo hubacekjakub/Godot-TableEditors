@@ -83,10 +83,9 @@ custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_knvl7")
-item_count = 3
-item_0/text = "InventoryExample (1 properties)"
-item_1/text = "TestItemData (5 properties)"
-item_2/text = "TypeSafeTestData (14 properties)"
+item_count = 2
+item_0/text = "TestItemData (5 properties)"
+item_1/text = "TypeSafeTestData (14 properties)"
 
 [node name="RefreshButton" type="Button" parent="MarginContainer/VBoxContainer/ScriptPanel/ScriptContainer"]
 unique_name_in_owner = true
