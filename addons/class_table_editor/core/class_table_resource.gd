@@ -149,6 +149,7 @@ func add_column(col_name: String = "") -> void:
 ## CSV Export/Import Functions
 
 ## Export sheet data to CSV file (comma-separated with header row including type hints).
+## Uses Godot's built-in store_csv_line() for proper CSV escaping.
 func export_to_csv(file_path: String) -> bool:
 	var file := FileAccess.open(file_path, FileAccess.WRITE)
 	if file == null:
@@ -163,16 +164,16 @@ func export_to_csv(file_path: String) -> bool:
 		var header_text = col_name
 		if not type_name.is_empty():
 			header_text += ":" + type_name
-		header_row.append(_escape_csv_value(header_text))
-	file.store_line(",".join(header_row))
+		header_row.append(header_text)
+	file.store_csv_line(header_row)
 
 	# Write data rows (no row names)
 	for row in range(row_count):
 		var data_row: PackedStringArray = []
 		for col in range(column_count):
 			var value := get_cell(row, col)
-			data_row.append(_escape_csv_value(value))
-		file.store_line(",".join(data_row))
+			data_row.append(value)
+		file.store_csv_line(data_row)
 
 	file.close()
 	if OS.is_debug_build():
@@ -181,6 +182,7 @@ func export_to_csv(file_path: String) -> bool:
 
 
 ## Import CSV file into sheet (supports type hints in headers).
+## Uses Godot's built-in get_csv_line() for proper CSV parsing.
 func import_from_csv(file_path: String) -> bool:
 	var file := FileAccess.open(file_path, FileAccess.READ)
 	if file == null:
@@ -192,31 +194,39 @@ func import_from_csv(file_path: String) -> bool:
 	column_names.clear()
 	row_names.clear()
 	columns_metadata.clear()
+	row_count = 0
 
-	var line_number := 0
-	var is_first_line := true
+	var current_row := 0
+	var is_header_parsed := false
 
-	while not file.eof_reached():
-		var line := file.get_line().strip_edges()
-		if line.is_empty():
+	# Use proper loop condition as recommended by Godot docs
+	while file.get_position() < file.get_length():
+		var values := file.get_csv_line()
+
+		# Skip completely empty lines (all values empty)
+		# But preserve rows that have at least one non-empty value
+		var has_content := false
+		for v in values:
+			if not v.is_empty():
+				has_content = true
+				break
+
+		if not has_content and values.size() <= 1:
 			continue
 
-		var values := _parse_csv_line(line)
-
-		if is_first_line:
+		if not is_header_parsed:
 			# First line is header with type hints
 			_parse_typed_header_line(values)
-			is_first_line = false
+			is_header_parsed = true
 		else:
 			# Data rows
-			var row_index := line_number - 1
-			row_count = max(row_count, row_index + 1)
+			row_count = current_row + 1
 
 			# Set data for each column
 			for col in range(min(values.size(), column_count)):
-				set_cell(row_index, col, values[col])
+				set_cell(current_row, col, values[col])
 
-		line_number += 1
+			current_row += 1
 
 	file.close()
 	if OS.is_debug_build():
@@ -224,49 +234,9 @@ func import_from_csv(file_path: String) -> bool:
 	return true
 
 
-## Escape a value for CSV format (minimal implementation).
-func _escape_csv_value(value: String) -> String:
-	if value.is_empty():
-		return ""
-
-	# If value contains comma, newline, or quotes, wrap in quotes and escape internal quotes
-	if value.contains(",") or value.contains("\n") or value.contains("\""):
-		return "\"" + value.replace("\"", "\"\"") + "\""
-
-	return value
-
-
-## Parse a CSV line into values (basic comma-separated parsing).
-func _parse_csv_line(line: String) -> PackedStringArray:
-	var values: PackedStringArray = []
-	var current_value := ""
-	var in_quotes := false
-	var i := 0
-
-	while i < line.length():
-		var c := line[i]
-
-		if c == "\"":
-			if in_quotes and i + 1 < line.length() and line[i + 1] == "\"":
-				# Escaped quote
-				current_value += "\""
-				i += 1
-			else:
-				# Toggle quote mode
-				in_quotes = not in_quotes
-		elif c == "," and not in_quotes:
-			# End of value
-			values.append(current_value)
-			current_value = ""
-		else:
-			current_value += c
-
-		i += 1
-
-	# Add last value
-	values.append(current_value)
-
-	return values
+## NOTE: Custom CSV escape/parse functions removed.
+## Now using Godot's built-in store_csv_line() and get_csv_line() which handle
+## all edge cases properly including quoted fields, embedded commas, and newlines.
 
 
 ## Parse header line with type hints like "name:String,damage:int"
