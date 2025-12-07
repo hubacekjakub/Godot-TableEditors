@@ -2,8 +2,8 @@
 extends Resource
 class_name ClassTableResource
 
-## Class Table data structure for Plugin 2: GDScript Class Integration
-## Stores table data generated from GDScript class definitions with type enforcement
+# Class table resource used for GDScript class integration.
+# Stores table data and minimal type metadata for columns.
 
 @export var sheet_name: String = "Untitled"
 @export var row_count: int = 0
@@ -11,21 +11,20 @@ class_name ClassTableResource
 @export var cells: Dictionary = {}  # Key format: "row,col" -> value (String)
 @export var column_names: Array[String] = []  # Custom column names
 @export var row_names: Array[String] = []  # Custom row names
-@export var source_class_path: String = ""  # Path to the source GDScript class file
 
-## NEW: Type metadata for class-based tables (uses PropertyInspector native types)
+# Type metadata for class-based tables (PropertyInspector native types)
 @export var source_class_name: String = ""  # Class this table represents (fully-qualified name)
 @export var class_file_path: String = ""  # Path to the source .gd file
 @export var columns_metadata: Array[Dictionary] = []  # Minimal schema info: {name, type, hint}
 
 
-## Get the value of a cell at the specified position.
+# Get the value of a cell at the specified position.
 func get_cell(row: int, col: int) -> String:
 	var key := "%d,%d" % [row, col]
 	return cells.get(key, "")
 
 
-## Set the value of a cell at the specified position.
+# Set the value of a cell at the specified position.
 func set_cell(row: int, col: int, value: String) -> void:
 	var key := "%d,%d" % [row, col]
 	if value.is_empty():
@@ -34,12 +33,12 @@ func set_cell(row: int, col: int, value: String) -> void:
 		cells[key] = value
 
 
-## Clear all cell data.
+# Clear all cell data.
 func clear_all_cells() -> void:
 	cells.clear()
 
 
-## Get the display name of a column or generate Excel-style letter if unnamed.
+# Get the display name of a column, or fallback if unnamed.
 func get_column_name(col: int) -> String:
 	if col >= 0 and col < column_names.size():
 		var name := column_names[col]
@@ -49,7 +48,7 @@ func get_column_name(col: int) -> String:
 	return "Column_%d" % col
 
 
-## Set a custom display name for a column.
+# Set a custom display name for a column.
 func set_column_name(col: int, name: String) -> void:
 	# Resize array if needed
 	while column_names.size() <= col:
@@ -57,7 +56,7 @@ func set_column_name(col: int, name: String) -> void:
 	column_names[col] = name
 
 
-## Get the display name of a row or generate a number if unnamed.
+# Get the display name of a row, or fallback to numerical label.
 func get_row_name(row: int) -> String:
 	if row >= 0 and row < row_names.size():
 		var name := row_names[row]
@@ -66,7 +65,7 @@ func get_row_name(row: int) -> String:
 	return str(row + 1)
 
 
-## Set a custom display name for a row.
+# Set a custom display name for a row.
 func set_row_name(row: int, name: String) -> void:
 	# Resize array if needed
 	while row_names.size() <= row:
@@ -74,7 +73,7 @@ func set_row_name(row: int, name: String) -> void:
 	row_names[row] = name
 
 
-## Delete a column and shift remaining columns left.
+# Delete a column and shift remaining columns left.
 func delete_column(col: int) -> void:
 	if col < 0 or col >= column_count:
 		return
@@ -104,7 +103,7 @@ func delete_column(col: int) -> void:
 	column_count -= 1
 
 
-## Delete a row and shift remaining rows up.
+# Delete a row and shift remaining rows up.
 func delete_row(row: int) -> void:
 	if row < 0 or row >= row_count:
 		return
@@ -134,22 +133,22 @@ func delete_row(row: int) -> void:
 	row_count -= 1
 
 
-## Add a new row at the end of the table.
+# Append a new row at the end of the table.
 func add_row(row_name: String = "") -> void:
 	row_names.append(row_name)
 	row_count += 1
 
 
-## Add a new column at the end of the table.
+# Append a new column at the end of the table.
 func add_column(col_name: String = "") -> void:
 	column_names.append(col_name)
 	column_count += 1
 
 
-## CSV Export/Import Functions
+# CSV export/import functions
 
-## Export sheet data to CSV file (comma-separated with header row including type hints).
-## Uses Godot's built-in store_csv_line() for proper CSV escaping.
+# Export the sheet to CSV. Header includes column type hints.
+# Uses Godot's store_csv_line for escaping.
 func export_to_csv(file_path: String) -> bool:
 	var file := FileAccess.open(file_path, FileAccess.WRITE)
 	if file == null:
@@ -181,8 +180,8 @@ func export_to_csv(file_path: String) -> bool:
 	return true
 
 
-## Import CSV file into sheet (supports type hints in headers).
-## Uses Godot's built-in get_csv_line() for proper CSV parsing.
+# Import a CSV into the sheet, optionally parsing type hints from header.
+# Uses Godot's get_csv_line for parsing.
 func import_from_csv(file_path: String) -> bool:
 	var file := FileAccess.open(file_path, FileAccess.READ)
 	if file == null:
@@ -234,12 +233,10 @@ func import_from_csv(file_path: String) -> bool:
 	return true
 
 
-## NOTE: Custom CSV escape/parse functions removed.
-## Now using Godot's built-in store_csv_line() and get_csv_line() which handle
-## all edge cases properly including quoted fields, embedded commas, and newlines.
+# Note: custom CSV parsing removed; we rely on Godot's implementations.
 
 
-## Parse header line with type hints like "name:String,damage:int"
+# Parse header line with type hints such as "name:String".
 func _parse_typed_header_line(header_values: PackedStringArray) -> void:
 	column_count = header_values.size()
 
@@ -249,7 +246,7 @@ func _parse_typed_header_line(header_values: PackedStringArray) -> void:
 		_add_column_metadata_from_header(parsed, i)
 
 
-## Parse a column header like "name:String" into name and type
+# Parse a column header "name:type" into name and type string.
 func _parse_typed_column_header(header_text: String) -> Dictionary:
 	var colon_pos = header_text.find(":")
 	if colon_pos == -1:
@@ -270,7 +267,7 @@ func _parse_typed_column_header(header_text: String) -> Dictionary:
 	}
 
 
-## Add column metadata from parsed header
+# Add column metadata from parsed header data.
 func _add_column_metadata_from_header(parsed_header: Dictionary, col_index: int) -> void:
 	var col_name = parsed_header["name"]
 	var type_name = parsed_header["type_name"]
@@ -293,9 +290,9 @@ func _add_column_metadata_from_header(parsed_header: Dictionary, col_index: int)
 	columns_metadata[col_index] = column_meta
 
 
-## === NEW: Type-Based Methods using PropertyInspector native API ===
+# Type-based methods (PropertyInspector integration)
 
-## Create table columns from a GDScript class using PropertyInspector
+# Create columns based on exported properties in a GDScript class.
 func create_columns_from_class(script_path: String) -> bool:
 	var metadata = PropertyInspector.get_property_metadata(script_path)
 	if metadata.is_empty():
@@ -327,8 +324,7 @@ func create_columns_from_class(script_path: String) -> bool:
 	return true
 
 
-## Add a column from PropertyInspector metadata dictionary
-## Metadata format from Godot: {name, type, type_name, usage, exported, default, hint, hint_string}
+# Add a column from PropertyInspector property metadata dictionary.
 func add_column_from_property_metadata(prop_meta: Dictionary) -> void:
 	var col_name = prop_meta.get("name", "unknown")
 	var col_type_id = prop_meta.get("type", TYPE_NIL)
@@ -346,8 +342,7 @@ func add_column_from_property_metadata(prop_meta: Dictionary) -> void:
 	column_count += 1
 
 
-## Add a column with type information
-## Compatibility wrapper kept for tests/examples - prefer create_columns_from_class
+# Add a column with a specified type. Kept for tests and backwards compatibility.
 func add_column_with_type(col_name: String, col_type: String, _default_value: Variant = null, _is_exported: bool = false, column_hint: String = "") -> void:
 	# Convert type name to Godot type ID
 	var type_id = _type_name_to_id(col_type)
@@ -362,7 +357,7 @@ func add_column_with_type(col_name: String, col_type: String, _default_value: Va
 	column_count += 1
 
 
-## Add a column from a PropertyInfo dictionary (compatibility method kept for tests/examples)
+# Convenience compatibility wrapper: add a column from a PropertyInfo dict.
 func add_column_from_property(prop: Dictionary) -> void:
 	var col_name = prop.get("name", "")
 	var col_type = prop.get("type", "Variant")
@@ -372,26 +367,26 @@ func add_column_from_property(prop: Dictionary) -> void:
 	add_column_with_type(col_name, col_type, default_value, is_exported)
 
 
-## Get type info for a column
+# Get column type metadata.
 func get_column_type_info(col: int) -> Dictionary:
 	if col >= 0 and col < columns_metadata.size():
 		return columns_metadata[col]
 	return {}
 
 
-## Get type name for a column (human-readable)
+# Get human-readable type name for a column.
 func get_column_type_name(col: int) -> String:
 	var type_id = get_column_type_id(col)
 	return _type_id_to_name(type_id)
 
 
-## Get Godot type ID for a column
+# Get Godot type ID for a column.
 func get_column_type_id(col: int) -> int:
 	var type_info = get_column_type_info(col)
 	return type_info.get("type", TYPE_NIL)
 
 
-## Validate a cell value against column type using native Godot types
+# Validate a value against a column's type.
 func validate_cell(row_index: int, col_index: int, value: Variant) -> bool:
 	var type_info = get_column_type_info(col_index)
 	if type_info.is_empty():
@@ -401,7 +396,7 @@ func validate_cell(row_index: int, col_index: int, value: Variant) -> bool:
 	return _is_valid_type_id(value, type_id)
 
 
-## Type validation using Godot type IDs
+# Type validation using Godot type IDs.
 func _is_valid_type_id(value: Variant, type_id: int) -> bool:
 	if value == null:
 		return true  # Allow null for now
@@ -435,7 +430,7 @@ func _is_valid_type_id(value: Variant, type_id: int) -> bool:
 			return true
 
 
-## Convert type name to Godot type ID
+# Convert a type-name string to a Godot type ID.
 func _type_name_to_id(type_name: String) -> int:
 	match type_name:
 		"bool": return TYPE_BOOL
@@ -465,12 +460,12 @@ func _extract_hint_text(prop_meta: Dictionary) -> String:
 	return ""
 
 
-## Check if a property type is supported for table storage
+# Check whether a Godot type is supported (proxy to PropertyInspector).
 func is_supported_type(type_id: int) -> bool:
 	return PropertyInspector.is_supported_type(type_id)
 
 
-## Get resource metadata
+# Return a lightweight metadata dictionary for the resource.
 func get_metadata() -> Dictionary:
 	return {
 		"class_name": source_class_name,
