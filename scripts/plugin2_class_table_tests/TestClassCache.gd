@@ -39,7 +39,7 @@ func test_cache() -> void:
 	# Test 4: Parse multiple files and test cache clearing
 	print("\nTest 4: Caching multiple files...")
 	cache.get_parsed_class("res://scripts/plugin2_class_table_tests/TestItemData.gd")
-	cache.get_parsed_class("res://scripts/ClassTableEditorTests.gd")  # Different file
+	cache.get_parsed_class("res://scripts/plugin2_class_table_tests/ClassTableEditorTests.gd")  # Different file
 
 	var stats_multi = cache.get_stats()
 	print("  Cache size with multiple files: ", stats_multi["cached_files"])

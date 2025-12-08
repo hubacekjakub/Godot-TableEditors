@@ -460,11 +460,6 @@ func _extract_hint_text(prop_meta: Dictionary) -> String:
 	return ""
 
 
-# Check whether a Godot type is supported (proxy to PropertyInspector).
-func is_supported_type(type_id: int) -> bool:
-	return PropertyInspector.is_supported_type(type_id)
-
-
 # Return a lightweight metadata dictionary for the resource.
 func get_metadata() -> Dictionary:
 	return {
