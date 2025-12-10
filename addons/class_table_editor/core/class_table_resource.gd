@@ -82,6 +82,10 @@ func delete_column(col: int) -> void:
 	if col < column_names.size():
 		column_names.remove_at(col)
 
+	# Remove column metadata
+	if col < columns_metadata.size():
+		columns_metadata.remove_at(col)
+
 	# Shift all cells in columns after the deleted one
 	var new_cells := {}
 	for key in cells.keys():
