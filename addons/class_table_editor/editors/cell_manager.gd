@@ -11,9 +11,38 @@ const TYPED_CELL_EDITOR_FACTORY := preload("res://addons/class_table_editor/util
 
 var dock: Control  # Reference to the dock for signal connections
 
+# Cached styles to prevent excessive allocation
+var _style_even: StyleBoxFlat
+var _style_odd: StyleBoxFlat
+var _style_focus: StyleBoxFlat
+
 
 func _init(p_dock: Control) -> void:
 	dock = p_dock
+	_init_styles()
+
+
+func _init_styles() -> void:
+	"""Initialize shared style resources once"""
+	_style_even = StyleBoxFlat.new()
+	_style_even.bg_color = Color(0.24, 0.24, 0.24, 1)
+	_style_even.border_width_right = 1
+	_style_even.border_width_bottom = 1
+	_style_even.border_color = Color(0.3, 0.3, 0.3, 1)
+
+	_style_odd = StyleBoxFlat.new()
+	_style_odd.bg_color = Color(0.22, 0.22, 0.22, 1)
+	_style_odd.border_width_right = 1
+	_style_odd.border_width_bottom = 1
+	_style_odd.border_color = Color(0.3, 0.3, 0.3, 1)
+
+	_style_focus = StyleBoxFlat.new()
+	_style_focus.bg_color = Color(0.25, 0.35, 0.45, 1)
+	_style_focus.border_width_left = 2
+	_style_focus.border_width_right = 2
+	_style_focus.border_width_top = 2
+	_style_focus.border_width_bottom = 2
+	_style_focus.border_color = Color(0.4, 0.6, 0.8, 1)
 
 
 ## Create a type-specific cell editor for the given position.
@@ -51,27 +80,16 @@ func create_cell_editor(row: int, col: int, sheet: ClassTableResource) -> Contro
 ## Apply appropriate styling to the cell editor.
 func _apply_cell_styling(cell_editor: Control, row: int, col: int, type_id: int) -> void:
 	# Style data cells with subtle alternating row colors
-	var cell_style := StyleBoxFlat.new()
-	# Use standard Godot theme colors with subtle alternation
+	var cell_style: StyleBoxFlat
 	if row % 2 == 0:
-		cell_style.bg_color = Color(0.24, 0.24, 0.24, 1)  # Slightly lighter
+		cell_style = _style_even
 	else:
-		cell_style.bg_color = Color(0.22, 0.22, 0.22, 1)  # Standard
-	cell_style.border_width_right = 1
-	cell_style.border_width_bottom = 1
-	cell_style.border_color = Color(0.3, 0.3, 0.3, 1)
+		cell_style = _style_odd
 
 	# Apply styles based on control type
 	if cell_editor is LineEdit:
 		cell_editor.add_theme_stylebox_override("normal", cell_style)
-		var focus_style := StyleBoxFlat.new()
-		focus_style.bg_color = Color(0.25, 0.35, 0.45, 1)
-		focus_style.border_width_left = 2
-		focus_style.border_width_right = 2
-		focus_style.border_width_top = 2
-		focus_style.border_width_bottom = 2
-		focus_style.border_color = Color(0.4, 0.6, 0.8, 1)
-		cell_editor.add_theme_stylebox_override("focus", focus_style)
+		cell_editor.add_theme_stylebox_override("focus", _style_focus)
 	elif cell_editor is Panel or cell_editor is PanelContainer:
 		cell_editor.add_theme_stylebox_override("panel", cell_style)
 
