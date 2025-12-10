@@ -178,16 +178,16 @@ func export_to_csv(file_path: String) -> bool:
 	# Write header row (row name column + column names)
 	var header_row: PackedStringArray = ["Row Name"]
 	for col in range(column_count):
-		header_row.append(_escape_csv_value(get_column_name(col)))
-	file.store_line(",".join(header_row))
+		header_row.append(get_column_name(col))
+	file.store_csv_line(header_row)
 
 	# Write data rows with row names
 	for row in range(row_count):
-		var data_row: PackedStringArray = [_escape_csv_value(get_row_name(row))]
+		var data_row: PackedStringArray = [get_row_name(row)]
 		for col in range(column_count):
 			var value := get_cell(row, col)
-			data_row.append(_escape_csv_value(value))
-		file.store_line(",".join(data_row))
+			data_row.append(value)
+		file.store_csv_line(data_row)
 
 	file.close()
 	print("Sheet exported to CSV: " + file_path)
@@ -212,11 +212,11 @@ func import_from_csv(file_path: String) -> bool:
 	var header_values: PackedStringArray = []
 
 	while not file.eof_reached():
-		var line := file.get_line().strip_edges()
-		if line.is_empty():
-			continue
+		var values := file.get_csv_line()
 
-		var values := _parse_csv_line(line)
+		# Handle potential empty lines or EOF
+		if values.size() == 0 or (values.size() == 1 and values[0].is_empty()):
+			continue
 
 		if is_first_line:
 			# First line is header
@@ -256,48 +256,3 @@ func import_from_csv(file_path: String) -> bool:
 	file.close()
 	print("Sheet imported from CSV: " + file_path + " (" + str(row_count) + " rows, " + str(column_count) + " columns, row names: " + str(has_row_names) + ")")
 	return true
-
-
-func _escape_csv_value(value: String) -> String:
-	"""Escape a value for CSV format (minimal implementation)"""
-	if value.is_empty():
-		return ""
-
-	# If value contains comma, newline, or quotes, wrap in quotes and escape internal quotes
-	if value.contains(",") or value.contains("\n") or value.contains("\""):
-		return "\"" + value.replace("\"", "\"\"") + "\""
-
-	return value
-
-
-func _parse_csv_line(line: String) -> PackedStringArray:
-	"""Parse a CSV line into values (basic comma-separated parsing)"""
-	var values: PackedStringArray = []
-	var current_value := ""
-	var in_quotes := false
-	var i := 0
-
-	while i < line.length():
-		var c := line[i]
-
-		if c == "\"":
-			if in_quotes and i + 1 < line.length() and line[i + 1] == "\"":
-				# Escaped quote
-				current_value += "\""
-				i += 1
-			else:
-				# Toggle quote mode
-				in_quotes = not in_quotes
-		elif c == "," and not in_quotes:
-			# End of value
-			values.append(current_value)
-			current_value = ""
-		else:
-			current_value += c
-
-		i += 1
-
-	# Add last value
-	values.append(current_value)
-
-	return values
