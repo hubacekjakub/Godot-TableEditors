@@ -363,10 +363,9 @@ func _build_save_path(save_path: String, file_name: String) -> String:
 func _save_sheet_resource(sheet: SpreadsheetResource, path: String) -> bool:
 	"""Save a sheet resource to the specified path"""
 	# Ensure destination directory exists
-	var dir_path := path.get_basename().get_basename()  # Get directory without filename
+	var dir_path := path.get_base_dir()
 	if not dir_path.is_empty():
-		var dir_access := DirAccess.open(dir_path.get_basename())
-		if dir_access == null:
+		if not DirAccess.dir_exists_absolute(dir_path):
 			# Directory doesn't exist, try to create it recursively
 			var create_error := DirAccess.make_dir_recursive_absolute(dir_path)
 			if create_error != OK:
