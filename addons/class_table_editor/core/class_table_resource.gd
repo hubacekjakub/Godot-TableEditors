@@ -8,7 +8,7 @@ class_name ClassTableResource
 @export var sheet_name: String = "Untitled"
 @export var row_count: int = 0
 @export var column_count: int = 0
-@export var cells: Dictionary = {}  # Key format: "row,col" -> value (String)
+@export var cells: Dictionary = {}  # Key format: Vector2i(row, col) -> value (String)
 @export var column_names: Array[String] = []  # Custom column names
 @export var row_names: Array[String] = []  # Custom row names
 
@@ -20,13 +20,12 @@ class_name ClassTableResource
 
 # Get the value of a cell at the specified position.
 func get_cell(row: int, col: int) -> String:
-	var key := "%d,%d" % [row, col]
-	return cells.get(key, "")
+	return cells.get(Vector2i(row, col), "")
 
 
 # Set the value of a cell at the specified position.
 func set_cell(row: int, col: int, value: String) -> void:
-	var key := "%d,%d" % [row, col]
+	var key := Vector2i(row, col)
 	if value.is_empty():
 		cells.erase(key)  # Remove empty cells to save memory
 	else:
@@ -89,19 +88,25 @@ func delete_column(col: int) -> void:
 	# Shift all cells in columns after the deleted one
 	var new_cells := {}
 	for key in cells.keys():
-		var parts: PackedStringArray = key.split(",")
-		var cell_row := int(parts[0])
-		var cell_col := int(parts[1])
+		var cell_pos: Vector2i
+		if key is Vector2i:
+			cell_pos = key
+		elif key is String:
+			# Migration support
+			var parts = key.split(",")
+			cell_pos = Vector2i(int(parts[0]), int(parts[1]))
+		else:
+			continue
 
-		if cell_col == col:
+		if cell_pos.y == col:
 			# Skip this column's cells (delete them)
 			continue
-		elif cell_col > col:
+		elif cell_pos.y > col:
 			# Shift left
-			new_cells["%d,%d" % [cell_row, cell_col - 1]] = cells[key]
+			new_cells[Vector2i(cell_pos.x, cell_pos.y - 1)] = cells[key]
 		else:
 			# Keep as is
-			new_cells[key] = cells[key]
+			new_cells[Vector2i(cell_pos.x, cell_pos.y)] = cells[key]
 
 	cells = new_cells
 	column_count -= 1
@@ -119,19 +124,25 @@ func delete_row(row: int) -> void:
 	# Shift all cells in rows after the deleted one
 	var new_cells := {}
 	for key in cells.keys():
-		var parts: PackedStringArray = key.split(",")
-		var cell_row := int(parts[0])
-		var cell_col := int(parts[1])
+		var cell_pos: Vector2i
+		if key is Vector2i:
+			cell_pos = key
+		elif key is String:
+			# Migration support
+			var parts = key.split(",")
+			cell_pos = Vector2i(int(parts[0]), int(parts[1]))
+		else:
+			continue
 
-		if cell_row == row:
+		if cell_pos.x == row:
 			# Skip this row's cells (delete them)
 			continue
-		elif cell_row > row:
+		elif cell_pos.x > row:
 			# Shift up
-			new_cells["%d,%d" % [cell_row - 1, cell_col]] = cells[key]
+			new_cells[Vector2i(cell_pos.x - 1, cell_pos.y)] = cells[key]
 		else:
 			# Keep as is
-			new_cells[key] = cells[key]
+			new_cells[Vector2i(cell_pos.x, cell_pos.y)] = cells[key]
 
 	cells = new_cells
 	row_count -= 1
