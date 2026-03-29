@@ -15,6 +15,8 @@ var _btn_save: Button
 var _btn_add_row: Button
 var _btn_remove_row: Button
 var _btn_new_table: Button
+var _btn_export_csv: Button
+var _btn_import_csv: Button
 
 
 func _ready() -> void:
@@ -73,6 +75,21 @@ func _build_toolbar() -> void:
 	_btn_remove_row.pressed.connect(_on_remove_row_pressed)
 	toolbar.add_child(_btn_remove_row)
 
+	var sep_v := VSeparator.new()
+	toolbar.add_child(sep_v)
+
+	_btn_export_csv = Button.new()
+	_btn_export_csv.text = "Export CSV"
+	_btn_export_csv.tooltip_text = "Export table to CSV file"
+	_btn_export_csv.pressed.connect(_on_export_csv_pressed)
+	toolbar.add_child(_btn_export_csv)
+
+	_btn_import_csv = Button.new()
+	_btn_import_csv.text = "Import CSV"
+	_btn_import_csv.tooltip_text = "Import data from CSV file"
+	_btn_import_csv.pressed.connect(_on_import_csv_pressed)
+	toolbar.add_child(_btn_import_csv)
+
 	var spacer2 := Control.new()
 	spacer2.size_flags_horizontal = SIZE_EXPAND_FILL
 	toolbar.add_child(spacer2)
@@ -115,6 +132,18 @@ func _on_remove_row_pressed() -> void:
 	_resource.remove_row(_resource.row_count - 1)
 	_table_grid.rebuild()
 	_update_status()
+
+
+func _on_export_csv_pressed() -> void:
+	if _resource == null:
+		return
+	_open_file_dialog("Export CSV", ["*.csv ; CSV Files"], _on_export_csv_path_selected, EditorFileDialog.FILE_MODE_SAVE_FILE)
+
+
+func _on_import_csv_pressed() -> void:
+	if _resource == null:
+		return
+	_open_file_dialog("Import CSV", ["*.csv ; CSV Files"], _on_import_csv_path_selected)
 
 
 # ── File dialog ───────────────────────────────────────────────────────
@@ -160,6 +189,26 @@ func _on_save_path_selected(path: String) -> void:
 	_save_resource(path)
 
 
+func _on_export_csv_path_selected(path: String) -> void:
+	if _resource == null:
+		return
+	if _resource.export_csv(path):
+		_status_label.text = "Exported: %s" % path.get_file()
+	else:
+		_status_label.text = "ERROR exporting CSV"
+
+
+func _on_import_csv_path_selected(path: String) -> void:
+	if _resource == null:
+		return
+	if _resource.import_csv(path):
+		_table_grid.rebuild()
+		_update_status()
+		_status_label.text = "Imported: %s" % path.get_file()
+	else:
+		_status_label.text = "ERROR importing CSV"
+
+
 func _save_resource(path: String) -> void:
 	if _resource == null:
 		return
@@ -203,3 +252,5 @@ func _update_button_states() -> void:
 	_btn_save.disabled = not has_resource
 	_btn_add_row.disabled = not has_resource
 	_btn_remove_row.disabled = not has_resource or (_resource and _resource.row_count == 0)
+	_btn_export_csv.disabled = not has_resource or (_resource and _resource.row_count == 0)
+	_btn_import_csv.disabled = not has_resource
