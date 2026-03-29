@@ -18,3 +18,13 @@ func _exit_tree() -> void:
 		remove_control_from_bottom_panel(_dock)
 		_dock.queue_free()
 		_dock = null
+
+
+func _handles(object: Object) -> bool:
+	return object is ClassTableResourceV2
+
+
+func _edit(object: Object) -> void:
+	if object is ClassTableResourceV2 and _dock:
+		_dock.edit_resource(object as ClassTableResourceV2)
+		make_bottom_panel_item_visible(_dock)

@@ -180,6 +180,11 @@ func _set_resource(res: ClassTableResourceV2) -> void:
 	_update_button_states()
 
 
+## Called by plugin._edit() when a .tres is double-clicked in FileSystem.
+func edit_resource(res: ClassTableResourceV2) -> void:
+	_set_resource(res)
+
+
 func _on_cell_edited(row: int, col: int, value: Variant) -> void:
 	_update_status()
 
