@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://7hvy12iououh"]
 
-[ext_resource type="Script" path="res://addons/class_table_editor_v2/prototypes/grid_comparison.gd" id="1"]
+[ext_resource type="Script" uid="uid://b3rbwgfnkceha" path="res://addons/class_table_editor_v2/prototypes/grid_comparison.gd" id="1"]
 
-[node name="GridComparison" type="Control"]
+[node name="GridComparison" type="Control" unique_id=124391749]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

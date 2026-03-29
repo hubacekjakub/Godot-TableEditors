@@ -1,18 +1,20 @@
 @tool
 extends EditorPlugin
-## Phase 1: Hosts the grid comparison prototype as a bottom panel.
+## Class Table Editor v2 — native Variant-based data table editor.
 
-var _comparison_dock: Control = null
+const TableDock := preload("res://addons/class_table_editor_v2/ui/table_dock.gd")
+
+var _dock: Control = null
 
 
 func _enter_tree() -> void:
-	var scene: PackedScene = preload("res://addons/class_table_editor_v2/prototypes/grid_comparison.tscn")
-	_comparison_dock = scene.instantiate()
-	add_control_to_bottom_panel(_comparison_dock, "Grid Comparison")
+	_dock = TableDock.new()
+	_dock.name = "ClassTableV2"
+	add_control_to_bottom_panel(_dock, "Class Table v2")
 
 
 func _exit_tree() -> void:
-	if _comparison_dock:
-		remove_control_from_bottom_panel(_comparison_dock)
-		_comparison_dock.queue_free()
-		_comparison_dock = null
+	if _dock:
+		remove_control_from_bottom_panel(_dock)
+		_dock.queue_free()
+		_dock = null
